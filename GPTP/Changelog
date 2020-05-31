@@ -1,321 +1,92 @@
-Version 4.106f-c
+Version 5.900:
 
-Fix an error spotted in Issue 38
-https://github.com/BoomerangAide/GPTP-For-VS2008/issues/38
+- Moving to Visual Studio 2019.This is mainly about project and solution files, the code files should remain backward compatible, though I won't check and just be careful
 
-Version 4.106f-b
-
-Fix an error spotted in Issue 37
-https://github.com/BoomerangAide/GPTP-For-VS2008/issues/37
-
-Version 4.106f
-
-Fix  stuff broken in previous partial patch thanks to
-another computer not affected by Github destructive
-changes.
-This will still most likely be the last update here,
-as working with github this way is way too much a chore,
-and it's likely to get more broken in the future anyway.
-But the point is: logically, the features announced in
-4.106 should be working at the time I Commit this.
-If they don't, I should at least be able to fix them
-here.
-
----------------------------------------
-
-GITHUB IS DESTROYED, ALL FEATURES ARE BROKEN TO THE POINT UPDATE IS
-NO LONGER POSSIBLE PROPERLY.
-I WILL POST AN UPDATE HERE WHEN I WILL HAVE FOUND A NEW PLACE.
-I KEEP THE V4.106 LOG HERE TO KNOW HOW TO FIX STUFF IF I FIND
-A NEW PLACE.
-IF YOU ARRIVE HERE AFTER V4.105, AND THE PROJECT NO LONGER WORK, TRY
-FINDING THE PRE-4.106 VERSION OF THE FILES.
-SORRY FOR THAT, MAYBE I WILL FIND A WAY TO FIX IT A BIT BETTER BEFORE
-ABANDONNING THINGS FOR GOOD REGARDING THIS PLACE.
-
-Version 4.106 (!!!FAILED FAILED FAILED!!!)
-
-Moved game_hooks.cpp into hooks/main/game_hooks.cpp
-Added functions to get supplies information in api.cpp/api.h
-Added functions to get or set a switch on the current map in api.cpp/api.h
-Some changes in scbwdata.h for current/future changes
-Replaced the way ExtendSightLimit was made by an actual real hook
-Upgraded CUnit files to be less likely to act differently from original code
-Minor upgrade of BinDlg struct
-Minor fixes in hooks/orders/load_unload_orders.cpp
-Minor fixes in hooks/load_unload_proc.cpp
-Minor changes
-
-Added some hooks related to harvesting, but in AI/experimental folder, since
-mostly used by AI.Those are disabled by default, and since they're hard to 
-test, there's a risk they don't do exactly what they should.
-
----------------------------------------
-
-Version 4.105
-
-Fixed an error in hooks/recv_commands/CMDRECV_Cancel.cpp
-
----------------------------------------
-
-Version 4.104
-
-Fixed non-working hook hooks/interface/stats_panel_display
-
----------------------------------------
-
-Version 4.103
-Unlocked and identified ordersDat[17] as RequirementsOffset
-Added some clues (as comments) for the use of ordersDat 2,3,5 and 12
-Improvements in CMDRECV_Stop.cpp:
-	-better identification of the last parameter of parseRequirementOpcodes()
-	-identification of 006655XX as use of orders_dat::RequirementsOffset[FixedOrderId]
-Changes in receive_command.cpp:
-	-changed the name order to orderId for clarity
-	-renamed "u32 function_0049A480()" to "bool CanTargetSelf()"
-	-replaced the call of CanTargetSelf() with fully modifiable code
-	(because void receive_command() is the only function that use it
-	so there was no need for a hook)
+- scbw\structures.h
+	- Fixed a signed/unsigned mistake in a type
+	- Added information on how "fastcall" worked compared to injected/helper functions
+- scbw\scbwdata.h
+	- added PortraitId and WeaponIconId confirmed entries for dat files
+	- removed tempUnitsListArraysCountsList as it was just a variation of another variable that should be used as such
+	- added some information on fontBase (not really useful yet, but soon...)
+	- added format strings used by the printf implementation of Starcraft
+- graphics folder:
+	- added drawDottedLine2 and drawDottedEllipse2 functions to alternate the drawn color between 2 colors
+- hooks\interface\btns_cond files:
+	- no longer using local constants, things fixed accordingly
+	- functions now have access to all the arguments they should have
+	- Added BTNSCOND_CanBuildUnit function
+- hooks\orders\building_making\building_terran.cpp:
+	- Fixes and improvement on variables names and readability
+- hooks\recv_commands\burrow_tech.cpp:
+- hooks\recv_commands\CMDRECV_SiegeTank.cpp:
+- hooks\recv_commands\CMDRECV_Stop.cpp:
+	- function_004754F0 better understanding reflected
+- hooks\interface\buttonsets files:
+	- now BUTTON_STATE enum properly used
+	- some fixes and changes to make it easier to use
+	- now comment by default getButtonSetPatch_For_Sub4591D0 from inject since it's either this one or the 591D0 that matter.
+- hooks\recv_commands\CMDRECV_Build files:
+	- added function cmdRECV_PlaceBuildingOrder (formerly known as function_0048DE70) and helpers needed for it
+- SCBW\structures\CUnit hooks:
+	- added the StoredUnit structure and updated code accordingly
+- definitions.h:
+	- added MIN and MAX macros because std functions used previously got lost in ide upgrade
+	- changed default plugin name
+- SCBW\enumerations.h:
+	- added a warning disabler
+	- Changed BUTTON_STATE enum to use it properly
+	- added TEXTLABELCOLOR enum
+- hooks\orders\liftland.cpp:
+	- fixed an error
+	- modified some comments
+- hooks\recv_commands\receive_command.cpp:
+	- Better functions understanding
+	- Hardcoded function_0049A410 in helpers
+- hooks\interface\select_larva.cpp
+	- Call to getLarvaeUnitsFromList helper is no longer ambiguous
+- hooks\interface\selection files:
+	- Previous version was broken and incomplete, could not work properly
+	- Added 3 more hooked functions
+	- Gave function 6FB40 its proper name (getSelectedUnitsAtPoint) and arguments
+	- Special CallToUnit_IsStandardAndMovable_Wrapper in inject file to mod the use
+	  of unit_IsStandardAndMovable by a function that could not just be hooked
+	- Lots of fixes and improvements
+- hooks\interface\status_display\stats_panel_display hooks:
+- hooks\interface\status_display\weapon_armor_tooltip hooks:
+- hooks\interface\status_display\wireframe hooks:
+- hooks\interface\status_display\weapon_armor_tooltip hooks:
+	- Moved from hooks\interface\
+- hooks\stim_packs hooks:
+	- Moved the CDMRECV function to its own file in proper section
+- hooks\weapons\wpnspellhit hooks:
+	- Fixed an error
 	
----------------------------------------
-
-Version 4.102
--Fixed a potential source of bug/error in hooks/interface/buttonsets.cpp
--Fixed an error in hooks/utils/utils.cpp
--Unlocked and gave the proper type to unitsDat[37] (AddonPlacement) in scbwdata.h
--Added a development trick and removed version number in definitions.h
--Added CMDRECV_Build hooks
-
----------------------------------------
-
-Version 4.101
--Added void statbtn_BIN_CustomCtrlID(BinDlg* dialog) to hooks/interface/buttonsets hooks
--Minor changes in hooks/interface/buttonsets hooks
--Fixed an error in hooks/recv_commands/CMDRECV_Morph_inject.cpp
--Minor comment added on stack_placeholder in hooks/utils/utils.cpp
-
----------------------------------------
-
-Version 4.100 (big update)
-
--Rewritten BinDlg structure to take more in account its variable content
--Modified various files to adapt to the changes of the BinDlg structure
-
--Fixed an error in hooks/interface/buttonsets.cpp (inverted mouseX and mouseY, though never saw an issue from that ingame)
--Minor changes to hooks/orders/building_making/building_terran.cpp (comments, variables names...)
--Fixed the .h include in hooks/orders/spells/hallucination_spell.cpp (somehow had no bad effect anyways)
--Minor changes to hooks/orders/unit_making/unit_train.cpp (comments, variables names...)
--Fixed an error in hooks/transfer_tech_upgrades_inject.cpp (wrong function call in injected, effect surprisingly never seen ingame)
-
--Added void InitializeDialog(BinDlg* dialog, void* dlgFunc) //00419D20 to hooks/utils Utils hooks.
--Added Mind Control spell order hook
-
--Minor changes and fixes
-
----------------------------------------
-
-Version 4.028
--cosmetic minor change in hooks/give_unit_inject.cpp
--new playersSelections variable available from SCBW/scbwdata.h (used in utils hooks)
--new Utils hooks (bool unit_IsStandardAndMovable(CUnit* unit) and CUnit* getActivePlayerFirstSelection())
-
----------------------------------------
-
-Version 4.027
--Fixed an error in getLarvaeUnitsFromList from hooks/interface/select_larva.cpp
--Added the missing lines in initialize.cpp preventing Select Larva hooks to be used
--Fixed comments for getMovableState() in SCBW/structures/CUnit.cpp (also added some asm info somewhere else)
--Added some asm info for getAngle() in SCBW/api.cpp
--Minor change in the way unit->getMovableState() is used/commented in some files
--Cleaned old comments and fixed an error in hooks/spider_mine.cpp
--Added Repair order hook
--Added Stats panel display hook
-
----------------------------------------
-
-Version 4.026
--Fixed some minor (no effects on testing) mistakes in hooks/interface/selection_inject.cpp
--added the select_larva hooks
--Minor cosmetics changes
-
----------------------------------------
-
-Version 4.025
--Fixed another mistake in hooks/orders/infestation.cpp (caused Issue #30)
--Minor changes in helper functions for the same hook
-
----------------------------------------
-
-Version 4.024
--Fixed a major mistake in hooks/orders/infestation.cpp (caused Issue #29)
--Various minor fix in hooks/orders/infestation.cpp
-
----------------------------------------
-
-Version 4.023
-
-Fixed an error in CUnit.cpp reduceDefensiveMatrixHp function causing
-defensive matrix overlay to never disappear
-
----------------------------------------
-
-Version 4.022
-Fixed lots of error in Recharge Shields hook, making it working properly
-
----------------------------------------
-
-Version 4.021
--minor change in hooks\orders\building_making\building_terran_inject.cpp
--improvement in hooks\orders\building_making\make_nydus_exit.cpp (identification of code)
--minor change in hooks\recv_commands\burrow_tech.cpp
--fixed the broken Cloak Nearby Units hook
--added the CMDRECV_Stop hooks
--added the CMDRECV_Cancel hooks
-
----------------------------------------
-
-Version 4.020
--fix mistakes that caused a crash in hooks/orders/unit_making/unit_train.cpp
--removed a comment in hooks/recv_commands/train_cmd_receive.cpp
--improvements and fixes in hooks/create_init_units.cpp
--added CMDRECV_MergeArchon hook
--added CMDRECV_Morph hook
-
----------------------------------------
-
-Version 4.019
--minor fixes in train_cmd_receive.cpp
--moved burrowed tech hooks into recv_commands folder
--added CMDRECV_SiegeTank hooks
--disabled cloak nearby units hook (broken)
-
----------------------------------------
-
-Version 4.018
-
--added the recv_commands folder
--moved receive command hook to the new folder
--added new Train Command Receive hook
-
----------------------------------------
-
-Version 4.017
-
--identified some unknown content in create init units hook
--added the Give Unit hook
-
----------------------------------------
-
-Version 4.016
-
--fix an error in burrow tech hook.
--removed useless content in Load/Unload proc.
--added startPositions to scbwdata.h.
--add Create Initial Units hooks.
-
----------------------------------------
-
-Version 4.015
-
--add new Receive Command hook
-
----------------------------------------
-
-Version 4.014
-
--renamed a function based on effect in attack orders hook.
--fix a wrong function use in Feedback spell hook.
--fix an error in Weapon/Spell hit hook.
--fix a comment in burrow tech injector file.
--fixes in function MoveScreenToUnit of api.cpp.
--unlock an entry in scbwdata.h for a future function.
-
----------------------------------------
-
-Version 4.013
--resync files of Weapon/Spell Hit hook with offline version (missing bugfix)
-
----------------------------------------
-
-Version 4.012
--fix in Medic Orders hook
-
----------------------------------------
-
-Version 4.011
--minor fix in hallucination spell hook
--major fixing in burrow tech hooks (weren't working at all)
--add Buttons Conditions hooks
-
-----------------------------------------
-
-Version 4.010
--fix a mistake in hallucination spell hook
--fix energy cost in recall spell hook
-
-----------------------------------------
-
-Version 4.009
--fix a mistake in Consume hit in wpnspellhit.cpp
-
-----------------------------------------
-
-Version 4.008
--add Hallucination spell hook
--add Feedback spell hook
--unit_train.cpp: added a missing code part, may fix a bug
--wpnspellhit.cpp: fix an error that could crash the game when hallucinated units attack
--update_unit_state.cpp: removed useless helper
--minor fixes
-
-----------------------------------------
-
-Version 4.007
--Add performAnotherOrder() to CUnit functions
--Add Medic hooks
--minor fixes
-
-----------------------------------------
-
-Version 4.006
--adding Burrow tech hooks
--adding Research/Upgrade orders hooks
--removed some useless include
-
-----------------------------------------
-
-Version 4.005
-adding Nuke Orders hooks
-
-----------------------------------------
-
-Version 4.004
--adding Load/Unload orders hooks
--adding Load/Unload proc hooks
-
-----------------------------------------
-
-Version 4.003:
-adding Unit_train hooks
-
-----------------------------------------
-
-
-Version 4.002:
-
--adding Building_Protoss hooks
--fix a param type in Building_Terran helper function
--modify a more identified member of CImage (2 u8 to 1 u16)
-
-----------------------------------------
-
-Version 4.001:
-
--fix a bug where some const CUnit* survived their removal
--adding Building_Terran hooks
-
-----------------------------------------
-
-Version 4.000:
-
-Adding Die_Order hook
+- hooks\recv_commands\CMDRECV_LiftOff hooks added
+- hooks\recv_commands\CMDRECV_ResearchUpgrade hooks added
+- hooks\recv_commands\CMDRECV_RightClick hooks added
+- hooks\recv_commands\CMDRECV_Selection hooks added
+- hooks\recv_commands\CMDRECV_Stimpack hooks added
+- hooks\utils\replace_unit hooks added
+- hooks\interface\status_display\advanced\status_base_text hooks added
+- hooks\interface\status_display\advanced\status_buildmorphtrain hooks added
+- hooks\interface\status_display\advanced\status_nukesilo_resources hooks added
+- hooks\interface\status_display\advanced\status_research_upgrade hooks added
+- hooks\interface\status_display\advanced\status_supply_provider hooks added
+- hooks\interface\status_display\advanced\status_transport hooks added
+- hooks\interface\status_display\unit_portrait hooks added
+- hooks\interface\status_display\unit_stat_act hooks added
+- hooks\interface\status_display\unit_stat_cond hooks added
+- hooks\interface\status_display\unit_stat_selection hooks added
+- hooks\interface\updateSelectedUnitData hooks added
+
+- Removed completely the AI folder (not enough interest AND what existed was too buggy to be kept)
+- Removed many "const" because hooks able to modify these values appeared
+- Used a short version of address instead of full one in many .h files
+- Removed "//V241 for VS2008" in many (all?) places where it existed
+- Added some information useful for people researching hooks and other unhooked stuff
+- Minor fixes not mentioned
+
+Older changelogs:
+https://github.com/BoomerangAide/GPTP-For-VS2008/blob/Update-4/GPTP/Changelog (4.000 to 4.106f)
+https://github.com/BoomerangAide/GPTP-For-VS2008/blob/Update-4/GPTP/Changelog_PreV4
