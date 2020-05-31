@@ -1,7 +1,5 @@
 #pragma once
 
-//V241 for VS2008
-
 namespace WeaponId {
 enum Enum {
   GaussRifle                                = 0x00,
