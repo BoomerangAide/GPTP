@@ -978,14 +978,14 @@ CUnit* CUnit::getLoadedUnit(int index) const {
 
 	CUnit* loaded_unit = NULL;
 
-	if( *((u16*)&this->loadedUnit[index]) != 0 ) {
+	if(this->loadedUnit[index].fullValue != 0) {
 
-		loaded_unit = (CUnit*)&unitTable_0059CB58[this->loadedUnit[index].index];
+		loaded_unit = (CUnit*)&unitTable_0059CB58[this->loadedUnit[index].innerValues.index];
 
 		if(
 			loaded_unit->sprite == NULL ||
 			(loaded_unit->mainOrderId == OrderId::Die && loaded_unit->mainOrderState == 1) ||
-			this->loadedUnit[index].unitId != loaded_unit->targetOrderSpecial
+			this->loadedUnit[index].innerValues.unitId != loaded_unit->targetOrderSpecial
 		)
 			loaded_unit = NULL;
 
@@ -1010,9 +1010,9 @@ CUnit* CUnit::getFirstLoadedUnit() const {
 
 		for(int i = 0; !bStopLoop && i < space_provided; i++) {
 
-			if( *((u16*)&this->loadedUnit[i]) != 0 ) {
+			if(this->loadedUnit[i].fullValue != 0) {
 
-				loaded_unit = (CUnit*)&unitTable_0059CB58[this->loadedUnit[i].index];
+				loaded_unit = (CUnit*)&unitTable_0059CB58[this->loadedUnit[i].innerValues.index];
 
 				if(
 					loaded_unit->sprite != NULL &&
@@ -1020,7 +1020,7 @@ CUnit* CUnit::getFirstLoadedUnit() const {
 						loaded_unit->mainOrderId != OrderId::Die ||
 						loaded_unit->mainOrderState != 1
 					) &&
-					loaded_unit->targetOrderSpecial == this->loadedUnit[i].unitId
+					loaded_unit->targetOrderSpecial == this->loadedUnit[i].innerValues.unitId
 				)
 					bStopLoop = true;
 
@@ -1048,9 +1048,9 @@ bool CUnit::hasLoadedUnit() const {
 
 	for(int i = 0; i < 8 && !return_value; i++) {
 
-		if( *((u16*)&this->loadedUnit[i]) != 0 ) {
+		if(this->loadedUnit[i].fullValue != 0) {
 
-			CUnit* loaded_unit = (CUnit*)&unitTable_0059CB58[this->loadedUnit[i].index];
+			CUnit* loaded_unit = (CUnit*)&unitTable_0059CB58[this->loadedUnit[i].innerValues.index];
 
 			if(
 				loaded_unit->sprite != NULL &&
@@ -1058,7 +1058,7 @@ bool CUnit::hasLoadedUnit() const {
 					loaded_unit->mainOrderId != OrderId::Die ||
 					loaded_unit->mainOrderState != 1
 				) &&
-				loaded_unit->targetOrderSpecial == this->loadedUnit[i].unitId
+				loaded_unit->targetOrderSpecial == this->loadedUnit[i].innerValues.unitId
 			)
 				return_value = true;
 
