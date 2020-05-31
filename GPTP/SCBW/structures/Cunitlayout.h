@@ -12,6 +12,17 @@ struct CSprite;
 struct COrder;
 struct CUnit;
 
+struct StoredUnit {
+	union {
+		struct {
+			u16 index : 11;             // 1-based index in the unit table.
+			u16 unitId : 5;
+		}innerValues;
+		u16 fullValue;
+	};
+};
+C_ASSERT(sizeof(StoredUnit) == 2);
+
 //From BWAPI/Source/BW/MovementFlags.h
 /** Definition of Flags specifying movement type - used in BW#Unit#movementFlags */
 namespace MovementFlags
@@ -132,10 +143,7 @@ struct CUnitLayout {
 /*0x0AA*/ u16       shieldGain;			  //< Shield gain on construction (from BWAPI, was unknown)
 /*0x0AC*/ u16       remainingBuildTime;   //Remaining bulding time; also used by powerups (flags) as the timer for returning to their original location.
 /*0x0AE*/ u16       previousHp;           // The HP of the unit before it changed (example Drone->Hatchery, the Drone's HP will be stored here)
-/*0x0B0*/ struct {
-            u16 index   : 11;             // 1-based index in the unit table.
-            u16 unitId  : 5;
-          } loadedUnit[8];				  // officially called "uwTransport[8]"
+/*0x0B0*/ struct StoredUnit loadedUnit[8];		  // officially called "uwTransport[8]"
 /*0x0C0*/ union {
             struct {
 /*0x0C0*/     u8 spiderMineCount;
