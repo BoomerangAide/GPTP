@@ -3,8 +3,6 @@
 #include "graphics.h"
 #include <string>
 
-//V241 for VS2008
-
 namespace graphics {
 
 //Speed-efficient non-virtual class for storing shapes that will be drawn.
@@ -19,9 +17,11 @@ class Shape {
     void setCircle(int x, int y, int radius, ColorId color, CoordType coordType);
     void setFilledBox(int left, int top, int right, int bottom, ColorId color, CoordType coordType);
     void setFilledCircle(int x, int y, int radius, ColorId color, CoordType coordType);
-    void setEllipse(int left, int top, int right, int bottom, ColorId color, CoordType coordType);
-    void setDottedLine(int x1, int y1, int x2, int y2, ColorId color, CoordType coordType);
-    void setDottedEllipse(int left, int top, int right, int bottom, ColorId color, CoordType coordType);
+	void setEllipse(int left, int top, int right, int bottom, ColorId color, CoordType coordType);
+	void setDottedLine(int x1, int y1, int x2, int y2, ColorId color, CoordType coordType);
+	void setDottedLine2(int x1, int y1, int x2, int y2, ColorId color1, ColorId color2, CoordType coordType);
+	void setDottedEllipse(int left, int top, int right, int bottom, ColorId color, CoordType coordType);
+	void setDottedEllipse2(int left, int top, int right, int bottom, ColorId color1, ColorId color2, CoordType coordType);
     void draw() const;
 
   private:
@@ -34,15 +34,18 @@ class Shape {
       CIRCLE,
       FILLED_BOX,
       FILLED_CIRCLE,
-      ELLIPSE,
-      DOTTED_LINE,
-      DOTTED_ELLIPSE
+	  ELLIPSE,
+	  DOTTED_LINE,
+	  DOTTED_LINE2,
+	  DOTTED_ELLIPSE,
+	  DOTTED_ELLIPSE2
     } type;
     CoordType coordType;
     Point32 p1;
     Point32 p2;
     int radius;
     ColorId color;
+	ColorId color2;
     FontSize fontSize;
     int stringIndex;
 };
