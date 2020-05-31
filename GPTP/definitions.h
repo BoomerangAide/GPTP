@@ -15,6 +15,10 @@
 //may want to either include it or add the other 2 macros directly into
 //the file where you need this trick
 
+//Min-max macros to not rely on std
+#define MIN(a,b) ((a<=b) ? a : b)
+#define MAX(a,b) ((a>=b) ? a : b)
+
 //Helper macro for retrieving the size of an array
 //Taken from http://blogs.msdn.com/b/the1/archive/2004/05/07/128242.aspx
 template <typename T, size_t N>
@@ -26,4 +30,4 @@ char ( &_ArraySizeHelper( T (&array)[N] ))[N];
 #define PLUGIN_ID 0x1B4D69B6
 
 //What is the plugin's name (and version)?
-#define PLUGIN_NAME "General Plugin Template Project for VS2008"
+#define PLUGIN_NAME "General Plugin Template Project for Starcraft"
