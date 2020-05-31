@@ -6,8 +6,6 @@
 #include "../enumerations.h"
 #pragma pack(1)
 
-//V241 for VS2008
-
 struct CImage;
 
 //note: the flag number is chosen according to the value used in 
