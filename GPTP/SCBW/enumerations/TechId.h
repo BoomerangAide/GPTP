@@ -1,7 +1,5 @@
 #pragma once
 
-//V241 for VS2008
-
 //General use
 namespace TechId {
 enum Enum {
