@@ -42,14 +42,14 @@ CUnit* templarMergePartner(CUnit* unit, CUnit** units_list, u32 units_list_lengt
 			u32 x_distance, y_distance;
 
 			x_distance = 
-				std::max(unit->sprite->position.x,units_list[i]->sprite->position.x) -
-				std::min(unit->sprite->position.x,units_list[i]->sprite->position.x);
+				MAX(unit->sprite->position.x,units_list[i]->sprite->position.x) -
+				MIN(unit->sprite->position.x,units_list[i]->sprite->position.x);
 
 			x_distance *= x_distance;
 
 			y_distance = 
-				std::max(unit->sprite->position.y,units_list[i]->sprite->position.y) -
-				std::min(unit->sprite->position.y,units_list[i]->sprite->position.y);
+				MAX(unit->sprite->position.y,units_list[i]->sprite->position.y) -
+				MIN(unit->sprite->position.y,units_list[i]->sprite->position.y);
 
 			y_distance *= y_distance;
 
