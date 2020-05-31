@@ -2,8 +2,6 @@
 #include "scbwdata.h"
 #include <algorithm>
 
-//V241 for VS2008
-
 namespace scbw {
 
 /// The callback interface for UnitFinder::forEach().
