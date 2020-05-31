@@ -3,8 +3,6 @@
 
 #pragma pack(1)
 
-//V241 for VS2008
-
 struct COrder {
 /*00*/  COrder*   prev;
 /*04*/  COrder*   next;
