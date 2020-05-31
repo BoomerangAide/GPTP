@@ -6,29 +6,29 @@
 
 namespace {
 
-	void fixTargetLocation(Point16* coords, u32 unitId);										//0x00401FA0
-	bool function_0042D810(int x, int y, u32 unitId);											//0x0042D810
-	CUnit** getAllUnitsInBounds(Box16* coords);													//0x0042FF80
-	void incrementUnitKillCount(CUnit* unit);													//0x004759C0
-	u32 getUnitDamageBonus(CUnit* unit, u8 weaponId);											//0x00475EC0
-	void attackOverlayAndNotify(CUnit* attacker, CUnit* target, u32 weaponType, u32 direction);	//0x00479730
-	bool setThingyVisibilityFlags(CThingy* thingy);												//0x004878F0
-	CThingy* createThingy(u32 spriteId, s16 x, s16 y, u32 playerId);							//0x00488210
-	void incrementUnitDeathScores(CUnit* unit, u8 player);										//0x00488AF0
-	u32 GetUnitBulletDamage(CBullet* bullet, CUnit* target);									//0x0048ACD0
-	u32 getSpellStatString(CUnit* target, u32 techId, u8 playerId);								//0x00491E80
-	void function_492CC0(CUnit* unit);															//0x00492CC0
-	void setAllImageGroupFlagsPal11(CSprite* sprite);											//0x00497430
-	void displayLastNetErrForPlayer(u32 playerId);												//0x0049E530
-	void updateUnitStrength(CUnit* unit);														//0x0049FA40
-	void function_004A01F0(CUnit* unit);														//0x004A01F0
-	CUnit* CreateUnit(u32 unitId, int x, int y, u32 playerId);									//0x004A09D0
-	void AI_TrainingUnit(CUnit* unit_creator, CUnit* created_unit);								//0x004A2830
-	void IterateUnitsAtLocationTargetProc_CorrosiveAcid(u32 attackingPlayerId,Box16* coords);	//0x004E8280
-	void IterateUnitsAtLocationTargetProc_Ensnare(CUnit* attacker,Box16* coords);				//0x004E8280
-	void IterateUnitsAtLocationTargetProc_Plague(CUnit* attacker,Box16* coords);				//0x004E8280
-	void IterateUnitsAtLocationTargetProc_Maelstrom(CUnit* attacker,Box16* coords);				//0x004E8280
-	void IterateUnitsAtLocationTargetProc_StasisField(CUnit* attacker,Box16* coords);			//0x004E8280
+	void fixTargetLocation(Point16* coords, u32 unitId);										//01FA0
+	bool function_0042D810(int x, int y, u32 unitId);											//2D810
+	CUnit** getAllUnitsInBounds(Box16* coords);													//2FF80
+	void incrementUnitKillCount(CUnit* unit);													//759C0
+	u32 getUnitDamageBonus(CUnit* unit, u8 weaponId);											//75EC0
+	void attackOverlayAndNotify(CUnit* attacker, CUnit* target, u32 weaponType, u32 direction);	//79730
+	bool setThingyVisibilityFlags(CThingy* thingy);												//878F0
+	CThingy* createThingy(u32 spriteId, s16 x, s16 y, u32 playerId);							//88210
+	void incrementUnitDeathScores(CUnit* unit, u8 player);										//88AF0
+	u32 GetUnitBulletDamage(CBullet* bullet, CUnit* target);									//8ACD0
+	u32 getSpellStatString(CUnit* target, u32 techId, u8 playerId);								//91E80
+	void function_492CC0(CUnit* unit);															//92CC0
+	void setAllImageGroupFlagsPal11(CSprite* sprite);											//97430
+	void displayLastNetErrForPlayer(u32 playerId);												//9E530
+	void updateUnitStrength(CUnit* unit);														//9FA40
+	void function_004A01F0(CUnit* unit);														//A01F0
+	CUnit* CreateUnit(u32 unitId, int x, int y, u32 playerId);									//A09D0
+	void AI_TrainingUnit(CUnit* unit_creator, CUnit* created_unit);								//A2830
+	void IterateUnitsAtLocationTargetProc_CorrosiveAcid(u32 attackingPlayerId,Box16* coords);	//E8280
+	void IterateUnitsAtLocationTargetProc_Ensnare(CUnit* attacker,Box16* coords);				//E8280
+	void IterateUnitsAtLocationTargetProc_Plague(CUnit* attacker,Box16* coords);				//E8280
+	void IterateUnitsAtLocationTargetProc_Maelstrom(CUnit* attacker,Box16* coords);				//E8280
+	void IterateUnitsAtLocationTargetProc_StasisField(CUnit* attacker,Box16* coords);			//E8280
 
 } //unnamed namespace
 
@@ -391,8 +391,8 @@ namespace hooks {
 		} //while(current_unit != NULL)
 
 		//reload the previous temporary unit list from before the call to getAllUnitsInBounds
+		*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsListLastIndex[*tempUnitsListArraysCountsListLastIndex];
 		*tempUnitsListArraysCountsListLastIndex = *tempUnitsListArraysCountsListLastIndex - 1;
-		*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsList[*tempUnitsListArraysCountsListLastIndex];
 
 	} //void EMPShockwaveHit(CUnit* attacker, int x, int y)
 
