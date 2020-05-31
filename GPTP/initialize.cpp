@@ -33,7 +33,7 @@
 #include "hooks/unit_stats/sight_range.h"
 #include "hooks/unit_stats/max_energy.h"
 #include "hooks/unit_stats/weapon_range.h"
-#include "hooks/interface/weapon_armor_tooltip.h"
+#include "hooks/interface/status_display/weapon_armor_tooltip.h"
 
 //in alphabetical order
 #include "hooks/orders/base_orders/attack_orders.h"
@@ -46,9 +46,14 @@
 #include "hooks/orders/spells/cast_order.h"
 #include "hooks/recv_commands/CMDRECV_Build.h"
 #include "hooks/recv_commands/CMDRECV_Cancel.h"
+#include "hooks/recv_commands/CMDRECV_LiftOff.h"
 #include "hooks/recv_commands/CMDRECV_MergeArchon.h"
 #include "hooks/recv_commands/CMDRECV_Morph.h"
+#include "hooks/recv_commands/CMDRECV_ResearchUpgrade.h"
+#include "hooks/recv_commands/CMDRECV_RightClick.h"
+#include "hooks/recv_commands/CMDRECV_Selection.h"
 #include "hooks/recv_commands/CMDRECV_SiegeTank.h"
+#include "hooks/recv_commands/CMDRECV_Stimpack.h"
 #include "hooks/recv_commands/CMDRECV_Stop.h"
 #include "hooks/create_init_units.h"
 #include "hooks/orders/base_orders/die_order.h"
@@ -70,21 +75,30 @@
 #include "hooks/orders/spells/recall_spell.h"
 #include "hooks/recv_commands/receive_command.h"
 #include "hooks/orders/repair_order.h"
+#include "hooks/utils/replace_unit.h"
 #include "hooks/orders/research_upgrade_orders.h"
 #include "hooks/interface/select_larva.h"
 #include "hooks/interface/selection.h"
 #include "hooks/orders/siege_transform.h"
-#include "hooks/interface/stats_panel_display.h"
+#include "hooks/interface/status_display/stats_display_main.h"
+#include "hooks/interface/status_display/stats_panel_display.h"
+#include "hooks/interface/status_display/advanced/status_base_text.h"
+#include "hooks/interface/status_display/advanced/status_buildmorphtrain.h"
+#include "hooks/interface/status_display/advanced/status_nukesilo_resources.h"
+#include "hooks/interface/status_display/advanced/status_research_upgrade.h"
+#include "hooks/interface/status_display/advanced/status_supply_provider.h"
+#include "hooks/interface/status_display/advanced/status_transport.h"
 #include "hooks/orders/base_orders/stopholdpos_orders.h"
 #include "hooks/recv_commands/train_cmd_receive.h"
 #include "hooks/orders/unit_making/unit_morph.h"
+#include "hooks/interface/status_display/unit_stat_act.h"
+#include "hooks/interface/status_display/unit_stat_cond.h"
+#include "hooks/interface/status_display/unit_stat_selection.h"
 #include "hooks/orders/unit_making/unit_train.h"
+#include "hooks/interface/updateSelectedUnitsData.h"
 #include "hooks/utils/utils.h"
-#include "hooks/interface/wireframe.h"
+#include "hooks/interface/status_display/wireframe.h"
 #include "hooks/weapons/wpnspellhit.h"
-
-//#include "AI/spellcasting.h"
-//#include "AI/experimental/ai_harvest.h"
 
 /// This function is called when the plugin is loaded into StarCraft.
 /// You can enable/disable each group of hooks by commenting them.
@@ -137,7 +151,7 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectResearchUpgradeOrdersHooks();
 	hooks::injectMedicOrdersHooks();
 	hooks::injectHallucinationSpellHook();
-	hooks::injectFeedbackSpellHook();	
+	hooks::injectFeedbackSpellHook();
 	hooks::injectBtnsCondHook();
 	hooks::injectRecvCmdHook();
 	hooks::injectCreateInitUnitsHooks();
@@ -155,6 +169,23 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectMindControlSpellHook();
 	hooks::injectCMDRECV_BuildHooks();
 	hooks::injectExtendSightLimitMod();
+	hooks::injectUpdateSelectedUnitsDataHook();
+	hooks::injectStatsDisplayMainHook();
+	hooks::injectUnitStatSelectionHooks();
+	hooks::injectUnitStatCondHooks();
+	hooks::injectUnitStatActHooks();
+	hooks::injectStatusBaseTextHooks();
+	hooks::injectStatusSupplyProviderHook();
+	hooks::injectStatusResearchUpgradeHooks();
+	hooks::injectStatusTransportHooks();
+	hooks::injectStatusNukeSilo_Resources_Hooks();
+	hooks::injectStatusBuildMorphTrain_Hooks();
+	hooks::injectCMDRECV_SelectionHooks();
+	hooks::injectCMDRECV_LiftOffHook();
+	hooks::injectCMDRECV_ResearchUpgradeHooks();
+	hooks::injectReplaceUnitWithTypeHook();
+	hooks::injectCMDRECV_StimpackHook();
+	hooks::injectCMDRECV_RightClickHooks();
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
@@ -186,8 +217,11 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	
 	hooks::injectUnitTooltipHook();
 
-	//hooks::injectSpellcasterAI();
-	//hooks::injectAI_HarvestHooks();
+	//fixes to make sc1 campaign playable from firegraft/mpqgraft self-executables
+	jmpPatch((void*)0x150182D0, 0x004101AE);
+	jmpPatch((void*)0x15017DD0, 0x004100B2);
+	jmpPatch((void*)0x15017960, 0x004100C4);
+	jmpPatch((void*)0x15014A80, 0x004100BE);
 
 	return TRUE;
 }
