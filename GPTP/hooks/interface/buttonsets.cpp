@@ -104,7 +104,7 @@ enum Enum : u32 {
 	Create_Unit = 0x004234B0,											//CMDACT_Train
 	Cancel_Last = 0x00423490,											//CMDACT_CancelTrain
 	Tank_Mode = 0x00423470,												//CMDACT_Unsiege
-	Siege_Mode = 0x00423450,											//CMDACT_Unsiege
+	Siege_Mode = 0x00423450,											//CMDACT_Siege
 	Cancel_Construction = 0x00423430,									//CMDACT_CancelConstruction
 	Cancel_Morph = 0x00423410,											//CMDACT_CancelUnitMorph
 	Move = 0x00424440,													//BTNSACT_Move
@@ -168,14 +168,16 @@ enum Enum : u32 {
 //This make a copy of the Marine buttonset.
 //Note that the function would have to be duplicated
 //for each buttonset to create
-BUTTON_SET* getCustomButtonSet() {
+BUTTON_SET* getCustomButtonSet(BUTTON_SET* base_buttonset) {
 
 	//Use static variables to avoid memory allocation trouble
 	static BUTTON_SET customButtonSet;
 	static BUTTON customButtonsArray[50]; //more than 9 buttons if 1 button can replace another (siege mode/tank mode,burrow/unburrow...)
 
 	//since it's a copy of the marine set, it would have the same amount of buttons
+	//this need to be modded according to what you expected selected due to hardcoded marine in example
 	customButtonSet.buttonsInSet = buttonSetTable[UnitId::TerranMarine].buttonsInSet;
+	//customButtonSet.buttonsInSet = base_buttonset->buttonsInSet; //to use buttonset passed
 
 	//connectedUnit should usually be init at 0xFFFF.Almost unused (maybe not fully implemented).
 	customButtonSet.connectedUnit = 0xFFFF;
@@ -184,8 +186,11 @@ BUTTON_SET* getCustomButtonSet() {
 	customButtonSet.firstButton = &customButtonsArray[0];
 
 	//For each button in the array until reaching the amount of buttonsInSet, copy the data for
-	//each member of the button structure from the marine to the custom set.
+	//each member of the button structure from the unmodded set to the custom set.
+	//this need to be modded according to what you expected selected due to hardcoded marine in example
 	for(u32 i = 0; i < customButtonSet.buttonsInSet; i++) {
+		//note: for each line, could also be:
+		//customButtonsArray[i].something = base_buttonset->firstButton[i].something;
 		customButtonsArray[i].actFunc = buttonSetTable[UnitId::TerranMarine].firstButton[i].actFunc;
 		customButtonsArray[i].actStringID = buttonSetTable[UnitId::TerranMarine].firstButton[i].actStringID;
 		customButtonsArray[i].actVar = buttonSetTable[UnitId::TerranMarine].firstButton[i].actVar;
@@ -453,6 +458,7 @@ namespace hooks {
 	//function in the _inject.cpp file.
 	BUTTON_SET* getButtonSet(int index) {
 		return &(buttonSetTable[index]);
+		//if using custom button set, call it with return getCustomButtonSet(&buttonSetTable[index]);
 	}
 
 	; //4599A0  
@@ -468,7 +474,7 @@ namespace hooks {
 		u16* const BUTTONSET_SPECIAL_BUTTONSETID = (u16*)0x0068C1C8; //replay, cancel building...
 		u8* const BUTTONSET_UNIT_MAINORDERID = (u8*)0x0068C1E4;
 
-		u32* const bCanUpdateCurrentButtonSet = (u32*)0x0068C1B0;
+		Bool32* const bCanUpdateCurrentButtonSet = (Bool32*)0x0068C1B0;
 
 		bool jumpTo59A38 = false;
 		bool jumpTo59A9F = false;
@@ -687,7 +693,7 @@ void updateButtonSet_Sub4591D0() {
 
 	current_dialog = *BUTTONSET_DIALOG;
 	current_button = current_buttonset->firstButton;
-	current_button_state = BUTTON_STATE::Disabled;
+	current_button_state = BUTTON_STATE::Invisible;
 
 	if(current_dialog->controlType != DialogControlTypes::DialogBox)
 		current_dialog = current_dialog->parent;
@@ -711,13 +717,13 @@ void updateButtonSet_Sub4591D0() {
 			jumpto5934E = true;
 		else { //loop to ignore the first unused/disabled buttons
 
-			current_button_state = BUTTON_STATE::Disabled;
+			current_button_state = BUTTON_STATE::Invisible;
 
-			while (current_button_state == BUTTON_STATE::Disabled && (buttons_count < current_buttonset->buttonsInSet)) {
+			while (current_button_state == BUTTON_STATE::Invisible && (buttons_count < current_buttonset->buttonsInSet)) {
 
 				current_button_state = req_check((u32)current_button->reqFunc,(u8)current_button->reqVar,(u8)*LOCAL_NATION_ID,*activePortraitUnit);
 
-				if(current_button_state == BUTTON_STATE::Disabled) {
+				if(current_button_state == BUTTON_STATE::Invisible) {
 					buttons_count++;
 					current_button++;	//select next button (advance by sizeof(BUTTON))
 				}
@@ -789,7 +795,7 @@ void updateButtonSet_Sub4591D0() {
 					//5930B
 					showDialog(current_dialog);
 
-					if(current_button_state == BUTTON_STATE::Invisible) {
+					if(current_button_state == BUTTON_STATE::Disabled) {
 
 						disableDialog(current_dialog);
 
