@@ -21,8 +21,8 @@ void orders_Build5(CUnit* nydus_canal) {
 	int x,y;
 	u32 result_f00473FB0;
 
-	x = units_dat::BuildingDimensions[UnitId::ZergNydusCanal].x;
-	y = units_dat::BuildingDimensions[UnitId::ZergNydusCanal].y;
+	x = (s16)units_dat::BuildingDimensions[UnitId::ZergNydusCanal].x;
+	y = (s16)units_dat::BuildingDimensions[UnitId::ZergNydusCanal].y;
 
 	if(x < 0)
 		x++;
