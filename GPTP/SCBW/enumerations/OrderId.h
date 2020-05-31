@@ -1,7 +1,5 @@
 #pragma once
 
-//V241 for VS2008
-
 namespace OrderId {
 enum Enum {
   Die                    = 0x00, /**< Causes the unit to die. Normal units run the death iscript animation, while hallucinated units have the sound/sprite spawned and then are removed.
@@ -383,5 +381,6 @@ enum Enum {
   Fatal                  = 0xBC, /**< Nothing.
                   * Default Requirements: Unused. */
   None                   = 0xBD
+    
 };
 }
