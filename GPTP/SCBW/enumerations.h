@@ -1,8 +1,7 @@
 //All-in-one header file for various enumerations used by GPTP.
-//V241 for VS2008
-
 #pragma once
 #pragma warning( disable: 4482 )
+#pragma warning( disable: 26812 )
 
 #include "enumerations/UnitId.h"
 #include "enumerations/WeaponId.h"
@@ -121,11 +120,10 @@ enum Enum : u32 {
 };
 }
 
-//---- Taken from buttons.cpp ----//
 namespace BUTTON_STATE {
 enum Enum {
-  Invisible = -1,
-  Disabled  = 0,
+	Disabled = -1,
+	Invisible= 0,
   Enabled   = 1
 };
 }
@@ -167,6 +165,36 @@ enum Enum {
   TextGone2     = 0x14,
 };
 }
+
+//Unused in GPTP values are based on PyTBL v1.7 infos
+enum TEXTLABELCOLOR {
+/*0x01*/	CYAN1 = 1,
+/*0x02*/	CYAN2 = 2,
+/*0x03*/	YELLOW = 3,
+/*0x04*/	WHITE = 4,
+/*0x05*/	GREY_LAST = 5,			//Starcraft will ignore other color tags if used
+/*0x06*/	RED = 6,
+/*0x07*/	GREEN = 7,
+/*0x08*/	RED_PLAYER1 = 8,
+/*0x0B*/	INVISIBLE_LAST = 11,	//Starcraft will ignore other color tags if used
+/*0x0C*/	TRUNCATE = 12,
+/*0x0E*/	BLUE_PLAYER2 = 14,
+/*0x0F*/	TEAL_PLAYER3 = 15,
+/*0x10*/	PURPLE_PLAYER4 = 16,
+/*0x11*/	ORANGE_PLAYER5 = 17,
+/*0x14*/	INVISIBLE_LAST2 = 20,	//Starcraft will ignore other color tags if used
+/*0x15*/	BROWN_PLAYER6 = 21,
+/*0x16*/	WHITE_PLAYER7 = 22,
+/*0x17*/	YELLOW_PLAYER8 = 23,
+/*0x18*/	GREEN_PLAYER9 = 24,
+/*0x19*/	BRIGHT_YELLOW_PLAYER10 = 25,
+/*0x1A*/	CYAN3 = 26,
+/*0x1B*/	PINKISH_PLAYER11 = 27,
+/*0x1C*/	DARK_CYAN_PLAYER12 = 28,
+/*0x1D*/	GREYGREEN = 29,
+/*0x1E*/	BLUEGREY = 30,
+/*0x1F*/	TURQUOISE = 31
+};
 
 namespace LobbyTextColor {
 enum Enum {
