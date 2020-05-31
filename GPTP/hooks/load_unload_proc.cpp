@@ -30,21 +30,21 @@ void loadUnitProc(CUnit* unit, CUnit* unitToLoad) {
 	if(units_dat::SpaceProvided[unit->id] != 0) {
 
 		bool bEndLoop = false;
-		u16* loadedUnitOffset;
+		StoredUnit* loadedUnit;
 
 		while(!bEndLoop) {
 
-			loadedUnitOffset = (u16*)&unit->loadedUnit[counter];
+			loadedUnit = &unit->loadedUnit[counter];
 
-			if(*loadedUnitOffset == 0)
+			if(loadedUnit->fullValue == 0)
 				bEndLoop = true;
 			else {
 
-				if(unitTable_0059CB58[unit->loadedUnit[counter].index].sprite == NULL)
+				if(unitTable_0059CB58[loadedUnit->innerValues.index].sprite == NULL)
 					bEndLoop = true;
 				else {
 
-					CUnit* current_loaded_unit = (CUnit*)&(unitTable_0059CB58[unit->loadedUnit[counter].index]);
+					CUnit* current_loaded_unit = (CUnit*)&(unitTable_0059CB58[loadedUnit->innerValues.index]);
 
 					if(
 						current_loaded_unit->mainOrderId == OrderId::Die &&
@@ -53,7 +53,7 @@ void loadUnitProc(CUnit* unit, CUnit* unitToLoad) {
 						bEndLoop = true;
 					else {
 
-						if(current_loaded_unit->targetOrderSpecial != unit->loadedUnit[counter].unitId)
+						if(current_loaded_unit->targetOrderSpecial != loadedUnit->innerValues.unitId)
 							bEndLoop = true;
 						else {
 
@@ -120,13 +120,11 @@ void loadUnitProc(CUnit* unit, CUnit* unitToLoad) {
 	unitToLoad->connectedUnit = unit;
 
 	if(loaded_index < UNIT_ARRAY_LENGTH) {
-		unit->loadedUnit[counter].index = loaded_index;
-		unit->loadedUnit[counter].unitId = unitToLoad->targetOrderSpecial;
+		unit->loadedUnit[counter].innerValues.index = loaded_index;
+		unit->loadedUnit[counter].innerValues.unitId = unitToLoad->targetOrderSpecial;
 	}
-	else {
-		unit->loadedUnit[counter].index = 0;
-		unit->loadedUnit[counter].unitId = 0;
-	}
+	else
+		unit->loadedUnit[counter].fullValue = 0;
 
 	unitToLoad->status |= UnitStatus::InTransport;
 	hideAndDisableUnit(unitToLoad);
