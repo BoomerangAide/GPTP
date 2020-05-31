@@ -19,7 +19,7 @@ u32 fxnInteract(BinDlg* dialog, u32 data_struct_offset);
 } //unnamed namespace
 
 namespace hooks {
-	
+
 //00419D20
 void InitializeDialog(BinDlg* dialog, void* dlgFunc) {
 
@@ -89,7 +89,7 @@ void InitializeDialog(BinDlg* dialog, void* dlgFunc) {
 
 }
 
-;	
+;
 
 //0047B770
 bool unit_IsStandardAndMovable(CUnit* unit) {
@@ -148,13 +148,11 @@ CUnit* getActivePlayerFirstSelection() {
 			if(unit == NULL)
 				bStopLoop = true;
 			else
-			if(unit->sprite != NULL) {
-				if(unit->mainOrderId != OrderId::Die)
+			if(
+				unit->sprite != NULL &&
+				(unit->mainOrderId != OrderId::Die || unit->mainOrderState != 1)
+			) 
 					bStopLoop = true;
-				else
-				if(unit->mainOrderState != 1)
-					bStopLoop = true;
-			}
 
 			if(!bStopLoop)
 				function_0049A7F0(unit); //remove the unit from playersSelections->unit[playerId][index] among other things
@@ -178,7 +176,7 @@ CUnit* getActivePlayerFirstSelection() {
 //-------- Helper function definitions. Do NOT modify! --------//
 
 namespace {
-	
+
 //Risk of memory leaks or memory corruption or stuff if such a thing is
 //used the wrong way or in the wrong place!
 const u32 Func_SMemAlloc = 0x0041006A;
@@ -219,7 +217,7 @@ void SetCallbackTimer(BinDlg* dialog, u32 unk1, u32 unk2, u32 unk3) {
 
 }
 
-;	
+;
 
 const u32 Func_Sub49A7F0 = 0x0049A7F0;
 void function_0049A7F0(CUnit* unit) {
@@ -234,7 +232,7 @@ void function_0049A7F0(CUnit* unit) {
 }
 
 ;
-	
+
 u32 fxnInteract(BinDlg* dialog, u32 data_struct_offset) {
 
 	static u32 return_value;
