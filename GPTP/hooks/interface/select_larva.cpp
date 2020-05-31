@@ -5,7 +5,7 @@
 
 namespace {
 
-u32 getLarvaeUnitsFromList(CUnit** unitList, CUnit** outputList);									//0x00423190
+u32 getLarvaeUnitsFromList_Helper(CUnit** unitList, CUnit** outputList);									//0x00423190
 CUnit** getAllUnitsInBounds(Box16* coords);															//0x0042FF80
 u32 CUnitToUnitID(CUnit* unit);																		//0x0047B1D0
 Bool32 selectSingleUnitFromID(u32 unitIndex);														//0x00496D30
@@ -79,7 +79,7 @@ namespace hooks {
 
 		units_in_bounds = getAllUnitsInBounds(&coords);
 
-		larvaeCount = getLarvaeUnitsFromList(units_in_bounds,new_selection);
+		larvaeCount = getLarvaeUnitsFromList_Helper(units_in_bounds,new_selection);
 
 		*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsListLastIndex[*tempUnitsListArraysCountsListLastIndex];
 		*tempUnitsListArraysCountsListLastIndex = *tempUnitsListArraysCountsListLastIndex - 1;
@@ -109,7 +109,7 @@ namespace hooks {
 namespace {
 
 	const u32 Func_getLarvaeUnitsFromList = 0x00423190;
-	u32 getLarvaeUnitsFromList(CUnit** unitList, CUnit** outputList) {
+	u32 getLarvaeUnitsFromList_Helper(CUnit** unitList, CUnit** outputList) {
 
 		static u32 larvaeList_Count;
 
