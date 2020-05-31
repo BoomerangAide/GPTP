@@ -1,12 +1,11 @@
-//Based on BWAPI's BW/CBullet.h
+//Based on BWAPI's BW/CImage.h
 
 #pragma once
 #include "common.h"
 #include "CList.h"
 #include <SCBW/enumerations.h>
-#pragma pack(1)
 
-//V241 for VS2008
+#pragma pack(1)
 //Additions from bwapi/bwapi/BWMemoryEdit/Enums/RLE.cs
 //Additions from bwapi/bwapi/BWAPI/Source/BW/CImage.h
 
@@ -83,6 +82,7 @@ struct CImage {
 
   /// Return a pointer to the current frame when called
   GrpFrame* getCurrentFrame() const;
+
 
 ////////////////////////////////////////////////////////////////
 //Actual data structure
