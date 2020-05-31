@@ -12,7 +12,7 @@ u32 RandBetween(u32 min, u32 max, u32 someIndex);					//0x004DC550
 
 namespace hooks {
 
-const int MIN_HITPOINTS_FOR_STIMPACKS = 2560;
+const int MIN_HITPOINTS_FOR_STIMPACKS = 2560; //2560 / 256 => 10 hp cost on ingame display
 
 //Equivalent to original code, only doubt is QueueGameCommand
 //Local answer when using stimpacks (check units of selection,
@@ -55,6 +55,8 @@ void CMDACT_Stimpack() {
 //code used by the AI (no questions about sync between players in that case)
 void useStimPacksAIHook(CUnit* unit) {
 
+	const int stimTimerBase = 37;
+
 	if (unit->hitPoints > MIN_HITPOINTS_FOR_STIMPACKS) {
 
 		scbw::playSound(
@@ -64,69 +66,10 @@ void useStimPacksAIHook(CUnit* unit) {
 
 		unit->damageHp(MIN_HITPOINTS_FOR_STIMPACKS,NULL,-1,true);
 
-		if (unit->stimTimer < 37) {
-			unit->stimTimer = 37;
+		if (unit->stimTimer < stimTimerBase) {
+			unit->stimTimer = stimTimerBase;
 			unit->updateSpeed();
 		}
-
-	}
-
-}
-
-;
-
-//Identical to original code
-//Global answer when applying the validated action of stimpack
-//Check the active player selection and apply stimpack effect on
-//each valid stimpack user
-void CMDRECV_StimPack() {
-
-	CUnit* activePlayerCurrentSelection;
-
-	*selectionIndexStart = 0;
-	activePlayerCurrentSelection = getActivePlayerNextSelection();
-
-	while(activePlayerCurrentSelection != NULL) {
-
-		if(
-			activePlayerCurrentSelection->canUseTech(TechId::Stimpacks,*ACTIVE_NATION_ID) == 1 &&
-			activePlayerCurrentSelection->hitPoints > MIN_HITPOINTS_FOR_STIMPACKS
-		)
-		{
-
-			int random_value;
-			
-			if(!*IS_IN_GAME_LOOP)
-				random_value = 0;
-			else {
-
-				static u32* randomnessCounter_0051C68C = (u32*)0x0051C68C;
-				static u32* randomnessCounter_0051CA18 = (u32*)0x0051CA18;
-
-				*randomnessCounter_0051C68C = (*randomnessCounter_0051C68C) + 1;
-				*randomnessCounter_0051CA18 = (*randomnessCounter_0051CA18) + 1;
-				*lastRandomNumber = ((*lastRandomNumber) * 0x015A4E35) + 1;
-
-				random_value = ((*lastRandomNumber) / 65535) & 32767;
-
-			}
-
-			//if used random, should give a value between 0 and 1
-			random_value = (random_value + random_value) / 32768;
-
-			scbw::playSound(SoundId::Terran_MARINE_TMaSti00_WAV + random_value, activePlayerCurrentSelection);
-
-			activePlayerCurrentSelection->damageHp(MIN_HITPOINTS_FOR_STIMPACKS,NULL,-1,true);
-
-			if (activePlayerCurrentSelection->stimTimer < 37) {
-				activePlayerCurrentSelection->stimTimer = 37;
-				activePlayerCurrentSelection->updateSpeed();
-			}
-
-
-		}
-
-		activePlayerCurrentSelection = getActivePlayerNextSelection(); 
 
 	}
 
