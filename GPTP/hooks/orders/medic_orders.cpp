@@ -391,6 +391,7 @@ void function_4748E0(CUnit* unit, int x, int y, u8 orderId) {
 
 ;
 
+//Maybe EDI could have another value in some circumstances
 const u32 Func_sub474940 = 0x00474940;
 void function_474940(CUnit* unit, CUnit* target, u8 orderId) {
 
