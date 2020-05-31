@@ -20,6 +20,8 @@ namespace hooks {
 
 void CreateInitialMeleeBuildings(u8 raceId, u32 playerId) {
 
+	const u32 Func_Sub49D640 = 0x0049D640;
+
 	u8 buildingId;
 	s32 buildingSizeX, buildingSizeY;
 	Box16 searchBox; 
@@ -36,8 +38,8 @@ void CreateInitialMeleeBuildings(u8 raceId, u32 playerId) {
 	else
 		buildingId = UnitId::None;
 
-	buildingSizeX = units_dat::BuildingDimensions[buildingId].x;
-	buildingSizeY = units_dat::BuildingDimensions[buildingId].y;
+	buildingSizeX = (s16)units_dat::BuildingDimensions[buildingId].x;
+	buildingSizeY = (s16)units_dat::BuildingDimensions[buildingId].y;
 
 	if(buildingSizeX < 0)
 		buildingSizeX++;
@@ -50,7 +52,7 @@ void CreateInitialMeleeBuildings(u8 raceId, u32 playerId) {
 	searchBox.right = buildingSizeX / 2 + ((startPositions[playerId].x - (s16)(buildingSizeX / 2)) & 0x0000FFE0) + buildingSizeX / 2 - 1;
 
 	//yes, the return value is unused for some reason
-	FindBestUnit(&searchBox,0x0049D640);
+	FindBestUnit(&searchBox,Func_Sub49D640);
 
 	created_unit = 
 		createUnit(
