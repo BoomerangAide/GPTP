@@ -78,6 +78,7 @@ Version 5.900:
 - hooks\interface\status_display\unit_stat_act hooks added
 - hooks\interface\status_display\unit_stat_cond hooks added
 - hooks\interface\status_display\unit_stat_selection hooks added
+- hooks\interface\status_display\stats_display_main hooks added
 - hooks\interface\updateSelectedUnitData hooks added
 
 - Removed completely the AI folder (not enough interest AND what existed was too buggy to be kept)
