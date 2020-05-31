@@ -4,8 +4,6 @@
 #include "../../types.h"
 #pragma pack(1)
 
-//V241 for VS2008
-
 struct Point8 {
   s8 x;
   s8 y;
