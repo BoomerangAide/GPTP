@@ -512,7 +512,7 @@ namespace hooks {
 			bool bEndLoop = false;
 			bool bFoundUnitToUnload = false;
 
-			u16* loadedUnitOffset;
+			StoredUnit* loadedUnitOffset;
 
 			bool jump_to_E8191 = false;
 			bool jump_to_E8195 = false;
@@ -520,18 +520,18 @@ namespace hooks {
 
 			while(!bEndLoop) {
 
-				loadedUnitOffset = (u16*)&unit->loadedUnit[counter];
+				loadedUnitOffset = &unit->loadedUnit[counter];
 
-				if(	*loadedUnitOffset != 0  &&
-					unitTable_0059CB58[unit->loadedUnit[counter].index].sprite != NULL
+				if(	loadedUnitOffset->fullValue != 0  &&
+					unitTable_0059CB58[loadedUnitOffset->innerValues.index].sprite != NULL
 				)
 				{
 
-					CUnit* unitToUnload = &(unitTable_0059CB58[unit->loadedUnit[counter].index]);
+					CUnit* unitToUnload = &(unitTable_0059CB58[loadedUnitOffset->innerValues.index]);
 
 					if(unitToUnload->mainOrderId != 0 || unitToUnload->mainOrderState != 1) {
 						
-						if(unit->loadedUnit[counter].unitId == unitToUnload->targetOrderSpecial) {
+						if(loadedUnitOffset->innerValues.unitId == unitToUnload->targetOrderSpecial) {
 
 							bFoundUnitToUnload = true;
 							result_E7F70 = unloadUnitProc(unitToUnload);
