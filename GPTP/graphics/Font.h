@@ -3,8 +3,6 @@
 #include "../types.h"
 #pragma pack(1)
 
-//V241 for VS2008
-
 namespace graphics {
 
 class FontChar {
