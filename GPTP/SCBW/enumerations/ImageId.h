@@ -1,7 +1,5 @@
 #pragma once
 
-//V241 for VS2008
-
 //Entries in arr\images.dat
 //List taken from PyMS: Libs\Data\Images.txt
 namespace ImageId {
