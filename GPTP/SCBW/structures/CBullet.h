@@ -4,8 +4,6 @@
 #include "Target.h"
 #pragma pack(1)
 
-//V241 for VS2008
-
 struct CUnit;
 struct CSprite;
 
