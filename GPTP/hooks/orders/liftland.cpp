@@ -5,34 +5,34 @@
 
 namespace {
 
-	void setUnitPathing(CUnit* unit, u8 unkPathRelated);															//0x00401360
-	bool isUnitPositions2Equal(CUnit* unit);																		//0x00402160
-	CUnit* connectAddonCheck(CUnit* unit);																			//0x004404A0
-	void function_00463470(CUnit* unit);																			//0x00463470
-	void function_004634E0(CUnit* unit);																			//0x004634E0
-	void function_00463640(CUnit* unit);																			//0x00463640
-	void completeAddon(CUnit* unit, CUnit* addon);																	//0x00463D50
-	void function_00464300(CUnit* unit);																			//0x00464300
-	void disconnectFromAddOn(CUnit* unit);																			//0x00464930
-	void function_00469EC0(CUnit* unit, int x, int y);																//0x00469EC0
-	void function_00469F60(CUnit* unit, int x, int y);																//0x00469F60
-	void function_0046A560(CUnit* unit);																			//0x0046A560
-	void function_0046A5A0(CUnit* unit);																			//0x0046A5A0
-	u32 function_00473FB0(CUnit* unit, u8 playerId, int x, int y, u16 unitId, u8 unk1, u8 unk2, u8 unk3, u8 unk4 );	//0x00473FB0
-	void removeOrderFromUnitQueue(CUnit* unit, COrder* order);														//0x004742D0
-	void function_00474760(CUnit* unit, COrder* order, u8 orderId);													//0x00474760
-	void actUnitReturnToIdle(CUnit* unit);																			//0x00475420
-	bool function_0047DF90(CUnit* unit);																			//0x0047DF90
-	void refreshLayer3And4();																						//0x0048D9A0
-	bool function_0048DDA0();																						//0x0048DDA0
-	void function_0048E310();																						//0x0048E310
-	void placebuildingProc();																						//0x0048E6E0
-	void playBuildingLandSound(CUnit* unit);																		//0x0048F5A0
-	void SetUnitMovementSpeed(CUnit* unit, u32 newSpeed);															//0x004951C0
-	void function_00498150(CSprite* sprite, u8 newVerticalOffset);													//0x00498150
-	void function_004997E0(CSprite* sprite);																		//0x004997E0
-	void function_004C3B40(CUnit* unit);																			//0x004C3B40
-	bool function_004EB9C0(CUnit* unit, int x, int y);																//0x004EB9C0
+	void setUnitPathing(CUnit* unit, u8 unkPathRelated);															//01360
+	bool isUnitPositions2Equal(CUnit* unit);																		//02160
+	CUnit* connectAddonCheck(CUnit* unit);																			//404A0
+	void function_00463470(CUnit* unit);																			//63470
+	void function_004634E0(CUnit* unit);																			//634E0
+	void function_00463640(CUnit* unit);																			//63640
+	void completeAddon(CUnit* unit, CUnit* addon);																	//63D50
+	void function_00464300(CUnit* unit);																			//64300
+	void disconnectFromAddOn(CUnit* unit);																			//64930
+	void function_00469EC0(CUnit* unit, int x, int y);																//69EC0
+	void function_00469F60(CUnit* unit, int x, int y);																//69F60
+	void function_0046A560(CUnit* unit);																			//6A560
+	void function_0046A5A0(CUnit* unit);																			//6A5A0
+	u32 function_00473FB0(CUnit* unit, u8 playerId, int x, int y, u16 unitId, u8 unk1, u8 unk2, u8 unk3, u8 unk4 );	//73FB0
+	void removeOrderFromUnitQueue(CUnit* unit, COrder* order);														//742D0
+	void function_00474760(CUnit* unit, COrder* order, u8 orderId);													//74760
+	void actUnitReturnToIdle(CUnit* unit);																			//75420
+	bool function_0047DF90(CUnit* unit);																			//7DF90
+	void refreshLayer3And4();																						//8D9A0
+	bool function_0048DDA0();																						//8DDA0
+	void function_0048E310();																						//8E310
+	void placebuildingProc();																						//8E6E0
+	void playBuildingLandSound(CUnit* unit);																		//8F5A0
+	void SetUnitMovementSpeed(CUnit* unit, u32 newSpeed);															//951C0
+	void function_00498150(CSprite* sprite, u8 newVerticalOffset);													//98150
+	void function_004997E0(CSprite* sprite);																		//997E0
+	void function_004C3B40(CUnit* unit);																			//C3B40
+	bool function_004EB9C0(CUnit* unit, int x, int y);																//EB9C0
 
 } //unnamed namespace
 
@@ -118,8 +118,8 @@ void orders_BuildingLand(CUnit* unit) {
 
 			int x,y;
 
-			x = units_dat::BuildingDimensions[unit->id].x;
-			y = units_dat::BuildingDimensions[unit->id].y;
+			x = (s16)units_dat::BuildingDimensions[unit->id].x;
+			y = (s16)units_dat::BuildingDimensions[unit->id].y;
 
 			if(x<0) x+=1;if(y<0) y+=1;
 
@@ -141,16 +141,16 @@ void orders_BuildingLand(CUnit* unit) {
 
 				//64504:
 
-				//probably play "landing sequence interrupted"
+				//play "landing sequence interrupted"
 				playBuildingLandSound(unit);
 
-				if(	unit->orderQueueHead != NULL &&
-					unit->orderQueueHead->orderId != OrderId::PlaceAddon
-					)
+				if(	
+					unit->orderQueueHead != NULL &&
+					unit->orderQueueHead->orderId == OrderId::PlaceAddon
+				)
 					removeOrderFromUnitQueue(unit, unit->orderQueueHead);
 
 				unit->orderToIdle();
-
 
 			}
 			else {
@@ -242,9 +242,7 @@ void orders_BuildingLand(CUnit* unit) {
 			//some others things?			
 			function_0046A5A0(unit);
 
-			//maybe the landing unit would get excluded from multi-units selection
-			//if that could happen in normal Starcraft gameplay?That may be what
-			//this function do.
+			//Exclude unit from multiple selection
 			if(unit->sprite->flags & CSprite_Flags::Selected && *clientSelectionCount > 1)
 				function_004C3B40(unit);
 
