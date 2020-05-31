@@ -3,8 +3,6 @@
 #include "graphics.h"
 #pragma pack(1)
 
-//V241 for VS2008
-
 namespace graphics {
 
 class Bitmap {
@@ -19,9 +17,11 @@ class Bitmap {
     void drawFilledBox(int left, int top, int right, int bottom, ColorId color);
     void drawCircle(int x, int y, int radius, ColorId color);
     void drawFilledCircle(int x, int y, int radius, ColorId color);
-    void drawEllipse(int left, int top, int right, int bottom, ColorId color);
-    void drawDottedLine(int x1, int y1, int x2, int y2, ColorId color);
-    void drawDottedEllipse(int left, int top, int right, int bottom, ColorId color);
+	void drawEllipse(int left, int top, int right, int bottom, ColorId color);
+	void drawDottedLine(int x1, int y1, int x2, int y2, ColorId color);
+	void drawDottedLine2(int x1, int y1, int x2, int y2, ColorId color1, ColorId color2);
+	void drawDottedEllipse(int left, int top, int right, int bottom, ColorId color);
+	void drawDottedEllipse2(int left, int top, int right, int bottom, ColorId color1, ColorId color2);
 
   private:
     u16 width, height;
