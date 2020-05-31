@@ -45,21 +45,6 @@ void __declspec(naked) useStimPacksAIWrapper() {
 
 ;
 
-void __declspec(naked) CMDRECV_StimPackWrapper() {
-
-	__asm PUSHAD
-
-	hooks::CMDRECV_StimPack();
-
-	__asm {
-		POPAD
-		RETN
-	}
-
-}
-
-;
-
 } //unnamed namespace
 
 namespace hooks {
@@ -67,7 +52,6 @@ namespace hooks {
 void injectStimPacksHooks() {
 	jmpPatch(CMDACT_StimpackWrapper,	0x004234D0, 4);
 	jmpPatch(useStimPacksAIWrapper,		0x004554A0, 5);
-	jmpPatch(CMDRECV_StimPackWrapper,	0x004C2F30, 3);
 }
 
 } //hooks
