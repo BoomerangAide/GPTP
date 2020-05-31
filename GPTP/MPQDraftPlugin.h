@@ -107,8 +107,6 @@
 #ifndef QDPLUGIN_H
 #define QDPLUGIN_H
 
-//V241 for VS2008
-
 #include <windows.h>
 
 // The maximum length of a plugin module's filename. INCLUDES final NULL.
