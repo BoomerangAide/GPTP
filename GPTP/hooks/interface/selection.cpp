@@ -1,32 +1,43 @@
 #include "selection.h"
 #include <SCBW/api.h>
 
-//Helper functions declaration
+#pragma warning( disable: 6386 )
 
+//Helper functions declaration
 namespace {
 
-	bool unitIsOwnedByCurrentPlayer(CUnit* unit); 																//0x00401170
-	bool isUnitBurrowed(CUnit* unit);																			//0x00402A70
-	void SC_memcpy_0(u32 dest, u32 src, u32 memsize);															//0x00408FD0
-	CUnit** getAllUnitsInBounds(Box16* coords);																	//0x0042FF80
-	void function_00468670(CUnit* unit);																		//0x00468670
-	bool unit_isUnselectable(u16 unitId);																		//00x046ED80
-	void function_0046F040(CUnit* current_unit, CUnit** unit_list, CUnit* clicked_unit, u32 list_length);		//00x046F040
-	u32 combineLists_Sub_6F290(CUnit* unit,CUnit** unit_list_1,CUnit** unit_list_2,u32 list_length);			//0x0046F290
-	void applyNewSelect_Sub_6FA00(CUnit** unit_list,u32 unit_list_length);										//0x0046FA00
-	u32 CUnitToUnitID(CUnit* unit);																				//0x0047B1D0
-	bool unit_IsStandardAndMovable(CUnit* unit); 																//0x0047B770
-	void selectBuildingSFX(CUnit* unit);																		//0x0048F910
-	Bool32 selectSingleUnitFromID(u32 unitIndex);																//0x00496D30
-	void CreateNewUnitSelectionsFromList(CUnit** unit_list, u32 unit_list_length);								//0x0049AE40
-	void CMDACT_Select(CUnit** unit_list, u32 unit_list_length); 												//0x004C0860
+	bool unitIsOwnedByCurrentPlayer(CUnit* unit); 																	//01170
+	bool isUnitBurrowed(CUnit* unit);																				//02A70
+	void SC_memcpy_0(u32 dest, u32 src, u32 memsize);																//08FD0
+	CUnit** getAllUnitsInBounds(Box16* coords);																		//2FF80
+	CUnit** FindAllUnits(Box16* coords);																			//308A0	
+	void function_00468670(CUnit* unit);																			//68670
+	bool unit_isUnselectable(u16 unitId);																			//6ED80
+	void function_0046F040_Helper(CUnit* current_unit, CUnit** unit_list, CUnit* clicked_unit, u32 list_length);	//6F040
+	u32 SortAllUnits_Helper(CUnit* unit, CUnit** unit_list, CUnit** units_in_bounds);								//6F0F0
+	u32 combineLists_Sub_6F290(CUnit* unit,CUnit** unit_list_1,CUnit** unit_list_2,u32 list_length);				//6F290
+	CUnit* function_0046F3A0(u32 unk1, u32 unk2);																	//6F3A0
+	void applyNewSelect_Sub_6FA00(CUnit** unit_list,u32 unit_list_length);											//6FA00
+	u32 CUnitToUnitID(CUnit* unit);																					//7B1D0
+	bool unit_IsStandardAndMovable(CUnit* unit); 																	//7B770
+	void CancelTargetOrder();																						//8CA10
+	void refreshLayer3And4();																						//8D9A0
+	void function_0048E310();																						//8E310
+	void selectBuildingSFX(CUnit* unit);																			//8F910
+	Bool32 selectSingleUnitFromID(u32 unitIndex);																	//96D30
+	Bool32 compareUnitRank(CUnit* current_unit, CUnit* other_unit);													//9A350
+	void CreateNewUnitSelectionsFromList(CUnit** unit_list, u32 unit_list_length);									//9AE40
+	void selectMultipleUnitsFromUnitList(CUnit** unitList, u32 unitsCount, Bool32 unk1, Bool32 unk2);				//9AEF0
+	void CMDACT_HotkeyUnit(u8 selectionGroupNumber, u32 params_length, CUnit** selection_array, u32 array_length);	//C07B0
+	void CMDACT_Select(CUnit** unit_list, u32 unit_list_length); 													//C0860
 
 } //unnamed namespace
 
 namespace hooks {
 
 	///
-	/// Function used by Ctrl+Click (select all units of same type)
+	/// Function used by Ctrl+Click (select all units of same type) and
+	/// selection by drawing a box holding click and dragging the mouse
 	///
 	u32 SortAllUnits(CUnit* unit,CUnit** unit_list,CUnit** units_in_bounds) {
 
@@ -191,7 +202,7 @@ namespace hooks {
 
 								//0x0046F208 (use of SELECTION_ARRAY_LENGTH)
 								if(current_index_in_unit_list >= SELECTION_ARRAY_LENGTH) //action when unit_list is full
-									function_0046F040(current_unit, unit_list, unit, current_index_in_unit_list);
+									function_0046F040_Helper(current_unit, unit_list, unit, current_index_in_unit_list);
 								else {
 									//6F217
 									//Add current_unit to unit_list
@@ -268,10 +279,169 @@ namespace hooks {
 
 	} //u32 SortAllUnits(CUnit* unit,CUnit** unit_list,CUnit* units_in_bounds)
 
+	;
+
+	///
+	/// Function that may be required to mod selection, as it is using unit_IsStandardAndMovable
+	/// that is a likely blocker for buildings and other special selections
+	///
+	u32 combineSelectionsLists(CUnit* unit, CUnit** unit_list_1, CUnit** unit_list_2, u32 list_length) {
+
+		CUnit* current_unit;
+		int list2_length;
+		u32 return_value;
+		bool bEndThere = false;
+
+		list2_length = 0;
+
+		if (unit_list_2[0] != NULL) {
+
+			do {
+				current_unit = unit_list_2[list2_length+1];
+				list2_length++;
+			} while (current_unit != NULL);
+
+			if (list2_length >= SELECTION_ARRAY_LENGTH) {
+				return_value = SELECTION_ARRAY_LENGTH;
+				bEndThere = true;
+			}
+			else
+			if(list2_length != 0) {
+
+				if (
+					!unit_IsStandardAndMovable(unit_list_1[0]) ||
+					*IS_IN_REPLAY != 0 ||
+					unit_list_1[0]->playerId != *LOCAL_NATION_ID ||
+					!unit_IsStandardAndMovable(unit_list_2[0]) ||
+					unit_list_2[0]->playerId != *LOCAL_NATION_ID
+				)
+				{
+					return_value = list2_length;
+					bEndThere = true;
+				}
+
+			}
+
+			//!bEndThere => 6F307
+
+		}
+
+		if (!bEndThere) {
+
+			if (list_length <= 0)
+				return_value = list2_length;
+			else
+			{
+
+				return_value = list2_length;
+
+				for (int counter = 0; list_length > 0; counter++) {
+
+					bool bUnitAlreadyInList = false;
+
+					current_unit = unit_list_1[counter];
+
+					if (list2_length != 0) {
+
+						int i = list2_length;
+
+						do {
+
+							i--;
+
+							if (unit_list_2[i] == current_unit)
+								bUnitAlreadyInList = true;
+
+						} while (i != 0 && !bUnitAlreadyInList);
+
+					}
+
+					//6F33A
+					if (!bUnitAlreadyInList) {
+
+						if (return_value >= SELECTION_ARRAY_LENGTH)
+							function_0046F040_Helper(current_unit, &unit_list_2[return_value], unit, counter);
+						else { //6F356
+							unit_list_2[return_value] = current_unit;
+							return_value++;
+						}
+
+					}
+
+					list_length--;
+
+				}
+
+			}
+		}
+
+		return return_value;
+
+	}
+
+	;
+
+	///
+	/// Select units within the rectangle drawn by the mouse
+	///
+	void getSelectedUnitsInBox(Box16* coords) {
+
+		static CUnit* local_array_1[SELECTION_ARRAY_LENGTH];
+		static CUnit* local_array_2[SELECTION_ARRAY_LENGTH];
+		u32 someResult;
+
+		for (int i = 0; i < SELECTION_ARRAY_LENGTH; i++)
+			local_array_1[i] = NULL;
+
+		someResult = SortAllUnits_Helper(NULL, local_array_1, FindAllUnits(coords));
+
+		*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsListLastIndex[*tempUnitsListArraysCountsListLastIndex];
+		*tempUnitsListArraysCountsListLastIndex = *tempUnitsListArraysCountsListLastIndex - 1;
+
+		if (someResult != 0) {
+
+			if (*IS_HOLDING_SHIFT && activePlayerSelection->unit[0] != NULL)
+			{
+				for (int i = 0; i < SELECTION_ARRAY_LENGTH; i++)
+					local_array_2[i] = activePlayerSelection->unit[i];
+				someResult = combineLists_Sub_6F290(NULL, local_array_1, local_array_2, someResult);
+				applyNewSelect_Sub_6FA00(local_array_2, someResult);
+			}
+			else
+			{
+
+				bool bEndThere = false;
+
+				if (
+					someResult != 1 ||
+					*IS_HOLDING_ALT == 0 ||
+					selectSingleUnitFromID(CUnitToUnitID(local_array_1[0])) == 0
+				)
+				{
+					selectMultipleUnitsFromUnitList(local_array_1, someResult, 1, 1);
+					bEndThere = (someResult != 1);
+				}
+
+				if (
+					!bEndThere &&
+					local_array_1[0] != NULL &&
+					local_array_1[0]->playerId == *ACTIVE_NATION_ID &&
+					local_array_1[0]->isFactory() //replace call to 7B2E0 unitIsFactoryUnit
+				)
+					function_00468670(local_array_1[0]); //this is what make the rally point briefly appear
+
+			}
+
+		}
+
+	}
+
+	;
+
 	///
 	/// Function used by Click on unit (possibly with key pressed)
 	///
-	void function_0046FB40(CUnit* clicked_unit) {
+	void getSelectedUnitsAtPoint(u32 unk1, u32 unk2) {
 
 		Bool32* const IS_DOUBLE_CLICKING =	(Bool32*)	0x0066FF58;
 
@@ -287,6 +457,11 @@ namespace hooks {
 
 		Box16 local_temp_box16_structure;	//used instead of using from [EBP-0C] to [EBP-06]
 
+		CUnit* clicked_unit = function_0046F3A0(unk1, unk2);
+
+		if (clicked_unit != NULL)
+		{
+
 		bool isHoldingCtrl_OR_isDoubleClickingSelectedClickedUnit = 
 			*IS_HOLDING_CTRL || 
 			( *IS_DOUBLE_CLICKING && (clicked_unit->sprite->flags & CSprite_Flags::Selected) );
@@ -296,11 +471,13 @@ namespace hooks {
 
 		if(
 			isHoldingCtrl_OR_isDoubleClickingSelectedClickedUnit ||
-			( *IS_HOLDING_SHIFT && (activePlayerSelection->unit[0] != NULL) )
+				(*IS_HOLDING_SHIFT != 0 && (activePlayerSelection->unit[0] != NULL))
 			) 
 		{
 
-			if( !*IS_HOLDING_SHIFT ) {
+				//6FC59
+
+				if (*IS_HOLDING_SHIFT == 0) {
 
 				//6FE07
 
@@ -320,12 +497,13 @@ namespace hooks {
 					local_temp_box16_structure.top = *MoveToY;
 					local_temp_box16_structure.right = *MoveToX + 640;
 					local_temp_box16_structure.bottom = *MoveToY + 400;
+
 					units_in_bounds = getAllUnitsInBounds(&local_temp_box16_structure);
-					sorted_list_length = SortAllUnits(clicked_unit,local_temp_array_1,units_in_bounds);
+						sorted_list_length = SortAllUnits_Helper(clicked_unit, local_temp_array_1, units_in_bounds);
 
 					//reload the previous temporary unit list from before the call to getAllUnitsInBounds
+						*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsListLastIndex[*tempUnitsListArraysCountsListLastIndex];
 					*tempUnitsListArraysCountsListLastIndex = *tempUnitsListArraysCountsListLastIndex - 1;
-					*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsList[*tempUnitsListArraysCountsListLastIndex];
 
 					if(sorted_list_length != 0) {
 
@@ -348,6 +526,8 @@ namespace hooks {
 
 			} //if( !*IS_HOLDING_SHIFT )
 			else {
+
+					//6FC64
 
 				//holding SHIFT (if not holding CTRL, then there's an active selection too)
 
@@ -373,11 +553,11 @@ namespace hooks {
 
 					//locate surrounding units for selection
 					units_in_bounds = getAllUnitsInBounds(&local_temp_box16_structure);
-					sorted_list_length = SortAllUnits(clicked_unit,local_temp_array_1,units_in_bounds);
+						sorted_list_length = SortAllUnits_Helper(clicked_unit, local_temp_array_1, units_in_bounds);
 
 					//reload the previous temporary unit list from before the call to getAllUnitsInBounds
+						*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsListLastIndex[*tempUnitsListArraysCountsListLastIndex];
 					*tempUnitsListArraysCountsListLastIndex = *tempUnitsListArraysCountsListLastIndex - 1;
-					*tempUnitsListCurrentArrayCount = tempUnitsListArraysCountsList[*tempUnitsListArraysCountsListLastIndex];
 
 					if(sorted_list_length != 0) {
 
@@ -409,8 +589,7 @@ namespace hooks {
 
 					if( !(clicked_unit->sprite->flags & CSprite_Flags::Selected) ) {	
 						
-						//0x0046FD13 (getting unit sprite) and 0x0046FD18 (middle of the test with the flag)
-						
+							//6FD18
 						//unit not selected, so it's added to current selection if valid
 
 						if(
@@ -513,7 +692,7 @@ namespace hooks {
 
 			bool bRecreatedSelectionThroughAltClick = false;
 
-			if(*IS_HOLDING_ALT) {
+				if (*IS_HOLDING_ALT != 0) {
 
 				//Recall the selection the unit belong to if there's one
 				//In this case, skip the code for a single unit handling
@@ -532,6 +711,9 @@ namespace hooks {
 				//Create a new selection containing only the clicked unit
 				CreateNewUnitSelectionsFromList(&clicked_unit,1);
 
+					if(compareUnitRank(clicked_unit,NULL) == 0)
+						selectBuildingSFX(NULL);
+					else
 				//play the sound of the unit (don't need to be a building)
 				selectBuildingSFX(clicked_unit);
 
@@ -553,7 +735,8 @@ namespace hooks {
 			//this is what make the rally point briefly appear when
 			//selecting a building with one.
 			//maybe can do others things?
-			if( clicked_unit->playerId == *ACTIVE_NATION_ID &&
+				if (
+					clicked_unit->playerId == *ACTIVE_NATION_ID &&
 				clicked_unit->isFactory()
 				)
 				function_00468670(clicked_unit);
@@ -562,8 +745,172 @@ namespace hooks {
 
 	}
 
+	}
 
+	;
 
+	//centerviewUnitGroup is not hooked due to complexity, but if selection
+	//is modded to allow multiple buildings or other special things through
+	//changes on unit_IsStandardAndMovable, then you can modify an entry in
+	//selection_inject.cpp to use a custom unit_IsStandardAndMovable
+	//function and allow it to use all the selection content properly.
+
+	;
+
+	///
+	/// Function used to select units from a group
+	/// Needed in addition to the CMDRECV functions due to a
+	/// call to unit_IsStandardAndMovable that could cause some
+	/// units to be filtered out if that function is only modded
+	/// elsewhere.
+	///
+	void selectUnitGroup(u32 selectionGroupNumber) {
+
+		u32* const			CGameStruct_selection_hotkeys	= (u32*)	0x0057FE60; //array of units refs of StoredUnit type stored as u32
+		Bool8* const		bCanUpdateSelectedUnitData		= (Bool8*)	0x0059723C;
+		CUnit* const		unitTable_0059CB58				= (CUnit*)	0x0059CB58;	//array of CUnit structures
+		Bool8* const		bDoingCancellableTargetOrder	= (Bool8*)	0x00641694;
+		Bool8* const		bCanUpdateSelectedUnitPortrait	= (Bool8*)	0x0068AC74;
+		Bool32* const		bCanUpdateCurrentButtonSet		= (Bool32*)	0x0068C1B0;
+		BinDlg** const		someDialogUnknown				= (BinDlg**)0x0068C1E8;
+		BinDlg** const		someDialogUnknownUser			= (BinDlg**)0x0068C1EC;
+		Bool8* const		bCanUpdateStatDataDialog		= (Bool8*)	0x0068C1F8;
+
+		int i;
+		u32 selectionLength = 0;
+		StoredUnit current_stored_unit;
+		CUnit* current_unit;
+		CUnit* temp_selection_array[SELECTION_ARRAY_LENGTH];
+		u32* CGameStruct_selection_hotkeys_current = &CGameStruct_selection_hotkeys[0xC * (0x12 * *LOCAL_HUMAN_ID + selectionGroupNumber)];
+
+		current_stored_unit.fullValue = CGameStruct_selection_hotkeys_current[selectionLength];
+
+		while (selectionLength < SELECTION_ARRAY_LENGTH && current_stored_unit.fullValue != 0) {
+			selectionLength++;
+			current_stored_unit.fullValue = CGameStruct_selection_hotkeys_current[selectionLength];
+		}
+
+		for (i = 0; i < SELECTION_ARRAY_LENGTH; i++)
+			temp_selection_array[i] = NULL;
+
+		if (selectionLength > 0) {
+
+			CUnit* validated_unit;
+			int index = 0;
+			i = 0;
+
+			do {
+
+				current_stored_unit.fullValue = CGameStruct_selection_hotkeys_current[i];
+
+				if (current_stored_unit.fullValue != 0) {
+
+					current_unit = &unitTable_0059CB58[current_stored_unit.innerValues.index];
+
+					if (
+						current_unit->sprite != NULL &&
+						(current_unit->mainOrderId != OrderId::Die || current_unit->mainOrderState != 1) &&
+						current_unit->targetOrderSpecial == current_stored_unit.innerValues.unitId &&
+						!(current_unit->sprite->flags & CSprite_Flags::Hidden) &&
+						current_unit->playerId == *ACTIVE_NATION_ID &&
+						(unit_IsStandardAndMovable(current_unit) || selectionLength <= 1)
+						)
+					{
+						validated_unit = current_unit;
+						temp_selection_array[index] = current_unit;
+						index++;
+					}
+					else
+						validated_unit = NULL;
+
+				}
+				else
+					validated_unit = NULL;
+
+				selectionLength--;
+				i++;
+
+			} while (selectionLength != 0);
+
+			//96C0E
+			if (index != 0) {
+
+				if (
+					index == 1 &&
+					validated_unit != NULL &&
+					validated_unit->playerId == *ACTIVE_NATION_ID &&
+					(
+						validated_unit->id == UnitId::TerranCommandCenter ||
+						validated_unit->id == UnitId::TerranBarracks ||
+						validated_unit->id == UnitId::TerranFactory ||
+						validated_unit->id == UnitId::TerranStarport ||
+						validated_unit->id == UnitId::ZergInfestedCommandCenter ||
+						validated_unit->id == UnitId::ZergHatchery ||
+						validated_unit->id == UnitId::ZergLair ||
+						validated_unit->id == UnitId::ZergHive ||
+						validated_unit->id == UnitId::ProtossNexus ||
+						validated_unit->id == UnitId::ProtossGateway ||
+						validated_unit->id == UnitId::ProtossStargate ||
+						validated_unit->id == UnitId::ProtossRoboticsFacility
+					)
+				) 
+				{
+					//this is what make the rally point briefly appear
+					function_00468670(validated_unit);
+				}
+
+				if (*IS_PLACING_BUILDING != 0) {
+					refreshLayer3And4();
+					function_0048E310();
+				}
+
+				if (*bDoingCancellableTargetOrder != 0)
+					CancelTargetOrder();
+
+				CreateNewUnitSelectionsFromList(temp_selection_array, index);
+
+				if (index > 0) {
+
+					int temp_index = index;
+					CUnit* previous_unit = NULL;
+					i = 0;
+
+					do {
+
+						current_unit = temp_selection_array[i];
+
+						if (compareUnitRank(current_unit, previous_unit) != 0)
+							previous_unit = current_unit;
+
+						i++;
+						temp_index--;
+
+					} while (temp_index != 0);
+
+					current_unit = previous_unit;
+
+				}
+				else
+					current_unit = NULL;
+
+				selectBuildingSFX(current_unit);
+
+				*bCanUpdateSelectedUnitData = 1;
+				*bCanUpdateCurrentButtonSet = 1;
+				*bCanUpdateSelectedUnitPortrait = 1;
+				*bCanUpdateStatDataDialog = 1;
+				*someDialogUnknown = NULL;
+				*someDialogUnknownUser = NULL;
+
+				CMDACT_HotkeyUnit(selectionGroupNumber, 1, temp_selection_array, index);
+
+			}
+
+		}
+
+	}
+
+	;
 
 } //namespace hooks
 
@@ -630,6 +977,25 @@ namespace {
 
 	;
 	
+	const u32 Func_FindAllUnits = 0x004308A0;
+	CUnit** FindAllUnits(Box16* coords) {
+
+		static CUnit** units_in_coords;
+
+		__asm {
+			PUSHAD
+			PUSH coords
+			CALL Func_FindAllUnits
+			MOV units_in_coords, EAX
+			POPAD
+		}
+
+		return units_in_coords;
+
+	}
+
+	;
+	
 	const u32 Func_Sub_468670 = 0x00468670;
 	void function_00468670(CUnit* unit) {
 
@@ -666,7 +1032,7 @@ namespace {
 	;
 	
 	const u32 Func_Sub_6F040 = 0x0046F040;
-	void function_0046F040(CUnit* current_unit, CUnit** unit_list, CUnit* clicked_unit, u32 list_length) {																//
+	void function_0046F040_Helper(CUnit* current_unit, CUnit** unit_list, CUnit* clicked_unit, u32 list_length) {																//
 
 		__asm {
 			PUSHAD
@@ -677,6 +1043,27 @@ namespace {
 			CALL Func_Sub_6F040
 			POPAD
 		}
+
+	}
+
+	;
+	
+	const u32 Func_SortAllUnits = 0x0046F0F0;
+	u32 SortAllUnits_Helper(CUnit* unit, CUnit** unit_list, CUnit** units_in_bounds) {
+
+		static u32 result;
+
+		__asm {
+			PUSHAD
+			PUSH unit
+			PUSH unit_list
+			PUSH units_in_bounds
+			CALL Func_SortAllUnits
+			MOV result, EAX
+			POPAD
+		}
+
+		return result;
 
 	}
 
@@ -699,6 +1086,26 @@ namespace {
 		}
 
 		return return_value;
+
+	}
+
+	;
+	
+	const u32 Func_function_0046F3A0 = 0x0046F3A0;
+	CUnit* function_0046F3A0(u32 unk1, u32 unk2) {
+
+		static CUnit* returned_unit;
+
+		__asm {
+			PUSHAD
+			PUSH unk1
+			PUSH unk2
+			CALL Func_function_0046F3A0
+			MOV returned_unit, EAX
+			POPAD
+		}
+
+		return returned_unit;
 
 	}
 
@@ -741,6 +1148,7 @@ namespace {
 	;
 	
 	const u32 Func_Unit_IsStandardAndMovable = 0x0047B770;
+	//hooked in utils
 	bool unit_IsStandardAndMovable(CUnit* unit) {
 
 		Bool32 return_value_unconverted;
@@ -754,6 +1162,43 @@ namespace {
 		}
 
 		return (return_value_unconverted != 0);
+
+	}
+
+	;
+	
+	const u32 Func_CancelTargetOrder = 0x0048CA10;
+	void CancelTargetOrder() {
+		__asm {
+			PUSHAD
+			CALL Func_CancelTargetOrder
+			POPAD
+		}
+	}
+
+	;
+
+	const u32 Func_RefreshLayer3And4 = 0x0048D9A0;
+	void refreshLayer3And4() {
+
+		__asm {
+			PUSHAD
+			CALL Func_RefreshLayer3And4
+			POPAD
+		}
+
+	}
+
+	;
+
+	const u32 Func_Sub48E310 = 0x0048E310;
+	void function_0048E310() {
+
+		__asm {
+			PUSHAD
+			CALL Func_Sub48E310
+			POPAD
+		}
 
 	}
 
@@ -792,6 +1237,28 @@ namespace {
 
 	;
 	
+	const u32 Func_CompareUnitRank = 0x0049A350;
+	//Check if current_unit is before other_unit in selection.
+	//If not, return 0 (I think).
+	Bool32 compareUnitRank(CUnit* current_unit, CUnit* other_unit) {
+
+		static Bool32 bResult;
+
+		__asm {
+			PUSHAD
+			MOV EDI, current_unit
+			MOV ESI, other_unit
+			CALL Func_CompareUnitRank
+			MOV bResult, EAX
+			POPAD
+		}
+
+		return bResult;
+
+	}
+
+	;
+	
 	const u32 Func_CreateNewUnitSelectionsFromList = 0x0049AE40;
 	void CreateNewUnitSelectionsFromList(CUnit** unit_list, u32 unit_list_length) {
 
@@ -807,6 +1274,38 @@ namespace {
 
 	;
 	
+	const u32 Func_selectMultipleUnitsFromUnitList = 0x0049AEF0;
+	void selectMultipleUnitsFromUnitList(CUnit** unitList, u32 unitsCount, Bool32 unk1, Bool32 unk2) {
+
+		__asm {
+			PUSHAD
+			PUSH unk2
+			PUSH unk1
+			PUSH unitList
+			PUSH unitsCount
+			CALL Func_selectMultipleUnitsFromUnitList
+			POPAD
+		}
+
+	}
+
+	;
+
+	const u32 Func_CMDACT_HotkeyUnit = 0x004C07B0;
+	void CMDACT_HotkeyUnit(u8 selectionGroupNumber, u32 params_length, CUnit** selection_array, u32 array_length) {
+		__asm {
+			PUSHAD
+			MOV BL, selectionGroupNumber
+			PUSH array_length
+			PUSH selection_array
+			PUSH params_length
+			CALL Func_CMDACT_HotkeyUnit
+			POPAD
+		}
+	}
+
+	;
+
 	const u32 Func_CMDACT_Select = 0x004C0860;
 	void CMDACT_Select(CUnit** unit_list, u32 unit_list_length) {
 
