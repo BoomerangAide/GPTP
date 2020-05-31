@@ -6,8 +6,6 @@
 #include <cstddef>
 #include "../../types.h"
 
-//V241 for VS2008
-
 template <class T>
 class CLink {
   public:
