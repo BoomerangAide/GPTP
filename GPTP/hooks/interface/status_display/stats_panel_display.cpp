@@ -8,7 +8,7 @@ namespace {
 void hideDialog(BinDlg* dialog);								//18700
 void StatsNukesCount(BinDlg* dialog, u32 index);				//25310
 void StatHangerCount(BinDlg* dialog, u32 index);				//253D0
-void StatsShieldLevel(BinDlg* dialog, u32 index);				//25510
+void StatsShieldLevel_Helper(BinDlg* dialog, u32 index);		//25510
 void StatsArmorLevel(BinDlg* dialog, u32 index);				//25600
 void StatsWeaponLevel(BinDlg* dialog, u32 index, u32 weaponId);	//25790
 bool StatSpidermineCount(BinDlg* dialog, u32 index);			//26300
@@ -29,7 +29,7 @@ void stats_panel_display(BinDlg* dialog) {
 
 	if(
 		!(activeUnit->status & UnitStatus::IsHallucination) ||
-		(!*IS_IN_REPLAY && activeUnit->playerId != *LOCAL_NATION_ID)
+		(!*IS_IN_REPLAY && activeUnit->playerId != *LOCAL_NATION_ID) //really both jumping to end somehow, checked
 	)
 	{
 
@@ -47,7 +47,7 @@ void stats_panel_display(BinDlg* dialog) {
 		}
 
 		if(units_dat::ShieldsEnabled[activeUnit->id]) {
-			StatsShieldLevel(dialog, index);
+			StatsShieldLevel_Helper(dialog, index);
 			index++;
 		}
 
@@ -203,7 +203,7 @@ void stats_panel_display(BinDlg* dialog) {
 		current_dialog = dialog->parent;
 
 	if(current_dialog->childrenDlg != NULL) {
-		
+
 		current_dialog = current_dialog->childrenDlg;
 
 		while(current_dialog != NULL && current_dialog->index != index + 9)
@@ -272,7 +272,7 @@ void StatHangerCount(BinDlg* dialog, u32 index) {
 ;
 
 const u32 Func_Sub425510 = 0x00425510;
-void StatsShieldLevel(BinDlg* dialog, u32 index) {
+void StatsShieldLevel_Helper(BinDlg* dialog, u32 index) {
 
 	__asm {
 		PUSHAD
