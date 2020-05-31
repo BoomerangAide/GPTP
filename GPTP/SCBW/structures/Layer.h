@@ -1,9 +1,6 @@
 #pragma once
 #include "../../types.h"
 
-//V241 for VS2008
-
-
 namespace graphics { class Bitmap; }
 struct bounds;
 
