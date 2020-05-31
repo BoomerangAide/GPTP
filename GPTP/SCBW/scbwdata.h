@@ -189,7 +189,7 @@ SCBW_DATA(u16*,		SoundYesLast,			unitsDat[35].address);	//00661440
 SCBW_DATA(Point16*,	BuildingDimensions,		unitsDat[36].address);	//00662860
 SCBW_DATA(Point16*,	AddonPlacement,			unitsDat[37].address);	//006626E0
 SCBW_DATA(Box16*,	UnitBounds,				unitsDat[38].address);	//006617C8
-//SCBW_DATA(u16*,	???,					unitsDat[39].address);	//00662F88 //Portrait according to EUDDB
+SCBW_DATA(u16*,		PortraitId,				unitsDat[39].address);	//00662F88
 SCBW_DATA(u16*,		MineralCost,			unitsDat[40].address);	//00663888
 SCBW_DATA(u16*,		GasCost,				unitsDat[41].address);	//0065FD00
 SCBW_DATA(u16*,		TimeCost,				unitsDat[42].address);	//00660428
@@ -244,7 +244,7 @@ SCBW_DATA(u8*,  LaunchSpin,         weaponsDat[19].address);//00657888
 SCBW_DATA(u8*,  ForwardOffset,      weaponsDat[20].address);//00657910
 SCBW_DATA(u8*,  VerticalOffset,     weaponsDat[21].address);//00656C20
 //SCBW_DATA(u16*, ???,				weaponsDat[22].address);//00656568 //Target Error Message according to EUDDB
-//SCBW_DATA(u16*, ???,				weaponsDat[23].address);//00656780 //Icon according to EUDDB
+SCBW_DATA(u16*, WeaponIconId,		weaponsDat[23].address);//00656780
 } //weapons_dat (last entry at 0x0051397C)
 
 namespace upgrades_dat {
@@ -350,7 +350,7 @@ SCBW_DATA(GetActivePlayerNextSelectionFunc, getActivePlayerNextSelection, 0x0049
 
 /// Selections of all players
 struct PlayersSel { CUnit* unit[PLAYABLE_PLAYER_COUNT][SELECTION_ARRAY_LENGTH]; };
-SCBW_DATA(const PlayersSel*, playersSelections, 0x006284E8);
+SCBW_DATA(PlayersSel*, playersSelections, 0x006284E8);
 
 typedef void (__fastcall *PrepareForNextOrderFunc)(CUnit*);
 SCBW_DATA(PrepareForNextOrderFunc, prepareForNextOrder, 0x00475000);
@@ -369,11 +369,10 @@ SCBW_DATA(const Point32*, angleDistance,        0x00512D28);
 SCBW_DATA(CUnit***,	tempUnitsListsArray,					0x006BB938);
 SCBW_DATA(u32*,		tempUnitsListCurrentArrayCount,			0x006BEE64);
 SCBW_DATA(u32*,		tempUnitsListArraysCountsListLastIndex,	0x006BEE6C);
-SCBW_DATA(u32*,		tempUnitsListArraysCountsList,			0x006BEE70);
 
 // Font & Drawing
 namespace graphics { class Font; class Bitmap; }
-SCBW_DATA(graphics::Font**, fontBase,           0x006CE0F4);
+SCBW_DATA(graphics::Font**, fontBase,           0x006CE0F4); //array of increasingly big fonts (max_index: 3?)
 SCBW_DATA(graphics::Bitmap*, gameScreenBuffer,  0x006CEFF0);
 SCBW_DATA(u8*,          refreshRegions,         0x006CEFF8);  //640 x 480 divided into 1200 squares of 16x16
 SCBW_DATA(Layers*,      screenLayers,           0x006CEF50);
@@ -441,6 +440,16 @@ SCBW_DATA(Bool32*,        IS_IN_GAME_LOOP,			0x006D11C8);
 SCBW_DATA(u32*,           lastRandomNumber,     	0x0051CA14);  //See scbw::random(), scbw::randBetween()
 SCBW_DATA(Bool32*,        canUpdatePoweredStatus,	0x0063FF44);
 SCBW_DATA(Bool32*,		  IS_PLACING_BUILDING,  	0x00640880);
+
+//-------- Format strings used by Starcraft implementations of printf --------//
+
+SCBW_DATA(const char*,  FORMATSTRING_COLORYELLOW_VALUE_COLORCYAN_SPACE,						0x00505708); //"\x03%d\x01 "
+SCBW_DATA(const char*,	FORMATSTRING_VALUE_SPACE,											0x00505710); //"%d "
+SCBW_DATA(const char*,	FORMATSTRING_CURRENTVALUE1_MAXVALUE1_COLOR_CURRENTVALUE2_MAXVALUE2, 0x00505714); //"%d/%d %c%d/%d"
+SCBW_DATA(const char*,	FORMATSTRING_COLOR_CURRENTVALUE_MAXVALUE,							0x00505724); //"%c%d/%d"
+SCBW_DATA(const char*,	FORMATSTRING_COLORWHITE_CURRENTVALUE_MAXVALUE,						0x0050572C); //"\x04%d/%d"
+SCBW_DATA(const char*,	FORMATSTRING_TEXT_SPACE_VALUE_IN_PARENTHESIS,						0x00505734); //"%s (%d)"
+SCBW_DATA(const char*,	FORMATSTRING_TEXT_SPACE_VALUE,										0x0050573C); //"%s %d"
 
 //-------- Tech levels --------//
 
