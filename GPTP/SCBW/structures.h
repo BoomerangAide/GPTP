@@ -106,7 +106,7 @@ struct LOCATION {
 typedef u32 ButtonState;
 typedef ButtonState (__fastcall *REQ_FUNC)(u32, u32, CUnit*);
 //(u32 reqVar, u32 playerId, CUnit* selected);
-typedef void (__fastcall *ACT_FUNC)(u32,u32);
+typedef void (__fastcall *ACT_FUNC)(u32,u32); //__fastcall(ECX, EDX, [EBP+??], ... , [EBP+0x0C], [EBP+0x08])
 //(u32 actVar, u32 shiftClick);
 
 struct BUTTON {
@@ -288,7 +288,7 @@ struct BinDlg {
 /*0x14*/  char    *pszText;
 /*0x18*/  u32     flags;			//use BinDlgFlags::Enum
 /*0x1C*/  u32     unk_1c;
-/*0x20*/  u16     index;
+/*0x20*/  s16     index;
 /*0x22*/  u16     controlType;		//use DialogControlTypes::Enum
 /*0x24*/  u16     graphic;
 
