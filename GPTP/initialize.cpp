@@ -218,10 +218,10 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectUnitTooltipHook();
 
 	//fixes to make sc1 campaign playable from firegraft/mpqgraft self-executables
-	jmpPatch((void*)0x150182D0, 0x004101AE);
-	jmpPatch((void*)0x15017DD0, 0x004100B2);
-	jmpPatch((void*)0x15017960, 0x004100C4);
-	jmpPatch((void*)0x15014A80, 0x004100BE);
+	//jmpPatch((void*)0x150182D0, 0x004101AE);
+	//jmpPatch((void*)0x15017DD0, 0x004100B2);
+	//jmpPatch((void*)0x15017960, 0x004100C4);
+	//jmpPatch((void*)0x15014A80, 0x004100BE);
 
 	return TRUE;
 }
