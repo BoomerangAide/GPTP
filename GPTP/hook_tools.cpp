@@ -1,7 +1,5 @@
 #include "hook_tools.h"
 
-//V241 for VS2008
-
 //Injects a relative CALL to [target] at the [position].
 //Original function from BWAPI by Kovarex; Modified by pastelmind
 void callPatch(const void* target, void* position, const unsigned int nops) {
