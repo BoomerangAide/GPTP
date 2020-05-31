@@ -30,6 +30,49 @@ void __declspec(naked) CMDRECV_PlaceBuildingAllowed_Wrapper() {
 
 ;
 
+void __declspec(naked) cmdRECV_PlaceBuildingOrder_Wrapper() {
+
+	static CUnit* builder;
+	static u32 orderId;
+	static u32 builtUnitId;
+	static Point16 coords;
+
+	__asm {
+
+		PUSH EBP
+		MOV EBP, ESP
+
+		MOV builder, EAX
+
+		MOVSX EAX, WORD PTR [EBP+0x0C]
+		MOV coords.x, AX
+
+		MOVSX EAX, WORD PTR [EBP+0x0E]
+		MOV coords.y, AX
+
+		MOV EAX, [EBP+0x08]
+		MOV orderId, EAX
+
+		MOV EAX, [EBP+0x10]
+		MOV builtUnitId, EAX
+
+		PUSHAD
+
+	}
+
+	hooks::cmdRECV_PlaceBuildingOrder(builder,builtUnitId,coords,orderId);
+
+	__asm {
+		POPAD
+		MOV ESP, EBP
+		POP EBP
+		RETN 0xC
+	}
+
+}
+
+;
+
 void __declspec(naked) cmdRECV_PlaceBuildingNormal_Wrapper() {
 
 	static s16 x;
