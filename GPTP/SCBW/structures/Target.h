@@ -1,7 +1,5 @@
 //Based on BWAPI's BW/Target.h
 
-//V241 for VS2008
-
 #pragma once
 #include "common.h"
 #pragma pack(1)
