@@ -162,7 +162,7 @@ void __declspec(naked) getButtonSetPatch_For_Sub4591D0() {
 namespace hooks {
 
 void injectButtonSetHooks() {
-	jmpPatch(getButtonSetPatch_For_Sub4591D0,	Func_Sub_4591ED, 2);
+	//jmpPatch(getButtonSetPatch_For_Sub4591D0,	Func_Sub_4591ED, 2);
 	jmpPatch(updateButtonSetExWrapper,			0x00458BC0, 1);
 	jmpPatch(updateButtonSet_Sub458D50Wrapper,	0x00458D50, 2);
 	jmpPatch(updateButtonSetWrapper,			0x00458DE0);
