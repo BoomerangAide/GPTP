@@ -7,6 +7,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#pragma warning(disable: 6385)
+#pragma warning(disable: 6386)
+
 class DarkSwarmFinderProc : public scbw::UnitFinderCallbackMatchInterface {
 	public:
 		bool match(CUnit* unit) {
@@ -39,7 +42,10 @@ void printText(const char* text, u32 color) {
 	if (!text) 
 		return;
 
+#pragma warning(push)
+#pragma warning(disable: 28159)
 	DWORD gtc = GetTickCount() + 7000;
+#pragma warning(pop)
 
 	__asm	 {
 		PUSHAD
@@ -193,7 +199,7 @@ int arctangent(int slope) {
 		 269,	283,	297,	312,	329,	346,	364,	384,
 		 405,	428,	452,	479,	509,	542,	578,	619,
 		 664,	716,	775,	844,	926, 1023, 1141, 1287,
-		1476, 1726, 2076, 2600, 3471, 5211, 10429, -1
+		1476, 1726, 2076, 2600, 3471, 5211, 10429, (unsigned int)-1
 	};
 
 	bool isNegative = false;
@@ -417,7 +423,7 @@ void setMapSwitch(int switch_number, bool value) {
 
 bool moveUnit(CUnit* unit, s16 x, s16 y) {
 
-	Point16 targetPos = {x, y};
+	Point16 targetPos = {(u16)x, (u16)y};
 	Point16 actualPos;
 	Point16 prevPos = unit->sprite->position;
 
