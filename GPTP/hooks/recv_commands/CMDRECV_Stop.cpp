@@ -5,10 +5,11 @@
 
 namespace {
 
-void parseOrdersDatReqs();																							//6D450
-int parseRequirementOpcodes(CUnit* unit, u32 orderId, u32 playerId, u32 address, u32 req_offset);						//6D610
-void removeOrderFromUnitQueue(CUnit* unit, COrder* order);															//742D0
-void function_004754F0(CUnit* unit,u32 unitId,u32 unk1,u32 unk2,u32 orderId,u32 unk3,u32 bCommandType,u32 unk5);	//754F0
+void parseOrdersDatReqs();																			//6D450
+int parseRequirementOpcodes(CUnit* unit, u32 orderId, u32 playerId, u32 address, u32 req_offset);	//6D610
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);											//742D0
+void function_004754F0(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
+						Point16 unkPos1, Point16 unkPos2, Bool32 isQueued, u32 unkQueuedOrderType);	//754F0
 
 } //unnamed namespace
 
@@ -20,8 +21,9 @@ namespace hooks {
 
 void CMDRECV_ReaverStop() {
 
+	u32* const u32_0066FF60 = (u32*)0x0066FF60;
+
 	CUnit* current_unit;
-	static u32* u32_0066FF60 = (u32*)0x0066FF60;
 
 	*selectionIndexStart = 0;
 
@@ -284,21 +286,25 @@ void CMDRECV_Stop(u8 bCommandType) {
 		if(orders_dat::RequirementsOffset[OrderId::Stop] == 0)
 			*u32_0066FF60 = 0x17;
 		else
-		if(parseRequirementOpcodes(
-			current_unit,
-			OrderId::Stop,
-			*ACTIVE_NATION_ID,
-			0x00514CF8,
-			orders_dat::RequirementsOffset[OrderId::Stop]
-		) == 1)
+		if(
+			parseRequirementOpcodes(
+				current_unit,
+				OrderId::Stop,
+				*ACTIVE_NATION_ID,
+				0x00514CF8,
+				orders_dat::RequirementsOffset[OrderId::Stop]
+			) == 1
+		)
 			function_004754F0(
 				current_unit,
-				UnitId::None,
-				*(u32*)(0x006D5C24),
-				*(u32*)(0x006D5C20),
 				OrderId::Stop,
 				0,
-				bCommandType != 0, //true (1) if Queued Order
+				0,
+				NULL,
+				UnitId::None,
+				*(Point16*)(0x006D5C24),
+				*(Point16*)(0x006D5C20),
+				bCommandType != 0,
 				1
 			);
 
@@ -367,25 +373,23 @@ void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 
 ;
 
-//Note: this function was made from what was seen in this case of use,
-//some things are hardcoded because it's hard to tell what is used or
-//not.
-//Basically, used elsewhere, the function would be implemented differently
 const u32 Func_Sub_4754F0 = 0x004754F0;
-void function_004754F0(CUnit* unit,u32 unitId,u32 unk1,u32 unk2,u32 orderId,u32 unk3,u32 bCommandType,u32 unk5) {
+void function_004754F0(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
+						Point16 unkPos1, Point16 unkPos2, Bool32 isQueued, u32 unkQueuedOrderType)
+{
 
 	__asm {
 		PUSHAD
-		MOV EAX, 0
-		MOV EDX, 0
+		MOV EAX, y
+		MOV EDX, x
 		MOV EBX, unitId
 		MOV ESI, unit
-		PUSH unk1
-		PUSH unk2
-		PUSH unk3
+		PUSH unkPos1
+		PUSH unkPos2
+		PUSH target
 		PUSH orderId
-		PUSH bCommandType
-		PUSH unk5
+		PUSH isQueued
+		PUSH unkQueuedOrderType
 		CALL Func_Sub_4754F0
 		POPAD
 	}
