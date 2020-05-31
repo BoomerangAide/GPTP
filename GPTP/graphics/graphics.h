@@ -4,12 +4,9 @@
 #include <string>
 #include "../types.h"
 
-//V241 for VS2008
-
 namespace graphics {
 
 //Based on BWAPI's ColorId.h and ColorId.cpp
-//No strongly typed enum because we're at pre-C++11
 typedef u8 ColorId;
 const ColorId RED     = 111;  //Player 1 color					(0x67)
 const ColorId BLUE    = 165;  //Player 2 color					(0xA5)
@@ -65,6 +62,10 @@ void drawEllipse(int left, int top, int right, int bottom, ColorId color, CoordT
 
 void drawDottedLine(int x1, int y1, int x2, int y2, ColorId color, CoordType ct = ON_SCREEN);
 
+void drawDottedLine2(int x1, int y1, int x2, int y2, ColorId color1, ColorId color2, CoordType ct = ON_SCREEN);
+
 void drawDottedEllipse(int left, int top, int right, int bottom, ColorId color, CoordType ct = ON_SCREEN);
+
+void drawDottedEllipse2(int left, int top, int right, int bottom, ColorId color1, ColorId color2, CoordType ct = ON_SCREEN);
 
 } //graphics
