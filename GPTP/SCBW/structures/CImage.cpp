@@ -18,7 +18,7 @@ void CImage::playIscriptAnim(IscriptAnimation::Enum animation) {
   }
 }
 
-//should be equivalent to ImageDestructor @ 0x004D4CE0 with ESI = sprite
+//should be equivalent to ImageDestructor @ 0x004D4CE0 with ESI = image
 void CImage::free() 
 {
 
