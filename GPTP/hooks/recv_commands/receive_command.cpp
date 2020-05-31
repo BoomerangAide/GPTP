@@ -5,13 +5,13 @@
 
 namespace {
 
-Bool32 OrderAllowed(CUnit* unit, u16 orderId, u32 nationID);							//0x0046DC20
-void function_004756B0(CUnit* unit, u8 orderId, u32 unk1, u32 unk2, u32 bCommandType);	//0x004756B0
-void function_004756E0(CUnit* unit, CUnit* target, u32 orderId, u32 bCommandType);		//0x004756E0
-u32 function_0049A410(CUnit* unit, u8 orderId);											//0x0049A410
-bool CanTargetSelf(CUnit* unit, u8 orderId);											//0x0049A480
-void function_0049A500(CUnit* unit,	u8* array_of_data);									//0x0049A500
-void function_0049A8C0(u8* array_of_data,Bool32 bCanBeObstructed);						//0x0049A8C0
+Bool32 OrderAllowed(CUnit* unit, u16 orderId, u32 nationID);									//6DC20
+void function_004756B0(CUnit* unit, u8 orderId, int y, int x, u32 unitId, u32 bCommandType);	//756B0
+void function_004756E0(CUnit* unit, CUnit* target, u32 orderId, u32 bCommandType);				//756E0
+Bool32 function_0049A410(CUnit* unit, u8* orderId);												//9A410
+bool CanTargetSelf(CUnit* unit, u8 orderId);													//9A480
+void function_0049A500(CUnit* unit,	u8* array_of_data);											//9A500
+void function_0049A8C0(u8* array_of_data,Bool32 bCanBeObstructed);								//9A8C0
 
 } //unnamed namespace
 
@@ -73,7 +73,7 @@ namespace hooks {
 
 				if(!jump_to_9AD7E) { //9ABC4:
 
-					if(function_0049A410(current_unit,bActionOrder) == 0)
+					if(function_0049A410(current_unit,(u8*)&current_order) == 0) //current_order because not used past this point, so can be changed
 						jump_to_9AD7E = true;
 					else
 					if(	current_unit->mainOrderId != OrderId::NukeLaunch ||
@@ -227,6 +227,7 @@ namespace hooks {
 								*saved_order_3,
 								*saved_unknown_2 / 65536,
 								*saved_unknown_2,
+								wUnitType,
 								bCommandType
 							);
 
@@ -238,6 +239,7 @@ namespace hooks {
 									*saved_order_2,
 									*saved_unknown_2 / 65536,
 									*saved_unknown_2,
+									wUnitType,
 									bCommandType
 								);
 								jump_to_9ad74 = true;
@@ -307,14 +309,15 @@ Bool32 OrderAllowed(CUnit* unit, u16 orderId, u32 nationID) {
 ;
 
 const u32 Func_Sub4756B0 = 0x004756B0;
-void function_004756B0(CUnit* unit, u8 orderId, u32 unk1, u32 unk2, u32 bCommandType) {
+void function_004756B0(CUnit* unit, u8 orderId, int y, int x, u32 unitId, u32 bCommandType) {
 
 	__asm {
 		PUSHAD
+		MOV EBX, unitId
 		MOV DL, orderId
 		MOV ESI, unit
-		PUSH unk1
-		PUSH unk2
+		PUSH y
+		PUSH x
 		PUSH bCommandType
 		CALL Func_Sub4756B0
 		POPAD
@@ -342,17 +345,40 @@ void function_004756E0(CUnit* unit, CUnit* target, u32 orderId, u32 bCommandType
 ;
 
 const u32 Func_Sub49A410 = 0x0049A410;
-u32 function_0049A410(CUnit* unit, u8 orderId) {
+//Return 1 for OrderId RallyPoint1,RallyPoint2,Rechargeshields2 and Pickup3
+//for GroundedBuilding
+//Can modify orderId
+Bool32 function_0049A410(CUnit* unit, u8* orderId) {
 
-	static u32 result; 
+	Bool32 result; 
 
-	__asm {
-		PUSHAD
-		MOV EAX, unit
-		MOV DL, orderId
-		CALL Func_Sub49A410
-		MOV result, EAX
-		POPAD
+	if (
+		unit->status & UnitStatus::GroundedBuilding &&
+		(
+			*orderId == OrderId::RallyPoint1 || *orderId == OrderId::RallyPoint2 ||
+			*orderId == OrderId::Rechargeshields2 || *orderId == OrderId::Pickup3
+		)
+	)
+		result = 1;
+	else
+	if (unit->id == UnitId::ZergLurker && unit->status & UnitStatus::Burrowed) {
+		*orderId = OrderId::PlayerGuard;
+		result = 1;
+	}
+	else
+	{
+
+		*orderId = units_dat::RightClickAction[unit->id];
+
+		if (
+			*orderId != OrderId::Die &&
+			unit->status & UnitStatus::GroundedBuilding &&
+			unit->isFactory()
+		)
+			*orderId = OrderId::Guard;
+
+		result = (*orderId != OrderId::Die);
+
 	}
 
 	return result;
