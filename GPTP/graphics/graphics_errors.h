@@ -2,8 +2,6 @@
 
 #pragma once
 
-//V241 for VS2008
-
 namespace graphics {
 
 enum GraphicsErrorId {
