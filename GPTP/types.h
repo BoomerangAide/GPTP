@@ -2,8 +2,6 @@
 
 #pragma once
 
-//V241 for VS2008
-
 //Based on http://msdn.microsoft.com/en-us/library/windows/desktop/ms679289.aspx
 #define C_ASSERT(e) typedef char __C_ASSERT__[(e)?1:-1]
 
