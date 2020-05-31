@@ -2,8 +2,6 @@
 #include "api.h"
 #include <cassert>
 
-//V241 for VS2008
-
 namespace scbw {
 
 UnitFinder::UnitFinder() : unitCount(0) {}
