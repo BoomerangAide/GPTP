@@ -5,10 +5,11 @@
 
 namespace {
 
-	void removeOrderFromUnitQueue(CUnit* unit, COrder* order);													//742D0
-	void actUnitReturnToIdle(CUnit* unit);																		//75420
-	void function_004754F0(CUnit* unit,u32 unitId,u32 unk1,u32 unk2,u32 orderId,u32 unk3,u32 unk4,u32 unk5);	//754F0
-	void function_004E97C0(CUnit* unit);																		//E97C0
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);												//742D0
+void actUnitReturnToIdle(CUnit* unit);																	//75420
+void function_004754F0(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
+						Point16 unkPos1, Point16 unkPos2, Bool32 isQueued, u32 unkQueuedOrderType);		//754F0
+void function_004E97C0(CUnit* unit);																	//E97C0
 
 } //unnamed namespace
 
@@ -61,11 +62,13 @@ namespace hooks {
 
 				function_004754F0(
 					selected_unit,
-					UnitId::None,
-					*(u32*)(0x006D5C24),
-					*(u32*)(0x006D5C20),
 					OrderId::Burrow,
 					0,
+					0,
+					NULL,
+					UnitId::None,
+					*(Point16*)(0x006D5C24),
+					*(Point16*)(0x006D5C20),
 					bCommandType,
 					1
 				);
@@ -171,25 +174,23 @@ namespace {
 
 	;
 	
-	//Note: this function was made from what was seen in this case of use,
-	//some things are hardcoded because it's hard to tell what is used or
-	//not.
-	//Basically, used elsewhere, the function would be implemented differently
 	const u32 Func_Sub_4754F0 = 0x004754F0;
-	void function_004754F0(CUnit* unit,u32 unitId,u32 unk1,u32 unk2,u32 orderId,u32 unk3,u32 unk4,u32 unk5) {
+	void function_004754F0(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
+							Point16 unkPos1, Point16 unkPos2, Bool32 isQueued, u32 unkQueuedOrderType) 
+	{
 
 		__asm {
 			PUSHAD
-			MOV EAX, 0
-			MOV EDX, 0
+			MOV EAX, y
+			MOV EDX, x
 			MOV EBX, unitId
 			MOV ESI, unit
-			PUSH unk1
-			PUSH unk2
-			PUSH unk3
+			PUSH unkPos1
+			PUSH unkPos2
+			PUSH target
 			PUSH orderId
-			PUSH unk4
-			PUSH unk5
+			PUSH isQueued
+			PUSH unkQueuedOrderType
 			CALL Func_Sub_4754F0
 			POPAD
 		}
