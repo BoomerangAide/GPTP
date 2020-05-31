@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BAE0A287-3166-4C79-9F90-0C6A6DDB5A69}</ProjectGuid>
+    <RootNamespace>GPTP</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.29403.142</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\patch\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.qdp</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\patch\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.qdp</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;GPTP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>
+      </MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>6011</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)\$(ProjectName).qdp</OutputFile>
+      <ModuleDefinitionFile>$(ProjectDir)\plugin.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;GPTP_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+      <MinimalRebuild />
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)\$(ProjectName).qdp</OutputFile>
+      <ModuleDefinitionFile>$(ProjectDir)\plugin.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="configure.cpp" />
+    <ClCompile Include="graphics\Bitmap.cpp" />
+    <ClCompile Include="graphics\draw_hook.cpp" />
+    <ClCompile Include="graphics\Font.cpp" />
+    <ClCompile Include="graphics\graphics.cpp" />
+    <ClCompile Include="graphics\graphics_errors.cpp" />
+    <ClCompile Include="graphics\Shape.cpp" />
+    <ClCompile Include="hooks\apply_upgrade_flags.cpp" />
+    <ClCompile Include="hooks\apply_upgrade_flags_inject.cpp" />
+    <ClCompile Include="hooks\attack_priority.cpp" />
+    <ClCompile Include="hooks\attack_priority_inject.cpp" />
+    <ClCompile Include="hooks\bunker_hooks.cpp" />
+    <ClCompile Include="hooks\bunker_hooks_inject.cpp" />
+    <ClCompile Include="hooks\cloak_nearby_units.cpp" />
+    <ClCompile Include="hooks\cloak_nearby_units_inject.cpp" />
+    <ClCompile Include="hooks\cloak_tech.cpp" />
+    <ClCompile Include="hooks\cloak_tech_inject.cpp" />
+    <ClCompile Include="hooks\create_init_units.cpp" />
+    <ClCompile Include="hooks\create_init_units_inject.cpp" />
+    <ClCompile Include="hooks\detector.cpp" />
+    <ClCompile Include="hooks\detector_inject.cpp" />
+    <ClCompile Include="hooks\give_unit.cpp" />
+    <ClCompile Include="hooks\give_unit_inject.cpp" />
+    <ClCompile Include="hooks\harvest.cpp" />
+    <ClCompile Include="hooks\harvest_inject.cpp" />
+    <ClCompile Include="hooks\interface\btns_cond.cpp" />
+    <ClCompile Include="hooks\interface\btns_cond_inject.cpp" />
+    <ClCompile Include="hooks\interface\buttonsets.cpp" />
+    <ClCompile Include="hooks\interface\buttonsets_inject.cpp" />
+    <ClCompile Include="hooks\interface\selection.cpp" />
+    <ClCompile Include="hooks\interface\selection_inject.cpp" />
+    <ClCompile Include="hooks\interface\select_larva.cpp" />
+    <ClCompile Include="hooks\interface\select_larva_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_base_text.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_base_text_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_buildmorphtrain.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_buildmorphtrain_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_nukesilo_resources.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_nukesilo_resources_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_research_upgrade.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_research_upgrade_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_supply_provider.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_supply_provider_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_transport.cpp" />
+    <ClCompile Include="hooks\interface\status_display\advanced\status_transport_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\stats_display_main.cpp" />
+    <ClCompile Include="hooks\interface\status_display\stats_display_main_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\stats_panel_display.cpp" />
+    <ClCompile Include="hooks\interface\status_display\stats_panel_display_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_portrait.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_portrait_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_stat_act.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_stat_act_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_stat_cond.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_stat_cond_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_stat_selection.cpp" />
+    <ClCompile Include="hooks\interface\status_display\unit_stat_selection_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\weapon_armor_tooltip.cpp" />
+    <ClCompile Include="hooks\interface\status_display\weapon_armor_tooltip_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\wireframe.cpp" />
+    <ClCompile Include="hooks\interface\status_display\wireframe_inject.cpp" />
+    <ClCompile Include="hooks\interface\updateSelectedUnitData.cpp" />
+    <ClCompile Include="hooks\interface\updateSelectedUnitsData_inject.cpp" />
+    <ClCompile Include="hooks\load_unload_proc.cpp" />
+    <ClCompile Include="hooks\load_unload_proc_inject.cpp" />
+    <ClCompile Include="hooks\main\game_hooks.cpp" />
+    <ClCompile Include="hooks\main\game_hooks_inject.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\attack_orders.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\attack_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\die_order.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\die_order_inject.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\stopholdpos_orders.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\stopholdpos_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\building_making\building_morph.cpp" />
+    <ClCompile Include="hooks\orders\building_making\building_morph_inject.cpp" />
+    <ClCompile Include="hooks\orders\building_making\building_protoss.cpp" />
+    <ClCompile Include="hooks\orders\building_making\building_protoss_inject.cpp" />
+    <ClCompile Include="hooks\orders\building_making\building_terran.cpp" />
+    <ClCompile Include="hooks\orders\building_making\building_terran_inject.cpp" />
+    <ClCompile Include="hooks\orders\building_making\make_nydus_exit.cpp" />
+    <ClCompile Include="hooks\orders\building_making\make_nydus_exit_inject.cpp" />
+    <ClCompile Include="hooks\orders\enter_nydus.cpp" />
+    <ClCompile Include="hooks\orders\enter_nydus_inject.cpp" />
+    <ClCompile Include="hooks\orders\infestation.cpp" />
+    <ClCompile Include="hooks\orders\infestation_inject.cpp" />
+    <ClCompile Include="hooks\orders\larva_creep_spawn.cpp" />
+    <ClCompile Include="hooks\orders\larva_creep_spawn_inject.cpp" />
+    <ClCompile Include="hooks\orders\liftland.cpp" />
+    <ClCompile Include="hooks\orders\liftland_inject.cpp" />
+    <ClCompile Include="hooks\orders\load_unload_orders.cpp" />
+    <ClCompile Include="hooks\orders\load_unload_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\medic_orders.cpp" />
+    <ClCompile Include="hooks\orders\medic_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\merge_units.cpp" />
+    <ClCompile Include="hooks\orders\merge_units_inject.cpp" />
+    <ClCompile Include="hooks\orders\repair_order.cpp" />
+    <ClCompile Include="hooks\orders\repair_order_inject.cpp" />
+    <ClCompile Include="hooks\orders\research_upgrade_orders.cpp" />
+    <ClCompile Include="hooks\orders\research_upgrade_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\siege_transform.cpp" />
+    <ClCompile Include="hooks\orders\siege_transform_inject.cpp" />
+    <ClCompile Include="hooks\orders\spells\cast_order.cpp" />
+    <ClCompile Include="hooks\orders\spells\cast_order_inject.cpp" />
+    <ClCompile Include="hooks\orders\spells\feedback_spell.cpp" />
+    <ClCompile Include="hooks\orders\spells\feedback_spell_inject.cpp" />
+    <ClCompile Include="hooks\orders\spells\hallucination_spell.cpp" />
+    <ClCompile Include="hooks\orders\spells\hallucination_spell_inject.cpp" />
+    <ClCompile Include="hooks\orders\spells\mindcontrol_spell.cpp" />
+    <ClCompile Include="hooks\orders\spells\mindcontrol_spell_inject.cpp" />
+    <ClCompile Include="hooks\orders\spells\nuke_orders.cpp" />
+    <ClCompile Include="hooks\orders\spells\nuke_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\spells\recall_spell.cpp" />
+    <ClCompile Include="hooks\orders\spells\recall_spell_inject.cpp" />
+    <ClCompile Include="hooks\orders\unit_making\unit_morph.cpp" />
+    <ClCompile Include="hooks\orders\unit_making\unit_morph_inject.cpp" />
+    <ClCompile Include="hooks\orders\unit_making\unit_train.cpp" />
+    <ClCompile Include="hooks\orders\unit_making\unit_train_inject.cpp" />
+    <ClCompile Include="hooks\psi_field.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+    </ClCompile>
+    <ClCompile Include="hooks\psi_field_inject.cpp" />
+    <ClCompile Include="hooks\psi_field_util.cpp" />
+    <ClCompile Include="hooks\rally_point.cpp" />
+    <ClCompile Include="hooks\rally_point_inject.cpp" />
+    <ClCompile Include="hooks\recharge_shields.cpp" />
+    <ClCompile Include="hooks\recharge_shields_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\burrow_tech.cpp" />
+    <ClCompile Include="hooks\recv_commands\burrow_tech_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Build.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Build_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Cancel.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Cancel_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_LiftOff.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_LiftOff_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_MergeArchon.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_MergeArchon_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Morph.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Morph_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_SiegeTank.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_SiegeTank_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Stop.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Stop_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\receive_command.cpp" />
+    <ClCompile Include="hooks\recv_commands\receive_command_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Selection.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Selection_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_ResearchUpgrade.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_ResearchUpgrade_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Stimpack.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Stimpack_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_RightClick.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_RightClick_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\train_cmd_receive.cpp" />
+    <ClCompile Include="hooks\recv_commands\train_cmd_receive_inject.cpp" />
+    <ClCompile Include="hooks\spider_mine.cpp" />
+    <ClCompile Include="hooks\spider_mine_inject.cpp" />
+    <ClCompile Include="hooks\stim_packs.cpp" />
+    <ClCompile Include="hooks\stim_packs_inject.cpp" />
+    <ClCompile Include="hooks\tech_target_check.cpp" />
+    <ClCompile Include="hooks\tech_target_check_inject.cpp" />
+    <ClCompile Include="hooks\transfer_tech_upgrades.cpp" />
+    <ClCompile Include="hooks\transfer_tech_upgrades_inject.cpp" />
+    <ClCompile Include="hooks\unit_destructor_special.cpp" />
+    <ClCompile Include="hooks\unit_speed.cpp" />
+    <ClCompile Include="hooks\unit_speed_inject.cpp" />
+    <ClCompile Include="hooks\unit_stats\armor_bonus.cpp" />
+    <ClCompile Include="hooks\unit_stats\armor_bonus_inject.cpp" />
+    <ClCompile Include="hooks\unit_stats\max_energy.cpp" />
+    <ClCompile Include="hooks\unit_stats\max_energy_inject.cpp" />
+    <ClCompile Include="hooks\unit_stats\sight_range.cpp" />
+    <ClCompile Include="hooks\unit_stats\sight_range_inject.cpp" />
+    <ClCompile Include="hooks\unit_stats\weapon_range.cpp" />
+    <ClCompile Include="hooks\unit_stats\weapon_range_inject.cpp" />
+    <ClCompile Include="hooks\update_status_effects.cpp" />
+    <ClCompile Include="hooks\update_status_effects_inject.cpp" />
+    <ClCompile Include="hooks\update_unit_state.cpp" />
+    <ClCompile Include="hooks\update_unit_state_inject.cpp" />
+    <ClCompile Include="hooks\utils\replace_unit.cpp" />
+    <ClCompile Include="hooks\utils\replace_unit_inject.cpp" />
+    <ClCompile Include="hooks\utils\utils.cpp" />
+    <ClCompile Include="hooks\utils\utils_inject.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_cooldown.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_cooldown_inject.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_damage.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_damage_inject.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_fire.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_fire_inject.cpp" />
+    <ClCompile Include="hooks\weapons\wpnspellhit.cpp" />
+    <ClCompile Include="hooks\weapons\wpnspellhit_inject.cpp" />
+    <ClCompile Include="hook_tools.cpp" />
+    <ClCompile Include="initialize.cpp" />
+    <ClCompile Include="logger.cpp" />
+    <ClCompile Include="Plugin.cpp" />
+    <ClCompile Include="plugin_main.cpp" />
+    <ClCompile Include="SCBW\api.cpp" />
+    <ClCompile Include="SCBW\structures\CImage.cpp" />
+    <ClCompile Include="SCBW\structures\CSprite.cpp" />
+    <ClCompile Include="SCBW\structures\CUnit.cpp" />
+    <ClCompile Include="SCBW\structures\Player.cpp" />
+    <ClCompile Include="SCBW\UnitFinder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AI\spells\defensive_matrix.h" />
+    <ClInclude Include="definitions.h" />
+    <ClInclude Include="graphics\Bitmap.h" />
+    <ClInclude Include="graphics\draw_hook.h" />
+    <ClInclude Include="graphics\Font.h" />
+    <ClInclude Include="graphics\graphics.h" />
+    <ClInclude Include="graphics\graphics_errors.h" />
+    <ClInclude Include="graphics\graphics_misc.h" />
+    <ClInclude Include="graphics\Shape.h" />
+    <ClInclude Include="hooks\apply_upgrade_flags.h" />
+    <ClInclude Include="hooks\attack_priority.h" />
+    <ClInclude Include="hooks\bunker_hooks.h" />
+    <ClInclude Include="hooks\cloak_nearby_units.h" />
+    <ClInclude Include="hooks\cloak_tech.h" />
+    <ClInclude Include="hooks\create_init_units.h" />
+    <ClInclude Include="hooks\detector.h" />
+    <ClInclude Include="hooks\give_unit.h" />
+    <ClInclude Include="hooks\harvest.h" />
+    <ClInclude Include="hooks\interface\btns_cond.h" />
+    <ClInclude Include="hooks\interface\buttonsets.h" />
+    <ClInclude Include="hooks\interface\selection.h" />
+    <ClInclude Include="hooks\interface\select_larva.h" />
+    <ClInclude Include="hooks\interface\status_display\advanced\status_base_text.h" />
+    <ClInclude Include="hooks\interface\status_display\advanced\status_buildmorphtrain.h" />
+    <ClInclude Include="hooks\interface\status_display\advanced\status_nukesilo_resources.h" />
+    <ClInclude Include="hooks\interface\status_display\advanced\status_research_upgrade.h" />
+    <ClInclude Include="hooks\interface\status_display\advanced\status_supply_provider.h" />
+    <ClInclude Include="hooks\interface\status_display\advanced\status_transport.h" />
+    <ClInclude Include="hooks\interface\status_display\stats_display_main.h" />
+    <ClInclude Include="hooks\interface\status_display\stats_panel_display.h" />
+    <ClInclude Include="hooks\interface\status_display\unit_portrait.h" />
+    <ClInclude Include="hooks\interface\status_display\unit_stat_act.h" />
+    <ClInclude Include="hooks\interface\status_display\unit_stat_cond.h" />
+    <ClInclude Include="hooks\interface\status_display\unit_stat_selection.h" />
+    <ClInclude Include="hooks\interface\status_display\weapon_armor_tooltip.h" />
+    <ClInclude Include="hooks\interface\status_display\wireframe.h" />
+    <ClInclude Include="hooks\interface\updateSelectedUnitsData.h" />
+    <ClInclude Include="hooks\load_unload_proc.h" />
+    <ClInclude Include="hooks\main\game_hooks.h" />
+    <ClInclude Include="hooks\orders\base_orders\attack_orders.h" />
+    <ClInclude Include="hooks\orders\base_orders\die_order.h" />
+    <ClInclude Include="hooks\orders\base_orders\stopholdpos_orders.h" />
+    <ClInclude Include="hooks\orders\building_making\building_morph.h" />
+    <ClInclude Include="hooks\orders\building_making\building_protoss.h" />
+    <ClInclude Include="hooks\orders\building_making\building_terran.h" />
+    <ClInclude Include="hooks\orders\building_making\make_nydus_exit.h" />
+    <ClInclude Include="hooks\orders\enter_nydus.h" />
+    <ClInclude Include="hooks\orders\infestation.h" />
+    <ClInclude Include="hooks\orders\larva_creep_spawn.h" />
+    <ClInclude Include="hooks\orders\liftland.h" />
+    <ClInclude Include="hooks\orders\load_unload_orders.h" />
+    <ClInclude Include="hooks\orders\medic_orders.h" />
+    <ClInclude Include="hooks\orders\merge_units.h" />
+    <ClInclude Include="hooks\orders\repair_order.h" />
+    <ClInclude Include="hooks\orders\research_upgrade_orders.h" />
+    <ClInclude Include="hooks\orders\siege_transform.h" />
+    <ClInclude Include="hooks\orders\spells\cast_order.h" />
+    <ClInclude Include="hooks\orders\spells\feedback_spell.h" />
+    <ClInclude Include="hooks\orders\spells\hallucination_spell.h" />
+    <ClInclude Include="hooks\orders\spells\mindcontrol_spell.h" />
+    <ClInclude Include="hooks\orders\spells\nuke_orders.h" />
+    <ClInclude Include="hooks\orders\spells\recall_spell.h" />
+    <ClInclude Include="hooks\orders\unit_making\unit_morph.h" />
+    <ClInclude Include="hooks\orders\unit_making\unit_train.h" />
+    <ClInclude Include="hooks\psi_field.h" />
+    <ClInclude Include="hooks\rally_point.h" />
+    <ClInclude Include="hooks\recharge_shields.h" />
+    <ClInclude Include="hooks\recv_commands\burrow_tech.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_Build.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_Cancel.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_LiftOff.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_MergeArchon.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_Morph.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_SiegeTank.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_Stop.h" />
+    <ClInclude Include="hooks\recv_commands\receive_command.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_Selection.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_ResearchUpgrade.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_Stimpack.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_RightClick.h" />
+    <ClInclude Include="hooks\recv_commands\train_cmd_receive.h" />
+    <ClInclude Include="hooks\spider_mine.h" />
+    <ClInclude Include="hooks\stim_packs.h" />
+    <ClInclude Include="hooks\tech_target_check.h" />
+    <ClInclude Include="hooks\transfer_tech_upgrades.h" />
+    <ClInclude Include="hooks\unit_destructor_special.h" />
+    <ClInclude Include="hooks\unit_speed.h" />
+    <ClInclude Include="hooks\unit_stats\armor_bonus.h" />
+    <ClInclude Include="hooks\unit_stats\max_energy.h" />
+    <ClInclude Include="hooks\unit_stats\sight_range.h" />
+    <ClInclude Include="hooks\unit_stats\weapon_range.h" />
+    <ClInclude Include="hooks\update_status_effects.h" />
+    <ClInclude Include="hooks\update_unit_state.h" />
+    <ClInclude Include="hooks\utils\ExtendSightLimit.h" />
+    <ClInclude Include="hooks\utils\replace_unit.h" />
+    <ClInclude Include="hooks\utils\utils.h" />
+    <ClInclude Include="hooks\weapons\weapon_cooldown.h" />
+    <ClInclude Include="hooks\weapons\weapon_damage.h" />
+    <ClInclude Include="hooks\weapons\weapon_fire.h" />
+    <ClInclude Include="hooks\weapons\wpnspellhit.h" />
+    <ClInclude Include="hook_tools.h" />
+    <ClInclude Include="logger.h" />
+    <ClInclude Include="MPQDraftPlugin.h" />
+    <ClInclude Include="Plugin.h" />
+    <ClInclude Include="SCBW\api.h" />
+    <ClInclude Include="SCBW\enumerations.h" />
+    <ClInclude Include="SCBW\enumerations\FlingyId.h" />
+    <ClInclude Include="SCBW\enumerations\IconId.h" />
+    <ClInclude Include="SCBW\enumerations\ImageId.h" />
+    <ClInclude Include="SCBW\enumerations\OrderId.h" />
+    <ClInclude Include="SCBW\enumerations\SoundId.h" />
+    <ClInclude Include="SCBW\enumerations\SpriteId.h" />
+    <ClInclude Include="SCBW\enumerations\TechId.h" />
+    <ClInclude Include="SCBW\enumerations\UnitId.h" />
+    <ClInclude Include="SCBW\enumerations\UpgradeId.h" />
+    <ClInclude Include="SCBW\enumerations\WeaponId.h" />
+    <ClInclude Include="SCBW\scbwdata.h" />
+    <ClInclude Include="SCBW\structures.h" />
+    <ClInclude Include="SCBW\structures\CBullet.h" />
+    <ClInclude Include="SCBW\structures\CImage.h" />
+    <ClInclude Include="SCBW\structures\CList.h" />
+    <ClInclude Include="SCBW\structures\common.h" />
+    <ClInclude Include="SCBW\structures\COrder.h" />
+    <ClInclude Include="SCBW\structures\CSprite.h" />
+    <ClInclude Include="SCBW\structures\CUnit.h" />
+    <ClInclude Include="SCBW\structures\CUnitLayout.h" />
+    <ClInclude Include="SCBW\structures\Layer.h" />
+    <ClInclude Include="SCBW\structures\Player.h" />
+    <ClInclude Include="SCBW\structures\Target.h" />
+    <ClInclude Include="SCBW\UnitFinder.h" />
+    <ClInclude Include="types.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
