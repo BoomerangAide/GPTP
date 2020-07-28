@@ -8,7 +8,7 @@ namespace {
 void parseOrdersDatReqs();																			//6D450
 int parseRequirementOpcodes(CUnit* unit, u32 orderId, u32 playerId, u32 address, u32 req_offset);	//6D610
 void removeOrderFromUnitQueue(CUnit* unit, COrder* order);											//742D0
-void function_004754F0(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
+void function_004754F0_Helper(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
 						Point16 unkPos1, Point16 unkPos2, Bool32 isQueued, u32 unkQueuedOrderType);	//754F0
 
 } //unnamed namespace
@@ -109,7 +109,7 @@ void CMDRECV_ReaverStop() {
 
 				}
 
-				current_unit->performAnotherOrder(OrderId::ReaverStop,0,0,NULL,UnitId::None,0);
+				current_unit->performAnotherOrder(OrderId::ReaverStop,0,0,NULL,UnitId::None);
 
 			}
 
@@ -214,7 +214,7 @@ void CMDRECV_CarrierStop() {
 
 				}
 
-				current_unit->performAnotherOrder(OrderId::CarrierStop,0,0,NULL,UnitId::None,0);
+				current_unit->performAnotherOrder(OrderId::CarrierStop,0,0,NULL,UnitId::None);
 
 			}
 
@@ -236,7 +236,6 @@ void CMDRECV_Stop(u8 bCommandType) {
 	static u32* u32_0066FF60 = (u32*)0x0066FF60;
 
 	*selectionIndexStart = 0;
-
 	current_unit = getActivePlayerNextSelection();
 
 	while(current_unit != NULL) {
@@ -295,7 +294,7 @@ void CMDRECV_Stop(u8 bCommandType) {
 				orders_dat::RequirementsOffset[OrderId::Stop]
 			) == 1
 		)
-			function_004754F0(
+			function_004754F0_Helper(
 				current_unit,
 				OrderId::Stop,
 				0,
@@ -374,7 +373,7 @@ void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 ;
 
 const u32 Func_Sub_4754F0 = 0x004754F0;
-void function_004754F0(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
+void function_004754F0_Helper(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
 						Point16 unkPos1, Point16 unkPos2, Bool32 isQueued, u32 unkQueuedOrderType)
 {
 
