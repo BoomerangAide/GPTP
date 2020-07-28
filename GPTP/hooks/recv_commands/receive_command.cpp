@@ -309,6 +309,7 @@ Bool32 OrderAllowed(CUnit* unit, u16 orderId, u32 nationID) {
 ;
 
 const u32 Func_Sub4756B0 = 0x004756B0;
+//Prepare arguments then call function_004754F0 hooked in CMDRECV_QueuedOrder
 void function_004756B0(CUnit* unit, u8 orderId, int y, int x, u32 unitId, u32 bCommandType) {
 
 	__asm {
@@ -328,6 +329,7 @@ void function_004756B0(CUnit* unit, u8 orderId, int y, int x, u32 unitId, u32 bC
 ;
 
 const u32 Func_Sub4756E0 = 0x004756E0;
+//Prepare arguments then call function_004754F0 hooked in CMDRECV_QueuedOrder
 void function_004756E0(CUnit* unit, CUnit* target, u32 orderId, u32 bCommandType) {
 
 	__asm {
