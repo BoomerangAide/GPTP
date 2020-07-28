@@ -224,6 +224,8 @@
     <ClCompile Include="hooks\orders\spells\nuke_orders_inject.cpp" />
     <ClCompile Include="hooks\orders\spells\recall_spell.cpp" />
     <ClCompile Include="hooks\orders\spells\recall_spell_inject.cpp" />
+    <ClCompile Include="hooks\orders\reset_collision.cpp" />
+    <ClCompile Include="hooks\orders\reset_collision_inject.cpp" />    
     <ClCompile Include="hooks\orders\unit_making\unit_morph.cpp" />
     <ClCompile Include="hooks\orders\unit_making\unit_morph_inject.cpp" />
     <ClCompile Include="hooks\orders\unit_making\unit_train.cpp" />
@@ -252,6 +254,8 @@
     <ClCompile Include="hooks\recv_commands\CMDRECV_MergeArchon_inject.cpp" />
     <ClCompile Include="hooks\recv_commands\CMDRECV_Morph.cpp" />
     <ClCompile Include="hooks\recv_commands\CMDRECV_Morph_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_QueuedOrder.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_QueuedOrder_inject.cpp" />    
     <ClCompile Include="hooks\recv_commands\CMDRECV_SiegeTank.cpp" />
     <ClCompile Include="hooks\recv_commands\CMDRECV_SiegeTank_inject.cpp" />
     <ClCompile Include="hooks\recv_commands\CMDRECV_Stop.cpp" />
@@ -266,6 +270,8 @@
     <ClCompile Include="hooks\recv_commands\CMDRECV_Stimpack_inject.cpp" />
     <ClCompile Include="hooks\recv_commands\CMDRECV_RightClick.cpp" />
     <ClCompile Include="hooks\recv_commands\CMDRECV_RightClick_inject.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Cloak_Decloak.cpp" />
+    <ClCompile Include="hooks\recv_commands\CMDRECV_Cloak_Decloak_inject.cpp" />    
     <ClCompile Include="hooks\recv_commands\train_cmd_receive.cpp" />
     <ClCompile Include="hooks\recv_commands\train_cmd_receive_inject.cpp" />
     <ClCompile Include="hooks\spider_mine.cpp" />
@@ -274,6 +280,8 @@
     <ClCompile Include="hooks\stim_packs_inject.cpp" />
     <ClCompile Include="hooks\tech_target_check.cpp" />
     <ClCompile Include="hooks\tech_target_check_inject.cpp" />
+    <ClCompile Include="hooks\right_click_CMDACT.cpp" />
+    <ClCompile Include="hooks\right_click_CMDACT_inject.cpp" />    
     <ClCompile Include="hooks\transfer_tech_upgrades.cpp" />
     <ClCompile Include="hooks\transfer_tech_upgrades_inject.cpp" />
     <ClCompile Include="hooks\unit_destructor_special.cpp" />
@@ -378,6 +386,7 @@
     <ClInclude Include="hooks\orders\spells\mindcontrol_spell.h" />
     <ClInclude Include="hooks\orders\spells\nuke_orders.h" />
     <ClInclude Include="hooks\orders\spells\recall_spell.h" />
+    <ClInclude Include="hooks\orders\reset_collision.h" />    
     <ClInclude Include="hooks\orders\unit_making\unit_morph.h" />
     <ClInclude Include="hooks\orders\unit_making\unit_train.h" />
     <ClInclude Include="hooks\psi_field.h" />
@@ -389,6 +398,7 @@
     <ClInclude Include="hooks\recv_commands\CMDRECV_LiftOff.h" />
     <ClInclude Include="hooks\recv_commands\CMDRECV_MergeArchon.h" />
     <ClInclude Include="hooks\recv_commands\CMDRECV_Morph.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_QueuedOrder.h" />    
     <ClInclude Include="hooks\recv_commands\CMDRECV_SiegeTank.h" />
     <ClInclude Include="hooks\recv_commands\CMDRECV_Stop.h" />
     <ClInclude Include="hooks\recv_commands\receive_command.h" />
@@ -396,10 +406,12 @@
     <ClInclude Include="hooks\recv_commands\CMDRECV_ResearchUpgrade.h" />
     <ClInclude Include="hooks\recv_commands\CMDRECV_Stimpack.h" />
     <ClInclude Include="hooks\recv_commands\CMDRECV_RightClick.h" />
+    <ClInclude Include="hooks\recv_commands\CMDRECV_Cloak_Decloak.h" />    
     <ClInclude Include="hooks\recv_commands\train_cmd_receive.h" />
     <ClInclude Include="hooks\spider_mine.h" />
     <ClInclude Include="hooks\stim_packs.h" />
     <ClInclude Include="hooks\tech_target_check.h" />
+    <ClInclude Include="hooks\right_click_CMDACT.h" />
     <ClInclude Include="hooks\transfer_tech_upgrades.h" />
     <ClInclude Include="hooks\unit_destructor_special.h" />
     <ClInclude Include="hooks\unit_speed.h" />
