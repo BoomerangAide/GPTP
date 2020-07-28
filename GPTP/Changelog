@@ -1,3 +1,15 @@
+Version 5.910:
+
+- Moved old BTNSCOND hooks from hooks\cloak_tech* to hooks\interface\btns_cond*
+- hooks\right_click_CMDACT hooks added
+- hooks\CMDRECV_Cloak_Decloak hooks added (to replace content from hooks\cloak_tech*)
+- CanBeQueued enabled in orders_dat
+- hooks\recv_commands\CMDRECV_QueuedOrder added
+- hooks\orders\reset_collision added
+- minor changes and fixes
+
+-----------
+
 Version 5.900:
 
 - Moving to Visual Studio 2019.This is mainly about project and solution files, the code files should remain backward compatible, though I won't check and just be careful
