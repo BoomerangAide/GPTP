@@ -5,20 +5,20 @@
 
 namespace {
 
-void disconnectFromAddOn(CUnit* unit);												//0x00464930
-void refundAllQueueSlots(CUnit* unit);												//0x00466E80
-void removeOrderFromUnitQueue(CUnit* unit, COrder* order);							//0x004742D0
-void actUnitReturnToIdle(CUnit* unit);												//0x00475420
-void incrementUnitDeathScores(CUnit* unit, u8 player);								//0x00488AF0
-void incrementUnitScores(CUnit* unit, s32 unkScore);								//0x00488BF0
-void incrementUnitScoresEx(CUnit* unit, s32 unkScore, s32 unk2);					//0x00488D50
-void initializeEmptyUnitsLinkedListRef_Sub49E4E0(CUnit* unit, u8 playerId);			//0x0049E4E0
-void GiveUnitHelper(CUnit* unit, u32 playerId, s32 unkScore);						//0x0049EFA0
-void changeUnitButtonSet_Sub_4E5D60(CUnit* unit, u16 unitId);						//0x004E5D60
-void hideAndDisableUnit(CUnit* unit);												//0x004E6340
-void showAndEnableUnit(CUnit* unit);												//0x004E6490
-void setNextWaypoint_Sub4EB290(CUnit* unit);										//0x004EB290
-void makeToHoldPosition(CUnit* unit);												//0x004EB5B0
+void disconnectFromAddOn(CUnit* unit);										//64930
+void refundAllQueueSlots(CUnit* unit);										//66E80
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);					//742D0
+void actUnitReturnToIdle(CUnit* unit);										//75420
+void incrementUnitDeathScores(CUnit* unit, u8 player);						//88AF0
+void incrementUnitScores(CUnit* unit, s32 unkScore);						//88BF0
+void incrementUnitScoresEx(CUnit* unit, s32 unkScore, s32 unk2);			//88D50
+void initializeEmptyUnitsLinkedListRef_Sub49E4E0(CUnit* unit, u8 playerId);	//9E4E0
+void GiveUnitHelper(CUnit* unit, u32 playerId, s32 unkScore);				//9EFA0
+void changeUnitButtonSet_Sub_4E5D60(CUnit* unit, u16 unitId);				//E5D60
+void hideAndDisableUnit(CUnit* unit);										//E6340
+void showAndEnableUnit(CUnit* unit);										//E6490
+void setNextWaypoint_Sub4EB290(CUnit* unit);								//EB290
+void makeToHoldPosition(CUnit* unit);										//EB5B0
 
 } //unnamed namespace
 
