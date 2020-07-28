@@ -1,19 +1,18 @@
 #include "siege_transform.h"
 #include <SCBW/api.h>
-#include <cassert>
 
 //Helper functions definitions
 
 namespace {
 
-void unitSetRetreatPoint(CUnit* unit, u8 angleValue);								//0x004011A0
-bool getCloserToDestination_sub402BE0(CUnit* unit);									//0x00402BE0
-void orderReturnToIdle(CUnit* unit);												//0x00463770
-bool checkForCloseUnit_sub464290(CUnit* unit);										//0x00464290
-void playSubunitIscript(CUnit* unit, IscriptAnimation::Enum anim);					//0x00474380
-void actUnitReturnToIdle(CUnit* unit);												//0x00475420
-void replaceUnitWithType(CUnit* unit, u16 newUnitId);								//0x0049FED0
-void makeToHoldPosition(CUnit* unit);												//0x004EB5B0
+void unitSetRetreatPoint(CUnit* unit, u8 angleValue);				//011A0
+bool getCloserToDestination_sub402BE0(CUnit* unit);					//02BE0
+void orderReturnToIdle(CUnit* unit);								//63770
+bool checkForCloseUnit_sub464290(CUnit* unit);						//64290
+void playSubunitIscript(CUnit* unit, IscriptAnimation::Enum anim);	//74380
+void actUnitReturnToIdle(CUnit* unit);								//75420
+void replaceUnitWithType(CUnit* unit, u16 newUnitId);				//9FED0
+void makeToHoldPosition(CUnit* unit);								//EB5B0
 
 } //unnamed namespace
 
@@ -277,8 +276,6 @@ const u32 Func_PlaySubunitIscript = 0x00474380;
 void playSubunitIscript(CUnit* unit, IscriptAnimation::Enum anim) {
 
 	u32 anim_ = anim;
-
-	assert(unit->subunit);
 
 	__asm {
 		PUSHAD
