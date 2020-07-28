@@ -145,7 +145,8 @@ void function_00468420(CUnit* unit) {
 		unit->lockdownTimer == 0 &&
 		unit->stasisTimer == 0 &&
 		unit->maelstromTimer == 0 &&
-		(	!units_dat::GroupFlags[unit->id].isZerg ||
+		(	
+			!units_dat::GroupFlags[unit->id].isZerg ||
 			unit->id == UnitId::ZergInfestedCommandCenter
 		)
 	)
@@ -232,7 +233,7 @@ void function_00468420(CUnit* unit) {
 							AI_CancelStructure(unit->currentBuildUnit);
 						else {
 
-							if(!units_dat::BaseProperty[unit->buildQueue[unit->buildQueueSlot % 5]] & UnitProperty::Building)
+							if(!(units_dat::BaseProperty[unit->buildQueue[unit->buildQueueSlot % 5]] & UnitProperty::Building))
 								refundUnitTrainCost(unit->buildQueue[unit->buildQueueSlot % 5],unit->playerId);
 
 						}
