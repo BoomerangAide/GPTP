@@ -521,6 +521,7 @@ void orders_SCVBuild2(CUnit* unit) {
 ;
 
 //Go to build a not yet existing building
+//Switch to orders_SCVBuild2 for construction itself
 void orders_SCVBuild(CUnit* unit) {
 
 	bool bEndThere = false;
