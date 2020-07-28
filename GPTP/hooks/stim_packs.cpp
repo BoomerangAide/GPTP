@@ -4,9 +4,9 @@
 //helper functions def
 namespace {
 
-void QueueGameCommand(u8* params, u32 param_length);				//0x00485BD0
-u32 get_statTxt_Str_0(CUnit* unit, u32 playerId, char* message);	//0x0048EF30
-u32 RandBetween(u32 min, u32 max, u32 someIndex);					//0x004DC550
+void QueueGameCommand(u8* params, u32 param_length);				//85BD0
+u32 get_statTxt_Str_0(CUnit* unit, u32 playerId, char* message);	//8EF30
+u32 RandBetween(u32 min, u32 max, u32 someIndex);					//DC550
 
 } //unnamed namespace
 
