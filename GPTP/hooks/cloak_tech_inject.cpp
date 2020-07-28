@@ -7,12 +7,12 @@
 
 There are 9 places where StarCraft checks unit ID for cloaking.
 
-* 0x00429210: BTNSCOND_IsCloaked  (Used by Infested Kerrigan, Infested Duran, and Mixed Cloakable Group)
-* 0x004292C0: BTNSCOND_CanCloak   (Used by Infested Kerrigan, Infested Duran, and Mixed Cloakable Group)
+* 0x00429210: BTNSCOND_IsCloaked  (Used by Infested Kerrigan, Infested Duran, and Mixed Cloakable Group)(hooked in hooks\interface\btns_cond)
+* 0x004292C0: BTNSCOND_CanCloak   (Used by Infested Kerrigan, Infested Duran, and Mixed Cloakable Group)(hooked in hooks\interface\btns_cond)
 * 0x00491B30: ApplyCloakingOrder  (Used by all spell-cloaking units)
-* 0x004C0720: CMDRECV_Cloak       (Used by all spell-cloaking units)
+* 0x004C0720: CMDRECV_Cloak       (Used by all spell-cloaking units)(hooked in hooks\recv_commands\CMDRECV_Cloak_Decloak)
 * 0x0043B970: AI_orderUnitCloaking(Used by AI-controlled units)
-* 0x004C0660: CMDRECV_Decloak     (Used by all spell-cloaking units)
+* 0x004C0660: CMDRECV_Decloak     (Used by all spell-cloaking units)(hooked in hooks\recv_commands\CMDRECV_Cloak_Decloak)
 * 0x00491A50: getCloakingTech     (Used by "Create Unit With Properties" in StarEdit + create_unit opcode in aiscript.bin)
 * 0x00491A90: getCloakingEnergyConsumption (Used by energy regen; This is editable from the energy hook stuff)
 * 0x00423540: currentUnitSelectionCanCloak(Called by CMDACT_Cloak for all units; also checks energy amount)
@@ -21,75 +21,11 @@ Note that Wraiths and Ghosts use BTNSCOND_CanCloak_0 and BTNSCOND_IsCloaked_0,
 which does NOT check unit IDs at all. (FireGraft has it wrong when it says that
 Wraiths use "Can Cloak" and Infested Kerrigan uses "Can Cloak - Mixed")
 
+Note: previous statements not from UndeadStar, not rechecked in details
+
 */
 
 namespace {
-
-//-------- Button conditions --------//
-
-//0x00429210
-void __declspec(naked) cloakingTechWrapper_IsCloaked() {
-
-	static Bool32 return_value;
-	static u32 playerId;
-	static CUnit* unit;	//unused in original function
-	static u16 reqVar;	//unused in original function
-
-	__asm {
-		PUSH EBP
-		MOV EBP, ESP
-		MOV playerId, EDX
-		MOV EBX, [EBP+0x08]
-		MOV unit, EBX
-		MOV reqVar, CX 
-		PUSHAD
-	}
-
-	return_value = hooks::BTNSCOND_IsCloaked(unit,playerId,reqVar);
-
-	__asm {
-		POPAD
-		MOV EAX, return_value
-		MOV ESP, EBP
-		POP EBP
-		RETN 4
-	}
-
-}
-
-;
-
-//0x004292C0
-void __declspec(naked) cloakingTechWrapper_CanCloak() {
-
-	static Bool32 return_value;
-	static u32 playerId;
-	static CUnit* unit;	//unused in original function
-	static u16 reqVar;	//unused in original function
-
-	__asm {
-		PUSH EBP
-		MOV EBP, ESP
-		MOV playerId, EDX
-		MOV EBX, [EBP+0x08]
-		MOV unit, EBX
-		MOV reqVar, CX 
-		PUSHAD
-	}
-
-	return_value = hooks::BTNSCOND_CanCloak(unit,playerId,reqVar);
-
-	__asm {
-		POPAD
-		MOV EAX, return_value
-		MOV ESP, EBP
-		POP EBP
-		RETN 4
-	}
-
-}
-
-;
 
 //-------- Actual cloak orders --------//
 
@@ -116,19 +52,6 @@ void applyCloakingOrderHook(CUnit* unit) {
 
 ;
 
-void __cdecl cloakingTechWrapper_CMDRECV_Cloak() {
-
-	*selectionIndexStart = 0;  
-
-	while (CUnit* unit = getActivePlayerNextSelection()) {
-		if (unit->canUseTech(hooks::getCloakingTech(unit), *ACTIVE_NATION_ID) == 1)
-			applyCloakingOrderHook(unit);
-	}
-
-}
-
-;
-
 void __declspec(naked) cloakingTechWrapper_AI_cloakUnit() {
 
 	static CUnit* unit;
@@ -147,19 +70,6 @@ void __declspec(naked) cloakingTechWrapper_AI_cloakUnit() {
 		POPAD
 		RETN
 	}
-}
-
-;
-
-void __cdecl cloakingTechWrapper_CMDRECV_Decloak() {
-	
-	*selectionIndexStart = 0;
-	
-	while (CUnit* unit = getActivePlayerNextSelection()) {
-		if (unit->canUseTech(hooks::getCloakingTech(unit), *ACTIVE_NATION_ID) == 1)
-			unit->setSecondaryOrder(OrderId::Decloak);
-	}
-
 }
 
 ;
@@ -207,7 +117,11 @@ Bool32 __cdecl currentUnitSelectionCanCloakWrapper() {
 
 	race = (*activePortraitUnit)->getRace();
 
-	scbw::showErrorMessageWithSfx((*activePortraitUnit)->playerId, 864 + race, 156 + race);
+	scbw::showErrorMessageWithSfx(
+		(*activePortraitUnit)->playerId, 
+		864 + race, //"Not enough energy."
+		SoundId::Zerg_Advisor_ZAdErr06_WAV + race
+	);
 
 	return false;
 
@@ -220,11 +134,7 @@ Bool32 __cdecl currentUnitSelectionCanCloakWrapper() {
 namespace hooks {
 
 void injectCloakingTechHooks() {
-  jmpPatch(cloakingTechWrapper_IsCloaked,       0x00429210, 1);
-  jmpPatch(cloakingTechWrapper_CanCloak,        0x004292C0, 1);
-  jmpPatch(cloakingTechWrapper_CMDRECV_Cloak,   0x004C0720, 3);
   jmpPatch(cloakingTechWrapper_AI_cloakUnit,    0x0043B970, 1);
-  jmpPatch(cloakingTechWrapper_CMDRECV_Decloak, 0x004C0660, 3);
   jmpPatch(getCloakingTechWrapper,              0x00491A50, 3);
   jmpPatch(currentUnitSelectionCanCloakWrapper, 0x00423540, 1);
 }
