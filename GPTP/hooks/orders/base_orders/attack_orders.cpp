@@ -12,35 +12,35 @@
 
 namespace {
 
-bool unitCantSeeCloakedTarget(CUnit* unit, CUnit* target);												//0x00401D60
-bool isInfestableUnit(CUnit* unit);																		//0x00402210
-bool unitCanInfest(CUnit* unit);																		//0x00402750
-void AI_AttackUnit(CUnit* unit);																		//0x0043FFD0
-CUnit* findBestAttackTarget(CUnit* unit);																//0x00443080
-bool function_00462EA0(CUnit* unit, u8 unknownByteValue);												//0x00462EA0
-void function_00465780(CUnit* unit);																	//0x00465780
-void removeOrderFromUnitQueue(CUnit* unit, COrder* order);												//0x004742D0
-void function_00474A70(CUnit* unit, CUnit* target, u8 orderId);											//0x00474A70
-bool isTargetWithinMinMovementRange(CUnit* unit, CUnit* target, u32 range);								//0x004763D0
-bool function_00476610(CUnit* unit, int x, int y);														//0x00476610
-bool isUnitInWeaponRange(CUnit* unit, CUnit* target);													//0x00476870
-void getWeaponBeginIscript(CUnit* unit, IscriptAnimation::Enum anim);									//0x00476ED0
-void function_00477510(CUnit* unit);																	//0x00477510
-void function_00477820(CUnit* unit, u8 orderId);														//0x00477820
-bool function_00478370(CUnit* unit, u8 orderId);														//0x00478370
-bool function_00478540(CUnit* unit);																	//0x00478540
-bool isUnitCritter(CUnit* unit);																		//0x0047B450
-void function_00495400(CUnit* unit, CUnit* target);														//0x00495400
-u16 SAI_GetRegionIdFromPxEx(s32 x, s32 y);																//0x0049C9F0
-bool isUnitVisible(CUnit* unit);																		//0x004E5DB0
-bool isTargetVisible(CUnit* unit, CUnit* target);														//0x004E5E30
-u8 getRightClickActionOrder(CUnit* unit);																//0x004E5EA0
-void setNextWaypoint_Sub4EB290(CUnit* unit);															//0x004EB290
-void makeToHoldPosition(CUnit* unit);																	//0x004EB5B0
-bool moveToTarget(CUnit* unit, CUnit* target);															//0x004EB720
-bool SetMoveTarget_xy(CUnit* unit, int x, int y);														//0x004EB820
-bool function_004EB900(CUnit* unit, CUnit* target);														//0x004EB900
-bool function_004EB9C0(CUnit* unit, int x, int y);														//0x004EB9C0
+bool unitCantSeeCloakedTarget(CUnit* unit, CUnit* target);					//01D60
+bool isInfestableUnit(CUnit* unit);											//02210
+bool unitCanInfest(CUnit* unit);											//02750
+void AI_AttackUnit(CUnit* unit);											//3FFD0
+CUnit* findBestAttackTarget(CUnit* unit);									//43080
+bool function_00462EA0(CUnit* unit, u8 unknownByteValue);					//62EA0
+void function_00465780(CUnit* unit);										//65780
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);					//742D0
+void function_00474A70(CUnit* unit, CUnit* target, u8 orderId);				//74A70
+bool isTargetWithinMinMovementRange(CUnit* unit, CUnit* target, u32 range);	//763D0
+bool function_00476610(CUnit* unit, int x, int y);							//76610
+bool isUnitInWeaponRange(CUnit* unit, CUnit* target);						//76870
+void getWeaponBeginIscript(CUnit* unit, IscriptAnimation::Enum anim);		//76ED0
+void function_00477510(CUnit* unit);										//77510
+void function_00477820(CUnit* unit, u8 orderId);							//77820
+bool function_00478370(CUnit* unit, u8 orderId);							//78370
+bool function_00478540(CUnit* unit);										//78540
+bool isUnitCritter(CUnit* unit);											//7B450
+void function_00495400(CUnit* unit, CUnit* target);							//95400
+u16 SAI_GetRegionIdFromPxEx(s32 x, s32 y);									//9C9F0
+bool isUnitVisible(CUnit* unit);											//E5DB0
+bool isTargetVisible(CUnit* unit, CUnit* target);							//E5E30
+u8 getRightClickActionOrder(CUnit* unit);									//E5EA0
+void setNextWaypoint_Sub4EB290(CUnit* unit);								//EB290
+void makeToHoldPosition(CUnit* unit);										//EB5B0
+bool moveToTarget(CUnit* unit, CUnit* target);								//EB720
+bool SetMoveTarget_xy(CUnit* unit, int x, int y);							//EB820
+bool function_004EB900(CUnit* unit, CUnit* target);							//EB900
+bool function_004EB9C0(CUnit* unit, int x, int y);							//EB9C0
 
 } //unnamed namespace
 
@@ -1395,7 +1395,7 @@ u8 getRightClickActionOrder(CUnit* unit) {
 		u8 temp_result = units_dat::RightClickAction[unit->id];
 
 		if(
-			temp_result == 0 &&
+			temp_result == RightClickActions::NoCommand_AutoAttack &&
 			unit->status & UnitStatus::GroundedBuilding &&
 			unit->isFactory()
 		)
