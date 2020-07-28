@@ -49,6 +49,7 @@
 #include "hooks/recv_commands/CMDRECV_LiftOff.h"
 #include "hooks/recv_commands/CMDRECV_MergeArchon.h"
 #include "hooks/recv_commands/CMDRECV_Morph.h"
+#include "hooks/recv_commands/CMDRECV_QueuedOrder.h"
 #include "hooks/recv_commands/CMDRECV_ResearchUpgrade.h"
 #include "hooks/recv_commands/CMDRECV_RightClick.h"
 #include "hooks/recv_commands/CMDRECV_Selection.h"
@@ -77,6 +78,8 @@
 #include "hooks/orders/repair_order.h"
 #include "hooks/utils/replace_unit.h"
 #include "hooks/orders/research_upgrade_orders.h"
+#include "hooks/orders/reset_collision.h"
+#include "hooks/right_click_CMDACT.h"
 #include "hooks/interface/select_larva.h"
 #include "hooks/interface/selection.h"
 #include "hooks/orders/siege_transform.h"
@@ -186,6 +189,9 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectReplaceUnitWithTypeHook();
 	hooks::injectCMDRECV_StimpackHook();
 	hooks::injectCMDRECV_RightClickHooks();
+	hooks::injectRightClickCMDACT_Hooks();
+	hooks::injectCMDRECV_QueuedOrderHooks();
+	hooks::injectResetCollisionHooks();	
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
