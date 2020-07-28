@@ -43,7 +43,7 @@ u32 returnNormalMove_NormalAttack_Order(CUnit* unit, int x, int y, CUnit** targe
 		returned_order = OrderId::Nothing2;
 	else
 	if (*target == NULL) {
-		if (unitId == UnitId::None)
+		if (unitId != UnitId::None)
 			returned_order = OrderId::Rightclickaction;
 		else
 			returned_order = OrderId::Move;
@@ -232,7 +232,7 @@ u32 returnHarvestAndRepair_Order(CUnit* unit, int x, int y, CUnit** target, u32 
 
 ;		
 
-//Function called by 004C2370  CMDRECV_RightClick
+//Function 004560D0 called by 004C2370  CMDRECV_RightClick
 //Do the actual work after the initial function
 //confirmed x and y are not out of map and extracted
 //the target unit
@@ -378,10 +378,9 @@ void CMDRECV_RightClick_Proc(s16 x, s16 y, CUnit* target, u16 wUnitType, u8 bCom
 					current_unit->rally.unit = NULL;
 					current_unit->rally.pt.x = x;
 					current_unit->rally.pt.y = y;
-					jumpNearLoopEnd = true;
 				}
-				else
-					jumpNearLoopEnd = true;
+				
+				jumpNearLoopEnd = true;
 
 			}
 
@@ -502,6 +501,8 @@ u32 function_004557C0(CUnit* unit, CUnit* target) {
 	return return_value;
 
 }
+	
+;
 
 const u32 Func_returnNormalMove_NormalAttack_Order = 0x00455900;
 u32 returnNormalMove_NormalAttack_Order_Helper(CUnit* unit, int x, int y, CUnit** target, u32 unitId){
@@ -662,6 +663,7 @@ bool isOrderValid(CUnit* unit, CUnit* target, u8 orderId, u32 unk) {
 ;
 
 const u32 Func_Sub4756B0 = 0x004756B0;
+//Prepare arguments then call function_004754F0 hooked in CMDRECV_QueuedOrder
 void function_004756B0(CUnit* unit, u8 orderId, int y, int x, u32 unitId, u32 bCommandType) {
 
 	__asm {
@@ -681,6 +683,7 @@ void function_004756B0(CUnit* unit, u8 orderId, int y, int x, u32 unitId, u32 bC
 ;
 
 const u32 Func_Sub4756E0 = 0x004756E0;
+//Prepare arguments then call function_004754F0 hooked in CMDRECV_QueuedOrder
 void function_004756E0(CUnit* unit, CUnit* target, u32 orderId, u32 bCommandType) {
 
 	__asm {
