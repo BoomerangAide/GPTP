@@ -620,7 +620,7 @@ void CUnit::order(u8 orderId, u16 x, u16 y, CUnit* target, u16 targetUnitId, boo
 }
 
 const u32 Func_PerformAnotherOrder = 0x004745F0;
-void CUnit::performAnotherOrder(u8 orderId, s16 x, s16 y, CUnit* target, u16 targetUnitId, u32 unk) {
+void CUnit::performAnotherOrder(u8 orderId, s16 x, s16 y, CUnit* target, u16 targetUnitId, COrder* unkOrder) {
 
 	static Point16 pos;
 	pos.x = x;pos.y = y;
@@ -632,7 +632,7 @@ void CUnit::performAnotherOrder(u8 orderId, s16 x, s16 y, CUnit* target, u16 tar
 		MOV BL, orderId
 		MOVZX EDX, targetUnitId
 		MOV ESI, this
-		MOV EDI, unk
+		MOV EDI, unkOrder
 		CALL Func_PerformAnotherOrder
 		POPAD
 	}
