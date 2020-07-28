@@ -86,7 +86,7 @@ bool GameLogger::updateFrame() {
     
   if (currentFrame > lastUpdatedFrame) {
     lastUpdatedFrame = currentFrame;
-    logFile << "Frame " << currentFrame << ":\n";
+    logFile << "\nFrame " << currentFrame << ":\n";
   }
 
   #endif
