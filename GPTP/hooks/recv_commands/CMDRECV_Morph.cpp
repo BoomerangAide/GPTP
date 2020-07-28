@@ -90,7 +90,7 @@ void CMDRECV_UnitMorph(u16 wUnitType) {
 
 				}
 
-				current_unit->performAnotherOrder(OrderId::Morph1,0,0,NULL,UnitId::None,0);
+				current_unit->performAnotherOrder(OrderId::Morph1,0,0,NULL,UnitId::None);
 
 			}
 
