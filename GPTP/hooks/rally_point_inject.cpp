@@ -214,15 +214,15 @@ namespace hooks {
 
 void injectRallyHooks() {
 	
-	jmpPatch(setRallyPositionWrapper,		0x00466910, 2);
-	jmpPatch(setRallyUnitWrapper,			0x00466B40, 1);
-	jmpPatch(orderNewUnitToRallyWrapper,	0x00466F50, 0);
+	jmpPatch(setRallyPositionWrapper,		0x00466910, 2);		//this is the actual function
+	jmpPatch(setRallyUnitWrapper,			0x00466B40, 1);		//this is the actual function	
+	jmpPatch(orderNewUnitToRallyWrapper,	0x00466F50, 0);		//this is the actual function
  
-	jmpPatch(setRallyPositionWrapper_Jmp1,	0x00456256, 19);	//24 - 5 of jump
-	jmpPatch(setRallyPositionWrapper_Jmp2,	0x0049ACEF, 19);	//24 - 5 of jump
+	jmpPatch(setRallyPositionWrapper_Jmp1,	0x00456256, 19);	//24 - 5 of jump //CMDRECV_RightClick hook should be disabled
+	jmpPatch(setRallyPositionWrapper_Jmp2,	0x0049ACEF, 19);	//24 - 5 of jump //receive_command() from hooks\recv_commands\receive_command() hook should be disabled
 
-	jmpPatch(setRallyUnitWrapper_Jmp1,		0x0045620D, 35);	//40 - 5 of jump
-	jmpPatch(setRallyUnitWrapper_Jmp2,		0x0049ACB0, 37);	//42 - 5 of jump
+	jmpPatch(setRallyUnitWrapper_Jmp1,		0x0045620D, 35);	//40 - 5 of jump //CMDRECV_RightClick hook should be disabled
+	jmpPatch(setRallyUnitWrapper_Jmp2,		0x0049ACB0, 37);	//42 - 5 of jump //receive_command() from hooks\recv_commands\receive_command() hook should be disabled
 
 }
 
