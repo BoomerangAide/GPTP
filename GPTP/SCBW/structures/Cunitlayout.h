@@ -53,10 +53,10 @@ struct CUnitLayout {
 /*0x008*/ s32       hitPoints;			  /// Hit points of unit, note that the displayed value in broodwar is ceil(healthPoints/256)
 										  /// Officially called "xLife"
 /*0x00C*/ CSprite   *sprite;
-/*0x010*/ Target    moveTarget;           ///< The position or unit to move to. It is NOT an order target.
-/*0x018*/ Point16   nextMovementWaypoint; ///< The next way point in the path the unit is following to get to its destination.
-                                          ///< Equal to moveToPos for air units since they don't need to navigate around buildings.
-/*0x01C*/ Point16   nextTargetWaypoint;   ///< The desired position
+/*0x010*/ Target    moveTarget;           /// The position or unit to move to. It is NOT an order target.
+/*0x018*/ Point16   nextMovementWaypoint; /// The next way point in the path the unit is following to get to its destination.
+                                          /// Equal to moveToPos for air units since they don't need to navigate around buildings.
+/*0x01C*/ Point16   nextTargetWaypoint;   /// The desired position
 /*0x020*/ u8        movementFlags;		  /// Flags specifying movement type, MovementFlags::Enum contains possible explanations
 /*0x021*/ u8        currentDirection1;	  /// The current direction the unit is facing
 /*0x022*/ u8        flingyTurnSpeed;      //AKA flingy turn radius
@@ -114,7 +114,7 @@ struct CUnitLayout {
 /*0x080*/ CUnit*    connectedUnit;        // ++Larva store a reference to the hatchery/Lair/Hive who created it
                                           // ++units inside transports store a reference to the transport
                                           // addons store a reference to its parent building (but not the other way around)
-/*0x084*/ u8        orderQueueCount;
+/*0x084*/ u8        orderQueueCount;	  // (may be count in addition to first since can be 2 when 3 orders are queued)
 /*0x085*/ u8        orderQueueTimer;      // Cycles down from from 8 to 0 (inclusive). See also 0x122.
 /*0x086*/ u8        _unknown_0x086;
 /*0x087*/ u8        attackNotifyTimer;    // Prevent "Your forces are under attack." on every attack
