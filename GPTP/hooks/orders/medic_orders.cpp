@@ -5,21 +5,21 @@
 
 namespace {
 
-CUnit* MedicHeal_TargetAcquire(CUnit* medic);											//422A0
-Bool32 AI_OrderHeal(CUnit* unit, CUnit* target);										//63530
-u32 doMedicHeal(CUnit* unit, CUnit* target);											//63C40
-void removeOrderFromUnitQueue(CUnit* unit, COrder* order);								//742D0
-void function_4748E0(CUnit* unit, int x, int y, u8 orderId);							//748E0
-void function_474940(CUnit* unit, CUnit* target, u8 orderId);							//74940
-void orderImmediate(CUnit* unit, u8 order);												//74B40
-void orderInterrupt(CUnit* unit, CUnit* target, u16 x, u16 y, u32 orderId);				//74C30
-void actUnitReturnToIdle(CUnit* unit);													//75420
-void unitOrderMoveToTargetUnit(CUnit* unit, CUnit* target);								//79FE0
-Bool32 AI_CastSpellBehaviour(CUnit* unit, u32 unknown);									//A13C0
-void setNextWaypoint_Sub4EB290(CUnit* unit);											//EB290
-bool moveToTarget(CUnit* unit, CUnit* target);											//EB720
-bool SetMoveTarget_xy(CUnit* unit, int x, int y);										//EB820
-bool function_004EB900(CUnit* unit, CUnit* target);										//EB900
+CUnit* MedicHeal_TargetAcquire(CUnit* medic);								//422A0
+Bool32 AI_OrderHeal(CUnit* unit, CUnit* target);							//63530
+u32 doMedicHeal(CUnit* unit, CUnit* target);								//63C40
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);					//742D0
+void function_4748E0(CUnit* unit, int x, int y, u8 orderId);				//748E0
+void function_474940(CUnit* unit, CUnit* target, u8 orderId);				//74940
+void orderImmediate(CUnit* unit, u8 order);									//74B40
+void orderInterrupt(CUnit* unit, CUnit* target, u16 x, u16 y, u32 orderId);	//74C30
+void actUnitReturnToIdle(CUnit* unit);										//75420
+void unitOrderMoveToTargetUnit(CUnit* unit, CUnit* target);					//79FE0
+Bool32 AI_CastSpellBehaviour(CUnit* unit, u32 unknown);						//A13C0
+void setNextWaypoint_Sub4EB290(CUnit* unit);								//EB290
+bool moveToTarget(CUnit* unit, CUnit* target);								//EB720
+bool SetMoveTarget_xy(CUnit* unit, int x, int y);							//EB820
+bool function_004EB900(CUnit* unit, CUnit* target);							//EB900
 
 } //unnamed namespace
 
@@ -373,38 +373,20 @@ void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 
 ;
 
-const u32 Func_sub4748E0 = 0x004748E0;
+//Equivalent to function @ 0x004748E0
+//also used in hooks\utils\utils.cpp and in unhooked orders_Patrol
 void function_4748E0(CUnit* unit, int x, int y, u8 orderId) {
-
-	__asm {
-		PUSHAD
-		MOV BL, orderId
-		MOV ESI, unit
-		XOR EDI, EDI
-		PUSH y
-		PUSH x
-		CALL Func_sub4748E0
-		POPAD
-	}
-
+	unit->performAnotherOrder(orderId, x, y, NULL, UnitId::None);
 }
 
 ;
 
-//Maybe EDI could have another value in some circumstances
-const u32 Func_sub474940 = 0x00474940;
+//Equivalent to function @ 0x00474940, also used in hooks\utils\utils.cpp
 void function_474940(CUnit* unit, CUnit* target, u8 orderId) {
-
-	__asm {
-		PUSHAD
-		MOV BL, orderId
-		MOV ESI, unit
-		MOV EAX, target
-		XOR EDI, EDI
-		CALL Func_sub474940
-		POPAD
-	}
-
+	if (target == NULL)
+		unit->performAnotherOrder(orderId, 0, 0, NULL, UnitId::None);
+	else
+		unit->performAnotherOrder(orderId, target->sprite->position.x, target->sprite->position.y, target, UnitId::None);
 }
 
 ;
