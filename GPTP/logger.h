@@ -28,6 +28,7 @@ class GameLogger {
     bool checkLogFile();
     bool updateFrame();
     std::ofstream logFile;
+#pragma warning(suppress:26495) //variable is initialized in startGame  
     int lastUpdatedFrame;
 };
 
