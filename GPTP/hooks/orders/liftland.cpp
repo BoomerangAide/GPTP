@@ -74,7 +74,7 @@ void orders_BuildingLand(CUnit* unit) {
 				coords.x,
 				coords.y, 
 				NULL, 
-				0
+				UnitId::None
 			);
 
 		} //if( (unit->mainOrderId != OrderId::Die) )
