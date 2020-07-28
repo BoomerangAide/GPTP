@@ -82,8 +82,7 @@ void CMDRECV_MergeDarkArchon() {
 							templar_merge_partner->sprite->position.x,
 							templar_merge_partner->sprite->position.y,
 							templar_merge_partner,
-							UnitId::None,
-							0
+							UnitId::None
 						);
 
 
@@ -117,8 +116,7 @@ void CMDRECV_MergeDarkArchon() {
 							templar_stored->sprite->position.x,
 							templar_stored->sprite->position.y,
 							templar_stored,
-							UnitId::None,
-							0
+							UnitId::None
 						);
 
 					}
@@ -212,8 +210,7 @@ void CMDRECV_MergeArchon() {
 							templar_merge_partner->sprite->position.x,
 							templar_merge_partner->sprite->position.y,
 							templar_merge_partner,
-							UnitId::None,
-							0
+							UnitId::None
 						);
 
 
@@ -247,8 +244,7 @@ void CMDRECV_MergeArchon() {
 							templar_stored->sprite->position.x,
 							templar_stored->sprite->position.y,
 							templar_stored,
-							UnitId::None,
-							0
+							UnitId::None
 						);
 
 					}
