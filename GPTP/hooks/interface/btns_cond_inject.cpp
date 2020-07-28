@@ -146,6 +146,82 @@ void __declspec(naked) BTNSCOND_CanBuildUnit_Wrapper() {
 }
 
 ;
+	
+void __declspec(naked) BTNSCOND_IsCloaked_Wrapper() {
+
+	static s32 button_state;
+
+	static u32 playerId;
+	static CUnit* unit;
+	static u16 reqVar;
+
+	__asm {
+
+		PUSH EBP
+		MOV EBP, ESP
+
+		MOV playerId, EDX
+
+		MOV EBX, [EBP+0x08]
+		MOV unit, EBX
+
+		MOV reqVar, CX 
+
+		PUSHAD
+
+	}
+
+	button_state = hooks::BTNSCOND_IsCloaked(unit,reqVar,playerId);
+
+	__asm {
+		POPAD
+		MOV EAX, button_state
+		MOV ESP, EBP
+		POP EBP
+		RETN 4
+	}
+
+}
+
+;
+
+void __declspec(naked) BTNSCOND_CanCloak_Wrapper() {
+
+	static s32 button_state;
+
+	static u32 playerId;
+	static CUnit* unit;
+	static u16 reqVar;
+
+	__asm {
+
+		PUSH EBP
+		MOV EBP, ESP
+
+		MOV playerId, EDX
+
+		MOV EBX, [EBP+0x08]
+		MOV unit, EBX
+
+		MOV reqVar, CX 
+
+		PUSHAD
+
+	}
+
+	button_state = hooks::BTNSCOND_CanCloak(unit,reqVar,playerId);
+
+	__asm {
+		POPAD
+		MOV EAX, button_state
+		MOV ESP, EBP
+		POP EBP
+		RETN 4
+	}
+
+}
+
+;
 
 }; //unnamed namespace
 
@@ -156,6 +232,8 @@ void injectBtnsCondHook() {
 	jmpPatch(BTNSCOND_Movement_Wrapper,		0x004283C0, 0);
 	jmpPatch(BTNSCOND_HasScarabs_Wrapper,	0x004286A0, 0);
 	jmpPatch(BTNSCOND_CanBuildUnit_Wrapper,	0x00428E60, 0);
+	jmpPatch(BTNSCOND_IsCloaked_Wrapper,	0x00429210, 1);
+	jmpPatch(BTNSCOND_CanCloak_Wrapper,		0x004292C0, 1);	
 }
 
 }
