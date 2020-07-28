@@ -289,7 +289,7 @@ void CMDRECV_Build(u8 orderId, s16 x, s16 y, u16 builtUnitId) {
 				y < mapTileSize->height &&
 				CMDRECV_PlaceBuildingAllowedHelper(builder, orderId, builtUnitId)
 			) 
-				cmdRECV_PlaceBuilding(x, y, orderId, builtUnitId);
+				cmdRECV_PlaceBuilding(x, y, orderId, builtUnitId); //will call cmdRECV_PlaceBuildingNormal or cmdRECV_PlaceBuildingAddon for main work
 
 		}
 
