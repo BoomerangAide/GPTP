@@ -207,7 +207,7 @@ struct CUnit: public CUnitLayout {
   /// Issues a new order to the unit.
   void order(u8 orderId, u16 x, u16 y, CUnit* target, u16 targetUnitId, bool stopPreviousOrders);
 
-  /// Probably add the @p order to the orders queue
+  /// Probably add the @p orderId to the orders queue
   void performAnotherOrder(u8 orderId, s16 x, s16 y, CUnit* target, u16 targetUnitId, u32 unk = NULL);
 
   /// Used by several hooks, details not completely understood.
