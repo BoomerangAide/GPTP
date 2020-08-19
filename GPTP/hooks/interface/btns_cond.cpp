@@ -63,6 +63,25 @@ s32 BTNSCOND_CanBuildUnit(CUnit* unit, u16 reqVar, u32 playerId) {
 
 }
 	
+;
+
+s32 BTNSCOND_IsCloaked(CUnit* unit, u16 reqVar, u32 playerId) {
+	
+	s32 returnValue = BUTTON_STATE::Enabled;
+	CUnit* unit_from_selection;
+
+	for(int i = 0; i < SELECTION_ARRAY_LENGTH && (returnValue == BUTTON_STATE::Enabled); i++) {
+
+		unit_from_selection = clientSelectionGroup->unit[i];
+
+		if(unit_from_selection != NULL) {
+
+			u8 techId; 
+
+			if (
+				unit->id == UnitId::TerranGhost ||
+				unit->id == UnitId::Hero_SarahKerrigan ||
+				unit->id == UnitId::Hero_AlexeiStukov ||
 				unit->id == UnitId::Hero_SamirDuran ||
 				unit->id == UnitId::Hero_InfestedDuran ||
 				unit->id == UnitId::Hero_InfestedKerrigan
