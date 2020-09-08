@@ -5,7 +5,7 @@
 
 namespace {
 
-void applyCloakingOrderHook(CUnit* unit);	//91B30
+void applyCloakingOrderHelper(CUnit* unit);	//91B30
 
 } //unnamed namespace
 
@@ -39,7 +39,7 @@ void CMDRECV_Cloak() {
 			techId = TechId::None;
 
 		if (current_unit->canUseTech(techId, *ACTIVE_NATION_ID) == 1)
-			applyCloakingOrderHook(current_unit);
+			applyCloakingOrderHelper(current_unit);
 
 		current_unit = getActivePlayerNextSelection();
 
@@ -94,7 +94,7 @@ void CMDRECV_Decloak() {
 namespace {
 
 //equivalent to 00491B30 ApplyCloakingOrder, based on old GPTP code
-void applyCloakingOrderHook(CUnit* unit) {
+void applyCloakingOrderHelper(CUnit* unit) {
 
 	if (!(unit->status & UnitStatus::RequiresDetection)) {
 
