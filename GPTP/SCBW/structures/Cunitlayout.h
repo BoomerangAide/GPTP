@@ -196,7 +196,10 @@ struct CUnitLayout {
 /*0x0D4*/         bool    isReady;
                 } silo;
 /*0x0D0*/       Box16     hatcheryHarvestValue; // wtf???
-/*0x0D0*/       Point16   powerupOrigin;
+				struct {
+/*0x0D0*/         Point16   powerupOrigin;
+/*0x0D4*/		  CUnit*	carrying_unit;
+				} powerup;
               };
             } building;
 
@@ -212,7 +215,7 @@ struct CUnitLayout {
           };
 
 /*0x0DC*/ u32       status;             // See UnitStatus::Enum for more info
-/*0x0E0*/ u8        resourceType;       // Type of resource chunk carried by this worker. 1 = vespene gas, 2 = mineral.
+/*0x0E0*/ u8        resourceType;       // Type of resource chunk carried by this worker. 1 = vespene gas, 2 = mineral, 4 = powerup (8bit flag value?)
 /*0x0E1*/ u8        wireframeRandomizer;
 /*0x0E2*/ u8        secondaryOrderState;
 /*0x0E3*/ u8        recentOrderTimer;   // Counts down from 15 to 0 when most orders are given, or when the unit moves after reaching a patrol location
