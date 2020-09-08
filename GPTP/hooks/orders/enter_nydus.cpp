@@ -4,7 +4,7 @@
 //helper functions def
 
 namespace {
-	bool orderToMoveToTarget(CUnit* unit, CUnit* target);	//0x004EB980
+	bool orderToMoveToTarget(CUnit* unit, CUnit* target);	//EB980
 } //unnamed namespace
 
 namespace hooks {
