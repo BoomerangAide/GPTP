@@ -536,6 +536,8 @@ void orders_SCVBuild(CUnit* unit) {
 			unit->sprite->position.y == unit->moveTarget.pt.y
 		)
 		{
+			
+			/*Ignored a bugged unit->status & UnitStatus::Unmovable check here*/
 
 			if (
 				!(unit->status & UnitStatus::Unmovable) &&
