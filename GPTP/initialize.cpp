@@ -15,7 +15,6 @@
 #include "hooks/harvest.h"
 #include "hooks/rally_point.h"
 #include "hooks/recharge_shields.h"
-#include "hooks/spider_mine.h"
 #include "hooks/stim_packs.h"
 #include "hooks/tech_target_check.h"
 #include "hooks/transfer_tech_upgrades.h"
@@ -72,7 +71,10 @@
 #include "hooks/orders/medic_orders.h"
 #include "hooks/orders/merge_units.h"
 #include "hooks/orders/spells/mindcontrol_spell.h"
+#include "hooks/orders/base_orders/move_orders.h"
 #include "hooks/orders/spells/nuke_orders.h"
+#include "hooks/orders/0_orders/orders_root.h"
+#include "hooks/orders/powerup.h"
 #include "hooks/orders/spells/recall_spell.h"
 #include "hooks/recv_commands/receive_command.h"
 #include "hooks/orders/repair_order.h"
@@ -82,7 +84,10 @@
 #include "hooks/right_click_CMDACT.h"
 #include "hooks/interface/select_larva.h"
 #include "hooks/interface/selection.h"
+#include "hooks/orders/shield_recharge_orders.h"
+#include "hooks/orders/shrouded_order.h"
 #include "hooks/orders/siege_transform.h"
+#include "hooks/orders/spidermine.h"
 #include "hooks/interface/status_display/stats_display_main.h"
 #include "hooks/interface/status_display/stats_panel_display.h"
 #include "hooks/interface/status_display/advanced/status_base_text.h"
@@ -191,7 +196,13 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectCMDRECV_RightClickHooks();
 	hooks::injectRightClickCMDACT_Hooks();
 	hooks::injectCMDRECV_QueuedOrderHooks();
-	hooks::injectResetCollisionHooks();	
+	hooks::injectResetCollisionHooks();
+	hooks::injectOrdersRootHooks();
+	hooks::injectShroudedOrderHook();
+	hooks::injectMoveOrdersHooks();
+	hooks::injectShieldRechargeOrdersHooks();
+	hooks::injectSpiderMineHooks();
+	hooks::injectPowerupOrderHooks();	
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
@@ -202,7 +213,6 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectHarvestResource();
 	hooks::injectRallyHooks();
 	hooks::injectRechargeShieldsHooks();
-	hooks::injectSpiderMineHooks();
 	hooks::injectStimPacksHooks();
 	hooks::injectTechTargetCheckHooks();
 	hooks::injectTransferTechAndUpgradesHooks();
