@@ -5,11 +5,11 @@
 //Helper function declarations. Do NOT modify!
 namespace {
 
-CUnit* findRandomAttackTarget(CUnit* unit);							//0x00442FC0
-Bool32 attackApplyCooldown(CUnit* unit);							//0x00478B40
-void setThingyVisibilityFlags(CThingy *thingy);						//0x004878F0
-CThingy* createThingy(u16 spriteId, s16 x, s16 y, u8 playerId = 0);	//0x00488210
-void setImageDirection(CImage *image, s8 direction);				//0x004D5F80
+CUnit* findRandomAttackTarget(CUnit* unit);							//42FC0
+Bool32 attackApplyCooldown(CUnit* unit);							//78B40
+void setThingyVisibilityFlags(CThingy *thingy);						//878F0
+CThingy* createThingy(u16 spriteId, s16 x, s16 y, u8 playerId = 0);	//88210
+void setImageDirection(CImage *image, s8 direction);				//D5F80
 
 
 } //unnamed namespace
@@ -145,6 +145,7 @@ CUnit* findRandomAttackTarget(CUnit* unit) {
 
 }
 
+;
 
 const u32 Func_attackApplyCooldown = 0x00478B40;
 Bool32 attackApplyCooldown(CUnit* unit) {
@@ -162,6 +163,8 @@ Bool32 attackApplyCooldown(CUnit* unit) {
 	return result;
 
 }
+	
+;
 
 const u32 Func_SetThingyVisibilityFlags = 0x004878F0;
 void setThingyVisibilityFlags(CThingy *thingy) {
