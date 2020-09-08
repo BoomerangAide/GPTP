@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-	void orders_Repair1(CUnit* unit);		//004673D0
+	void orders_Repair1(CUnit* unit);	//673D0
 
 	void injectRepairOrderHook();
 
