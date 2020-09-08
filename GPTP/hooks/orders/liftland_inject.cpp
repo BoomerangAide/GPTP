@@ -11,7 +11,6 @@ namespace {
 		__asm {
 			PUSH EBP
 			MOV EBP, ESP
-			SUB ESP, 0x10
 			MOV unit, EAX
 			PUSHAD
 		}
@@ -36,7 +35,6 @@ namespace {
 		__asm {
 			PUSH EBP
 			MOV EBP, ESP
-			SUB ESP, 0x08
 			MOV unit, ESI
 			PUSHAD
 		}
