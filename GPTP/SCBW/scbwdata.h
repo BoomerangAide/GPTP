@@ -301,7 +301,7 @@ SCBW_DATA(u8*,		TechUsed,           ordersDat[14].address);	//00664E00
 SCBW_DATA(u8*,		OrderIscriptAnim,	ordersDat[15].address);	//00664D40 //Animation (IscriptAnimation) according to EUDDB
 SCBW_DATA(s16*,		ButtonIcon,			ordersDat[16].address);	//00664EC0
 SCBW_DATA(u16*,		RequirementsOffset,	ordersDat[17].address);	//00665580 //based on context
-//SCBW_DATA(u8*,	???,				ordersDat[18].address);	//00665400 //"Obscured Order" according to EUDDB
+SCBW_DATA(u8*,		ObscuredOrder,		ordersDat[18].address);	//00665400
 } //orders_dat (last entry at 0x00513FA0)
 
 namespace sprites_dat {
