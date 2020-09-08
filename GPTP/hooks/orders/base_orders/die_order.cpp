@@ -5,12 +5,12 @@
 
 namespace {
 
-CThingy* createThingy(u32 spriteId, s16 x, s16 y, u32 playerId);		//0x00488210
-void clearUnitSprites(CSprite* unit_sprite, CSprite* subunit_sprite);	//0x00496F00
-void function_00497480(CSprite* thingySprite, u32 visibility_flags);	//0x00497480
-void _UnitDestructor(CUnit* unit);										//0x004A0740
-void UnitDestructor(CUnit* unit);										//0x004A0990
-void hideAndDisableUnit(CUnit* unit);									//0x004E6340
+CThingy* createThingy(u32 spriteId, s16 x, s16 y, u32 playerId);		//88210
+void clearUnitSprites(CSprite* unit_sprite, CSprite* subunit_sprite);	//96F00
+void function_00497480(CSprite* thingySprite, u32 visibility_flags);	//97480
+void _UnitDestructor(CUnit* unit);										//A0740
+void UnitDestructor(CUnit* unit);										//A0990
+void hideAndDisableUnit(CUnit* unit);									//E6340
 
 } //unnamed namespace
 
