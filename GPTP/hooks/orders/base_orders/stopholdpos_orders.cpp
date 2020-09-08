@@ -5,15 +5,17 @@
 
 namespace {
 
-CUnit* MedicHeal_TargetAcquire(CUnit* medic);															//0x004422A0
-CUnit* findBestAttackTarget(CUnit* unit);																//0x00443080
-u32 doMedicHeal(CUnit* unit, CUnit* target);															//0x00463C40
-void removeOrderFromUnitQueue(CUnit* unit, COrder* order);												//0x004742D0
-void orderImmediate(CUnit* unit, u8 order);																//0x00474B40
-void function_00476FC0(CUnit* unit, CUnit* target, u32 unk1, u32 unk2);									//0x00476FC0
-Bool32 function_004770E0(CUnit* unit);																	//0x004770E0
-u32 RandBetween(u32 min, u32 max, u32 someIndex);														//0x004DC550
-void setNextWaypoint_Sub4EB290(CUnit* unit);															//0x004EB290
+CUnit* MedicHeal_TargetAcquire(CUnit* medic);							//422A0
+CUnit* findBestAttackTarget(CUnit* unit);								//43080
+u32 doMedicHeal(CUnit* unit, CUnit* target);							//63C40
+void function_004655F0(CUnit* unit);									//655F0
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);				//742D0
+void orderImmediate(CUnit* unit, u8 order);								//74B40
+void function_00476FC0(CUnit* unit, CUnit* target, u32 unk1, u32 unk2);	//76FC0
+Bool32 function_004770E0(CUnit* unit);									//770E0
+void orders_PlayerGuard_Helper(CUnit* unit);							//774A0
+u32 RandBetween(u32 min, u32 max, u32 someIndex);						//DC550
+void setNextWaypoint_Sub4EB290(CUnit* unit);							//EB290
 
 } //unnamed namespace
 
@@ -216,6 +218,30 @@ void orders_ReaverStop(CUnit* unit) {
 
 ;
 
+//Initially unidentified function 00465910
+void orders_CarrierStop(CUnit* unit) {
+
+	//change move target destination to current position
+	setNextWaypoint_Sub4EB290(unit);
+
+	if(
+		unit->moveTarget.pt.x != unit->nextTargetWaypoint.x ||
+		unit->moveTarget.pt.y != unit->nextTargetWaypoint.y
+	) 
+	{
+		unit->nextTargetWaypoint.x = unit->moveTarget.pt.x;
+		unit->nextTargetWaypoint.y = unit->moveTarget.pt.y;
+	}
+
+	//stop and order to return to the interceptors
+	function_004655F0(unit);
+
+	unit->orderTo(OrderId::Carrier, unit->orderTarget.unit);
+
+}
+
+;
+
 void orders_Guard(CUnit* unit) {
 
 	unit->mainOrderTimer = (u8)RandBetween(0,15,29);
@@ -259,14 +285,14 @@ void orders_TurretGuard(CUnit* unit) {
 		unit->nextTargetWaypoint.y = unit->subunit->nextTargetWaypoint.y;
 	}
 
-	function_004774A0(unit);
+	orders_PlayerGuard_Helper(unit);
 
 } //void orders_TurretGuard(CUnit* unit)
 
 ;
 
-//Guard related function, may be a poorly identified official guard order
-void function_004774A0(CUnit* unit) {
+//Initially unidentified function 004774A0
+void orders_PlayerGuard(CUnit* unit) {
 
 	//if unit->autoTargetUnit != NULL, attack this target
 	//then disable the unit...I think
@@ -374,6 +400,55 @@ u32 doMedicHeal(CUnit* unit, CUnit* target) {
 
 ;
 
+//Equivalent to function @ 004655F0
+//Note: function also used by paralysing spells like
+//Maelstrom and Lockdown, take it into account if
+//using a different code in this use case.
+void function_004655F0(CUnit* unit) {
+
+	CUnit* outHangarChild = unit->carrier.outHangarChild;
+
+	while(outHangarChild != NULL) {
+
+		outHangarChild->userActionFlags |= 1;
+
+		if(outHangarChild->mainOrderId != OrderId::Die) {
+
+			bool bNotRemovableOrder = false;
+
+			while(outHangarChild->orderQueueTail != NULL && !bNotRemovableOrder) {
+
+				if(
+					!orders_dat::CanBeInterrupted[outHangarChild->orderQueueTail->orderId] &&
+					outHangarChild->orderQueueTail->orderId != OrderId::Return
+				) 
+					bNotRemovableOrder = true;
+				else
+					removeOrderFromUnitQueue(outHangarChild, outHangarChild->orderQueueTail);
+
+			}
+
+			//6565B
+			outHangarChild->performAnotherOrder(
+				OrderId::Return,
+				0,
+				0,
+				NULL,
+				UnitId::None
+			);
+
+		}
+
+		//65671
+		prepareForNextOrder(outHangarChild);
+		outHangarChild = outHangarChild->interceptor.hangar_link.prev;
+
+	}
+
+}
+
+;
+
 const u32 Func_removeOrderFromUnitQueue = 0x004742D0;
 void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 
@@ -436,6 +511,18 @@ Bool32 function_004770E0(CUnit* unit) {
 
 	return (return_value != 0);
 
+}
+
+;
+
+const u32 Func_Sub4774A0 = 0x004774A0;
+void orders_PlayerGuard_Helper(CUnit* unit) {
+	__asm {
+		PUSHAD
+		MOV EAX, unit
+		CALL Func_Sub4774A0
+		POPAD
+	}
 }
 
 ;
