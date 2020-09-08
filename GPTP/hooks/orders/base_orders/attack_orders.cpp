@@ -1,46 +1,45 @@
 #include "attack_orders.h"
 #include <SCBW/api.h>
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 //helper functions def
 
 namespace {
 
-bool unitCantSeeCloakedTarget(CUnit* unit, CUnit* target);					//01D60
-bool isInfestableUnit(CUnit* unit);											//02210
-bool unitCanInfest(CUnit* unit);											//02750
-void AI_AttackUnit(CUnit* unit);											//3FFD0
-CUnit* findBestAttackTarget(CUnit* unit);									//43080
-bool function_00462EA0(CUnit* unit, u8 unknownByteValue);					//62EA0
-void function_00465780(CUnit* unit);										//65780
-void removeOrderFromUnitQueue(CUnit* unit, COrder* order);					//742D0
-void function_00474A70(CUnit* unit, CUnit* target, u8 orderId);				//74A70
-bool isTargetWithinMinMovementRange(CUnit* unit, CUnit* target, u32 range);	//763D0
-bool function_00476610(CUnit* unit, int x, int y);							//76610
-bool isUnitInWeaponRange(CUnit* unit, CUnit* target);						//76870
-void getWeaponBeginIscript(CUnit* unit, IscriptAnimation::Enum anim);		//76ED0
-void function_00477510(CUnit* unit);										//77510
-void function_00477820(CUnit* unit, u8 orderId);							//77820
-bool function_00478370(CUnit* unit, u8 orderId);							//78370
-bool function_00478540(CUnit* unit);										//78540
-bool isUnitCritter(CUnit* unit);											//7B450
-void function_00495400(CUnit* unit, CUnit* target);							//95400
-u16 SAI_GetRegionIdFromPxEx(s32 x, s32 y);									//9C9F0
-bool isUnitVisible(CUnit* unit);											//E5DB0
-bool isTargetVisible(CUnit* unit, CUnit* target);							//E5E30
-u8 getRightClickActionOrder(CUnit* unit);									//E5EA0
-void setNextWaypoint_Sub4EB290(CUnit* unit);								//EB290
-void makeToHoldPosition(CUnit* unit);										//EB5B0
-bool moveToTarget(CUnit* unit, CUnit* target);								//EB720
-bool SetMoveTarget_xy(CUnit* unit, int x, int y);							//EB820
-bool function_004EB900(CUnit* unit, CUnit* target);							//EB900
-bool function_004EB9C0(CUnit* unit, int x, int y);							//EB9C0
+bool isDistanceGreaterThanHaltDistance(CUnit* unit, int x, int y, u32 distance);	//01240
+bool unitCantSeeCloakedTarget(CUnit* unit, CUnit* target);							//01D60
+bool isInfestableUnit(CUnit* unit);													//02210
+bool unitCanInfest(CUnit* unit);													//02750
+void AI_AttackUnit(CUnit* unit);													//3FFD0
+CUnit* findBestAttackTarget(CUnit* unit);											//43080
+bool function_00462EA0(CUnit* unit, u8 unknownByteValue);							//62EA0
+void function_00465780(CUnit* unit);												//65780
+bool function_00465810(CUnit* unit);												//65810
+bool function_00465A60(CUnit* unit, int range1, int range2);						//65A60
+void function_0046D30(CUnit* unit, u16 x, u16 y, u8 unk);							//65D30
+CUnit* launchInterceptorScarab(CUnit* unit);										//66440
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);							//742D0
+void function_00474A70(CUnit* unit, CUnit* target, u8 orderId);						//74A70
+bool isTargetWithinMinMovementRange(CUnit* unit, CUnit* target, u32 range);			//763D0
+bool function_00476610(CUnit* unit, int x, int y);									//76610
+bool isUnitInWeaponRange(CUnit* unit, CUnit* target);								//76870
+void getWeaponBeginIscript(CUnit* unit, IscriptAnimation::Enum anim);				//76ED0
+void function_00477510(CUnit* unit);												//77510
+void function_00477820(CUnit* unit, u8 orderId);									//77820
+bool function_00478370(CUnit* unit, u8 orderId);									//78370
+bool function_00478540(CUnit* unit);												//78540
+Bool32 attackApplyCooldown(CUnit* unit);											//78B40
+bool isUnitCritter(CUnit* unit);													//7B450
+void function_00495400(CUnit* unit, CUnit* target);									//95400
+u16 SAI_GetRegionIdFromPxEx(s32 x, s32 y);											//9C9F0
+bool isUnitVisible(CUnit* unit);													//E5DB0
+bool isTargetVisible(CUnit* unit, CUnit* target);									//E5E30
+u8 getRightClickActionOrder(CUnit* unit);											//E5EA0
+void setNextWaypoint_Sub4EB290(CUnit* unit);										//EB290
+void makeToHoldPosition(CUnit* unit);												//EB5B0
+bool moveToTarget(CUnit* unit, CUnit* target);										//EB720
+bool SetMoveTarget_xy(CUnit* unit, int x, int y);									//EB820
+bool function_004EB900(CUnit* unit, CUnit* target);									//EB900
+bool function_004EB9C0(CUnit* unit, int x, int y);									//EB9C0
 
 } //unnamed namespace
 
@@ -172,6 +171,288 @@ void orders_CarrierAttack1(CUnit* unit) {
 	}
 
 } //void orders_CarrierAttack1(CUnit* unit)
+
+;
+
+//Attack order of Reavers Scarabs
+void orders_StrafeUnit2(CUnit* unit) {
+	
+	if (unit->mainOrderState <= 6) {
+
+		if (unit->mainOrderState == 0) {
+
+			if (unit->removeTimer == 0 || unit->removeTimer > 90)
+				unit->removeTimer = 90;
+
+			unit->status |= UnitStatus::NoCollide;
+			unit->mainOrderTimer = 7;
+
+			if (unit->orderTarget.unit != NULL) {
+				moveToTarget(unit, unit->orderTarget.unit);
+				unit->mainOrderState = 2;
+			}
+			else
+			if(function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y))
+				unit->mainOrderState = 2;
+
+		}
+		else
+		if (unit->mainOrderState == 2) {
+
+			if (unit->mainOrderTimer == 0) {
+				unit->status &= ~UnitStatus::NoCollide; //unset flag if set
+				unit->mainOrderState = 3;
+			}
+
+		}
+
+		if (unit->mainOrderState == 2 || unit->mainOrderState == 3) {
+
+			CUnit* target = unit->orderTarget.unit;
+			bool bNotEndThere;
+
+			if (target != NULL) {
+
+				if (
+					unit->isTargetWithinMinRange(target, 256) &&
+					target->movementFlags & MovementFlags::Accelerating
+				)
+					function_00495400(unit, target);
+				else
+					function_004EB900(unit, target);
+
+				bNotEndThere = unit->isTargetWithinMinRange(target, weapons_dat::InnerSplashRadius[units_dat::GroundWeapon[unit->id]]);
+
+			}
+			else
+				bNotEndThere = (unit->getMovableState() != 0); //unit has reached destination
+
+			if (bNotEndThere) {
+
+				CImage* current_image;
+
+				unit->orderTarget.pt.x = unit->sprite->position.x;
+				unit->orderTarget.pt.y = unit->sprite->position.y;
+
+				current_image = unit->sprite->images.head;
+
+				while (current_image != NULL) {
+					current_image->playIscriptAnim(IscriptAnimation::SpecialState1);
+					current_image = current_image->link.next;
+				}
+
+				unit->mainOrderState = 6;
+
+			}
+
+		}
+		else
+		if (unit->mainOrderState == 6) {
+
+			if (unit->orderSignal & 1) {
+				unit->status |= UnitStatus::IsSelfDestructing;
+				unit->remove();
+			}
+
+		}
+
+	}
+
+}
+
+;
+
+//Attack order of Carriers Interceptors
+void orders_StrafeUnit(CUnit* unit) {
+
+	if (
+		unit->interceptor.parent != NULL &&
+		unit->shields < (units_dat::MaxShieldPoints[UnitId::ProtossInterceptor] * 256) / 4
+	)
+		unit->orderComputerCL(OrderId::Return);
+	else
+	//function can cause interceptor to return instead for various reasons
+	//and thus not execute following code if returning false
+	if (function_00465810(unit) && unit->mainOrderState <= 5) {
+
+		//Because of unit->remove() not taking the risk to access mainOrderState in some conditions
+		bool bEndThere = false;
+
+		if (unit->mainOrderState == 0) {
+
+			if (unit->interceptor.parent == NULL)
+				unit->remove();
+			else
+			{
+				scbw::playSound(SoundId::Protoss_TEMPLAR_PTeSum00_WAV_1, unit); //sound name seems wrong, but underlying value is correct for interceptor launch sound
+				function_0046D30(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y, 3);
+				unit->mainOrderTimer = 15;
+				unit->mainOrderState = 1;
+			}
+
+			//note: cannot continue into mainOrderState 1 because mainOrderTimer
+			//would not be 0 and mainOrderState 1 would end instantly
+			bEndThere = true;
+
+		}
+		else
+		if (unit->mainOrderState == 1) {
+
+			if (unit->mainOrderTimer == 0) {
+				unit->sprite->elevationLevel += 2;
+				unit->mainOrderState = 3;
+			}
+			else
+				bEndThere = true;
+
+		}
+
+		if (!bEndThere) {
+			if (unit->mainOrderState == 3) {
+
+				CUnit* target = unit->orderTarget.unit;
+
+				if (target != NULL) {
+
+					if (isTargetVisible(unit, target)) {
+
+						CUnit* current_unit;
+						u8 weaponId;
+
+						if (unit->subunit != NULL && units_dat::BaseProperty[unit->subunit->id] & UnitProperty::Subunit)
+							current_unit = unit->subunit;
+						else
+							current_unit = unit;
+
+						if (target->status & UnitStatus::InAir)
+							weaponId = units_dat::AirWeapon[current_unit->id];
+						else
+						if (current_unit->id == UnitId::ZergLurker && !(current_unit->status & UnitStatus::Burrowed))
+							weaponId = WeaponId::None;
+						else
+							weaponId = units_dat::GroundWeapon[current_unit->id];
+
+						if (weaponId < WeaponId::None) {
+
+							u32 minRange = weapons_dat::MinRange[weaponId];
+
+							if (minRange == 0 || current_unit->isTargetWithinMinRange(target, minRange)) {
+
+								if (unit->isTargetWithinMinRange(target, unit->getMaxWeaponRange(weaponId)))
+									getWeaponBeginIscript(unit, IscriptAnimation::GndAttkRpt);
+
+							}
+
+						}
+
+					}
+
+				}
+				else
+					getWeaponBeginIscript(unit, IscriptAnimation::GndAttkRpt);
+
+				if (isTargetWithinMinMovementRange(unit, NULL, 50)) {
+					function_0046D30(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y, 1);
+					unit->mainOrderState = 4;
+				}
+				else
+					function_004EB9C0(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y);
+
+
+			}
+			else
+			if (unit->mainOrderState == 4) {
+				if (isDistanceGreaterThanHaltDistance(unit, unit->moveTarget.pt.x, unit->moveTarget.pt.y, 50)) {
+					function_0046D30(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y, 2);
+					unit->mainOrderState = 5;
+				}
+			}
+			else
+			if (unit->mainOrderState == 5) {
+				if (isDistanceGreaterThanHaltDistance(unit, unit->moveTarget.pt.x, unit->moveTarget.pt.y, 50)) {
+					if(function_004EB9C0(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y))
+						unit->mainOrderState = 3;
+				}
+			}
+
+		}
+
+	}
+	
+}
+
+;
+
+//Used when unit->mainOrderId is 
+//OrderId::Reaver, OrderId::ReaverFight or OrderId::ReaverHold
+void orders_Reaver(CUnit* unit) {
+	
+	int seekRange = unit->getSeekRange() * 32;
+
+	if (function_00465A60(unit, seekRange * 2, seekRange)) {
+		
+		if (
+			unit->nextTargetWaypoint.x != unit->orderTarget.pt.x ||
+			unit->nextTargetWaypoint.y != unit->orderTarget.pt.y
+		)
+		{
+			unit->nextTargetWaypoint.x = unit->orderTarget.pt.x;
+			unit->nextTargetWaypoint.y = unit->orderTarget.pt.y;
+		}
+
+		int angle = scbw::getAngle(
+			unit->sprite->position.x,
+			unit->sprite->position.y,
+			unit->nextTargetWaypoint.x,
+			unit->nextTargetWaypoint.y
+		);
+
+		if (unit->currentDirection1 - angle > 1)
+			unit->orderQueueTimer = 0;
+		else
+		if(!(unit->status & UnitStatus::CanNotAttack) && unit->carrier.outHangarChild == NULL)
+		{
+
+			CUnit* sentUnit = launchInterceptorScarab(unit);
+
+			if (sentUnit != NULL) {
+				sentUnit->orderTo(units_dat::AttackUnitOrder[UnitId::ProtossScarab], unit->orderTarget.unit);
+				sentUnit->interceptor.parent = unit;
+				unit->mainOrderTimer = 60;
+			}
+
+		}
+
+	}
+	else
+	if(unit->pAI != NULL && unit->mainOrderTimer == 0)
+		unit->orderComputerCL(OrderId::ComputerAI);
+
+}
+
+;
+
+//Used when unit->mainOrderId is 
+//OrderId::Carrier, OrderId::CarrierFight or OrderId::HoldPosition1
+void orders_Carrier(CUnit* unit) {
+
+	if (function_00465A60(unit, 0, unit->getSeekRange() * 32)) {
+
+		CUnit* sentUnit = launchInterceptorScarab(unit);
+
+		if (sentUnit != NULL) {
+			sentUnit->shields = units_dat::MaxShieldPoints[sentUnit->id] * 256;
+			sentUnit->sprite->elevationLevel = unit->sprite->elevationLevel - 1;
+			sentUnit->orderTo(units_dat::AttackUnitOrder[UnitId::ProtossInterceptor], unit->orderTarget.unit);
+			unit->mainOrderTimer = 7;
+		}
+
+	}
+	else
+	if(unit->pAI != NULL && unit->mainOrderTimer == 0)
+		unit->orderComputerCL(OrderId::ComputerAI);
+
+}
 
 ;
 
@@ -339,7 +620,7 @@ void orders_TurretAttack(CUnit* unit) {
 				if(
 					unit->id != UnitId::TerranSiegeTankTankModeTurret ||
 					current_subunit->pAI == NULL ||
-					(current_subunit->canUseTech(TechId::TankSiegeMode,unit->playerId) != TRUE) ||
+					(current_subunit->canUseTech(TechId::TankSiegeMode,unit->playerId) != 1) ||
 					!isUnitVisible(unit)
 				)
 					jump_to_77BD7 = true;
@@ -490,7 +771,6 @@ void orders_TurretAttack(CUnit* unit) {
 	} while(bJumpToEarlierCode);
 
 } //void orders_TurretAttack(CUnit* unit)
-
 
 ;
 
@@ -796,12 +1076,7 @@ void orders_SapLocation(CUnit* unit) {
 
 			}
 
-/*The original code set EAX to 0 or 1 depending on Unmovable status,
-  then add 1 to this value, thus equality to 0 is always impossible.
-  Kept an equivalent code in comment for bugchecking
-			if((unit->status & UnitStatus::Unmovable) + 1) == false
-				bStopThere = true;	
-*/
+			/*Ignored a bugged unit->status & UnitStatus::Unmovable check here*/
 
 			if(!bStopThere) { //78AF3
 
@@ -917,7 +1192,7 @@ void orders_AttackMove(CUnit* unit) {
 		if(
 			unit->moveTarget.pt.x != unit->sprite->position.x ||
 			unit->moveTarget.pt.y != unit->sprite->position.y
-			/*|| (unit->status & UnitStatus::Unmovable) + 1 == 0)*/ //impossible code yet in original
+			/*Ignored a bugged unit->status & UnitStatus::Unmovable check here*/
 		)
 		//Logically, this function would check one last time if a target is in range,
 		//and attack it if that's the case, else AttackMove end here
@@ -928,6 +1203,46 @@ void orders_AttackMove(CUnit* unit) {
 	}
 
 } //void orders_AttackMove(CUnit* unit)
+
+;
+
+//Was unreferenced function @ 00479150
+//Used by defense structures
+void orders_TowerAttack(CUnit* unit) {
+
+	if (
+		unit->status & UnitStatus::DoodadStatesThing ||
+		unit->lockdownTimer != 0 ||
+		unit->stasisTimer != 0 ||
+		unit->maelstromTimer != 0 ||
+		attackApplyCooldown(unit) == 0 //try to perform attack here, return 0 if failed
+	)
+	{
+		
+		if (unit->orderQueueHead != NULL) {
+			unit->userActionFlags |= 1;
+			prepareForNextOrder(unit);
+		}
+		else
+		if(unit->pAI != NULL)
+			unit->orderComputerCL(OrderId::ComputerAI);
+		else
+			unit->orderComputerCL(units_dat::ReturnToIdleOrder[unit->id]);
+
+	}
+	else
+	{
+
+		SetMoveTarget_xy(unit, unit->sprite->position.x, unit->sprite->position.y);
+
+		if ((unit->orderTarget.pt.x != unit->nextTargetWaypoint.x) || (unit->orderTarget.pt.y != unit->nextTargetWaypoint.y)) {
+			unit->nextTargetWaypoint.x = unit->orderTarget.pt.x;
+			unit->nextTargetWaypoint.y = unit->orderTarget.pt.y;
+		}
+
+	}
+
+}
 
 ;
 
@@ -973,6 +1288,28 @@ void orders_AttackUnit(CUnit* unit) {
 //-------- Helper function definitions. Do NOT modify! --------//
 
 namespace {
+
+const u32 Func_isDistanceGreaterThanHaltDistance = 0x00401240;
+bool isDistanceGreaterThanHaltDistance(CUnit* unit, int x, int y, u32 distance) {
+
+	static Bool32 bPreResult;
+
+	__asm {
+		PUSHAD
+		PUSH x
+		PUSH distance
+		MOV EAX, y
+		MOV ECX, unit
+		CALL Func_isDistanceGreaterThanHaltDistance
+		MOV bPreResult, EAX
+		POPAD
+	}
+
+	return (bPreResult != 0);
+
+}
+
+;
 
 const u32 Func_unitCantSeeCloakedTarget = 0x00401D60;
 bool unitCantSeeCloakedTarget(CUnit* unit, CUnit* target) {
@@ -1103,6 +1440,176 @@ void function_00465780(CUnit* unit) {
 
 ;
 
+const u32 Func_Sub465810 = 0x00465810;
+bool function_00465810(CUnit* unit) {
+
+	static Bool32 bPreResult;
+
+	__asm {
+		PUSHAD
+		MOV EAX, unit
+		CALL Func_Sub465810
+		MOV bPreResult, EAX
+		POPAD
+	}
+
+	return (bPreResult != 0);
+
+}
+
+;
+
+const u32 Func_Sub465A60 = 0x00465A60;
+bool function_00465A60(CUnit* unit, int range1, int range2) {
+
+	static Bool32 bPreResult;
+
+	__asm {
+		PUSHAD
+		PUSH range1
+		PUSH range2
+		MOV EAX, unit
+		CALL Func_Sub465A60
+		MOV bPreResult, EAX
+		POPAD
+	}
+
+	return (bPreResult != 0);
+
+}
+
+;
+
+const u32 Func_Sub465D30 = 0x00465D30;
+//"unk" seems to be used by random number generators
+void function_0046D30(CUnit* unit, u16 x, u16 y, u8 unk) {
+
+	static Point16 pos;
+	pos.x = x; pos.y = y;
+
+	__asm {
+		PUSHAD
+		PUSH pos
+		MOV CL, unk
+		MOV EAX, unit
+		CALL Func_Sub465D30
+		POPAD
+	}
+
+}
+
+//Only used here, and making a modified copy could be useful,so hardcoded.
+//Not using helpers, a copy should not reproduce that bad coding behavior.
+//Function @ 00466440
+CUnit* launchInterceptorScarab(CUnit* unit) {
+
+	CUnit* launched_unit = unit->carrier.inHangarChild;
+
+	while (launched_unit != NULL && !(launched_unit->status & UnitStatus::Completed))
+		launched_unit = launched_unit->interceptor.hangar_link.prev;
+
+	if (launched_unit != NULL) {
+
+		CUnit* temp_unit = launched_unit->interceptor.hangar_link.prev;
+
+		while (temp_unit != NULL) {
+
+			if (
+				(temp_unit->status & UnitStatus::Completed) &&
+				(temp_unit->hitPoints > launched_unit->hitPoints)
+			)
+				launched_unit = temp_unit;
+
+			temp_unit = temp_unit->interceptor.hangar_link.prev;
+
+		}
+
+		if (launched_unit->id == UnitId::ProtossInterceptor) {
+
+			int maxHp = units_dat::MaxHitPoints[UnitId::ProtossInterceptor];
+
+			if (maxHp < 0)
+				maxHp += 1;
+
+			if (launched_unit->hitPoints < maxHp / 2)
+				launched_unit = NULL;
+
+		}
+
+		if (launched_unit != NULL) {
+
+			const u32 Func_InitUnitTrapDoodad = 0x004E6490; //move to helpers if making a modified copy
+			int x, y;
+
+			if (launched_unit->id == UnitId::ProtossScarab) {
+
+				const u32 Func_turnGraphic = 0x00495F20;	//move to helpers if making a modified copy
+				u8 direction = unit->currentDirection1;
+
+				x = unit->sprite->position.x + angleDistance[direction].x * 25 / 256;
+				y = unit->sprite->position.y + angleDistance[direction].y * 25 / 256;
+
+				//void turnGraphic(CUnit* unit, u8 direction) @ 00495F20
+				__asm {
+					PUSHAD
+					MOV EAX, launched_unit
+					MOV BL, direction
+					CALL Func_turnGraphic
+					POPAD
+				}
+
+			}
+			else
+			{
+				x = unit->sprite->position.x;
+				y = unit->sprite->position.y;
+			}
+
+			scbw::refreshConsole();
+
+			if (unit->carrier.inHangarChild == launched_unit)
+				unit->carrier.inHangarChild = launched_unit->interceptor.hangar_link.prev;
+
+			if (launched_unit->interceptor.hangar_link.prev != NULL)
+				(launched_unit->interceptor.hangar_link.prev)->interceptor.hangar_link.next = launched_unit->interceptor.hangar_link.next;
+
+			if (launched_unit->interceptor.hangar_link.next != NULL)
+				(launched_unit->interceptor.hangar_link.next)->interceptor.hangar_link.prev = launched_unit->interceptor.hangar_link.prev;
+
+			unit->carrier.inHangarCount--;
+
+			launched_unit->interceptor.hangar_link.prev = unit->carrier.outHangarChild;
+			launched_unit->interceptor.hangar_link.next = NULL;
+
+			if (unit->carrier.outHangarChild != NULL)
+				(unit->carrier.outHangarChild)->interceptor.hangar_link.next = launched_unit;
+
+			unit->carrier.outHangarChild = launched_unit;
+
+			unit->carrier.outHangarCount++;
+
+			scbw::setUnitPosition(launched_unit, x, y);
+
+			//void showAndEnableUnit(CUnit* unit) @ 004E6490
+			__asm {
+				PUSHAD
+				MOV EDI, launched_unit
+				CALL Func_InitUnitTrapDoodad
+				POPAD
+			}
+
+			launched_unit->interceptor.isOutsideHangar = true;
+
+		}
+
+	}
+
+	return launched_unit;
+
+}
+
+;
+
 const u32 Func_removeOrderFromUnitQueue = 0x004742D0;
 void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 
@@ -1135,7 +1642,7 @@ void function_00474A70(CUnit* unit, CUnit* target, u8 orderId) {
 ;
 
 const u32 Func_isTargetWithinMinMovementRange = 0x004763D0;
-bool isTargetWithinMinMovementRange(CUnit* unit, CUnit* target, u32 range) {										// EDI = unit or subunit,ECX = MaxWpnRange,EAX = target
+bool isTargetWithinMinMovementRange(CUnit* unit, CUnit* target, u32 range) {
 
 	static Bool32 bPreResult;
 
@@ -1304,6 +1811,25 @@ bool isUnitCritter(CUnit* unit) {
 		bReturnValue = false;
 
 	return bReturnValue;
+
+}
+
+;
+
+const u32 Func_attackApplyCooldown = 0x00478B40;
+Bool32 attackApplyCooldown(CUnit* unit) {
+
+	static u32 result;
+
+	__asm {
+		PUSHAD
+		MOV EAX, unit
+		CALL Func_attackApplyCooldown
+		MOV result, EAX
+		POPAD
+	}
+
+	return result;
 
 }
 
