@@ -5,14 +5,14 @@
 
 namespace {
 
-u32 getUpgradedWpnCooldown(CUnit* unit, u8 weaponId);													//0x00475DC0
-bool function_00476640(CUnit* unit, u32 weaponId);														//0x00476640
-void setUnitStatTxtErrorMsg(char* message);																//0x0048CCB0
-u32 get_statTxt_Str_0(CUnit* unit, u32 playerId, char* message);										//0x0048EF30
-bool canCastSpell_0(CUnit* unit);																		//0x00492140
-u32 function_00492620(CUnit* unit, Bool32 wasMainOrderStateZero);										//0x00492620
-u32 RandomizeShort(u32 unknown_index);																	//0x004DC4A0
-void setNextWaypoint_Sub4EB290(CUnit* unit);															//0x004EB290
+u32 getUpgradedWpnCooldown(CUnit* unit, u8 weaponId);				//75DC0
+bool function_00476640(CUnit* unit, u32 weaponId);					//76640
+void setUnitStatTxtErrorMsg(char* message);							//8CCB0
+u32 get_statTxt_Str_0(CUnit* unit, u32 playerId, char* message);	//8EF30
+bool canCastSpell_0(CUnit* unit);									//92140
+u32 function_00492620(CUnit* unit, Bool32 wasMainOrderStateZero);	//92620
+u32 RandomizeShort(u32 unknown_index);								//DC4A0
+void setNextWaypoint_Sub4EB290(CUnit* unit);						//EB290
 
 } //unnamed namespace
 
