@@ -1,5 +1,4 @@
 #include "cloak_tech.h"
-#include "../SCBW/scbwdata.h"
 #include "../SCBW/api.h"
 #include "../hook_tools.h"
 
