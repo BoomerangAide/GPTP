@@ -511,7 +511,6 @@ void showAndEnableUnit(CUnit* unit) {
 
 }
 
-
 ;
 
 //not related with assigning orders, but only with
