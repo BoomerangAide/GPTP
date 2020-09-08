@@ -94,7 +94,7 @@ void transferResourceToWorkerHook(CUnit* worker, CUnit* resource) {
 
 				if (worker->resourceType & 3) { //Is carrying a mineral / gas
 
-					//Identical to function @ 0x004F3900
+					//Equivalent to function @ 0x004F3900
 					//Remove powerup shadows (mineral chunk shadow, psi emitter shadow, etc.)
 					worker->sprite->removeOverlay(ImageId::MineralChunkShadow, ImageId::PsiEmitterShadow_Carried);
 
@@ -103,6 +103,9 @@ void transferResourceToWorkerHook(CUnit* worker, CUnit* resource) {
 
 					//Remove Uraj / Khalis
 					worker->sprite->removeOverlay(ImageId::Uraj, ImageId::Khalis);
+
+					//End of function @ 0x004F3900 equivalent, return value is overwritten					
+					
 					worker->resourceType = 0;
 
 				}
