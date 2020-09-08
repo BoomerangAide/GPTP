@@ -1,3 +1,23 @@
+Version 5.920:
+
+- minor fix in liftland_inject.cpp (removal of sub esp)
+- hooks\orders\0_orders\orders_root hooks added
+- ObscuredOrder enabled for orders_dat
+- added hooks\orders\shrouded_order
+- added TowerAttack, orders_Carrier, orders_Reaver, orders_StrafeUnit and orders_StrafeUnit2 to hooks\orders\base_orders\attack_orders
+- added code for launch of a single interceptor/scarab in hooks\orders\base_orders\attack_orders helpers
+- added orders_CarrierStop to hooks\orders\base_orders\stopholdpos_orders
+- hooks\orders\move_orders hooks added
+- added an entry in CUnitLayout for powerup, may be incomplete, but is enough for now
+- hooks\orders\powerup hooks added
+- Moved hooks\spider_mine.cpp to hooks\orders\spidermine hook, fixed and modified things
+- hook\orders\orders_RechargeShields hooks added
+- Moved orderRechargeShieldsHook from hook\recharge_shields to hook\orders\orders_RechargeShields
+- Fixed a bug where Shield Battery only worked at melee range instead of normal range
+- minor fixes and changes
+
+-----------
+
 Version 5.910:
 
 - Moved old BTNSCOND hooks from hooks\cloak_tech* to hooks\interface\btns_cond*
