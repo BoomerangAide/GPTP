@@ -5,14 +5,14 @@
 
 namespace {
 
-	u8 function_00414680(u32 unitId, int x, int y);								//0x00414680
-	void AI_TrainingOverlord(CUnit* main_building, CUnit* larva);				//0x00435770
-	void updateUnitStrength(CUnit* unit);										//0x0049FA40
-	void function_004A01F0(CUnit* unit);										//0x004A01F0
-	CUnit* CreateUnit(u32 unitId, int x, int y, u32 playerId);					//0x004A09D0
-	u32 IterateUnitsAtLocationTargetProc_LarvaCount(CUnit* unit, Box16* coords);//0x004E8280
-	void function_004E8DA0(CUnit* unit);										//0x004E8DA0
-	bool function_004E8E10(CUnit* unit, Point32* coords);						//0x004E8E10
+	u8 function_00414680(u32 unitId, int x, int y);								//14680
+	void AI_TrainingOverlord(CUnit* main_building, CUnit* larva);				//35770
+	void updateUnitStrength(CUnit* unit);										//9FA40
+	void function_004A01F0(CUnit* unit);										//A01F0
+	CUnit* CreateUnit(u32 unitId, int x, int y, u32 playerId);					//A09D0
+	u32 IterateUnitsAtLocationTargetProc_LarvaCount(CUnit* unit, Box16* coords);//E8280
+	void function_004E8DA0(CUnit* unit);										//E8DA0
+	bool function_004E8E10(CUnit* unit, Point32* coords);						//E8E10
 
 } //unnamed namespace
 
