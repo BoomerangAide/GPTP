@@ -108,6 +108,46 @@ void __declspec(naked) function_004774A0_Wrapper() {
 }
 
 ;
+	
+void __declspec(naked) orders_HoldPosition2Wrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_HoldPosition2(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
+
+void __declspec(naked) makeToHoldPositionWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, ESI
+		PUSHAD
+	}
+
+	hooks::makeToHoldPosition(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
 
 }//unnamed namespace
 
@@ -119,6 +159,8 @@ void injectStopHoldPosOrdersHooks() {
 	jmpPatch(orders_CarrierStopWrapper,			0x00465910, 3);
 	jmpPatch(orders_GuardWrapper,				0x00475B90, 2);
 	jmpPatch(function_004774A0_Wrapper,			0x004774A0, 3);
+	jmpPatch(orders_HoldPosition2Wrapper,		0x00478D10, 1);
+	jmpPatch(makeToHoldPositionWrapper,			0x004EB5B0, 2);	
 }
 
 } //hooks
