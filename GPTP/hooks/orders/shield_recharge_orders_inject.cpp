@@ -2,6 +2,30 @@
 #include <hook_tools.h>
 
 namespace {
+	
+void __declspec(naked) Orders_Harvest5Wrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV unit, EDI
+		PUSHAD
+	}
+
+	hooks::function_00493920(unit);
+
+	__asm {
+		POPAD
+		MOV ESP, EBP
+		POP EBP
+		RETN
+	}
+
+}
+
+;
 
 void __declspec(naked) orders_RechargeShields2Wrapper() {
 
@@ -52,6 +76,7 @@ void __declspec(naked) orders_RechargeShields1Wrapper() {
 namespace hooks {
 
 void injectShieldRechargeOrdersHooks() {
+	jmpPatch(Orders_Harvest5Wrapper,			0x00493920, 1);
 	jmpPatch(orders_RechargeShields2Wrapper,	0x00493990, 1);
 	jmpPatch(orders_RechargeShields1Wrapper,	0x00493DD0, 1);
 }
