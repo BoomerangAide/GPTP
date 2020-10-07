@@ -12,7 +12,7 @@ bool checkForCloseUnit_sub464290(CUnit* unit);						//64290
 void playSubunitIscript(CUnit* unit, IscriptAnimation::Enum anim);	//74380
 void actUnitReturnToIdle(CUnit* unit);								//75420
 void replaceUnitWithType(CUnit* unit, u16 newUnitId);				//9FED0
-void makeToHoldPosition(CUnit* unit);								//EB5B0
+void makeToHoldPosition_Helper(CUnit* unit);						//EB5B0
 
 } //unnamed namespace
 
@@ -99,7 +99,7 @@ namespace hooks {
 			if(unit->id == UnitId::TerranSiegeTankTankMode || unit->id == UnitId::Hero_EdmundDukeTankMode) {
 
 				if(unit->movementFlags & MovementFlags::Accelerating)
-					makeToHoldPosition(unit);
+					makeToHoldPosition_Helper(unit);
 
 				unit->mainOrderState = 1;
 
@@ -200,7 +200,7 @@ namespace hooks {
 namespace {
 
 const u32 Func_UnitSetRetreatPoint = 0x004011A0;
-//angleValue is a guess
+//angleValue is a name guess
 void unitSetRetreatPoint(CUnit* unit, u8 angleValue) {
 
 	__asm {
@@ -318,7 +318,8 @@ void replaceUnitWithType(CUnit* unit, u16 newUnitId) {
 }
 
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 
 	__asm {
 		PUSHAD
