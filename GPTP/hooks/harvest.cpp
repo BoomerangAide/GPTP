@@ -11,7 +11,7 @@ namespace hooks {
 
 const int RESOURCE_HARVESTED = 8;
 
-//Harvests minerals/gas from the @p resource and returns the amount that a
+//Harvests minerals/gas from the resource and returns the amount that a
 //worker should carry.
 //Identical to sub_469650
 u8 harvestResourceFrom(CUnit* resource, bool isMineral) {
