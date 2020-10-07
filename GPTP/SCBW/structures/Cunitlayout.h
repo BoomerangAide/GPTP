@@ -46,6 +46,18 @@ enum Enum
 };
 }
 
+namespace ResourceCarried
+{
+enum Enum
+{
+	None = 0x00,
+	Vespene = 0x01,
+	Minerals = 0x02,
+	GasOrMineral = 0x03,
+	PowerUp = 0x04
+};
+}
+
 //Layout of the CUnit structure
 //Comments marked with ++ added by RavenWolf
 struct CUnitLayout {
@@ -215,7 +227,7 @@ struct CUnitLayout {
           };
 
 /*0x0DC*/ u32       status;             // See UnitStatus::Enum for more info
-/*0x0E0*/ u8        resourceType;       // Type of resource chunk carried by this worker. 1 = vespene gas, 2 = mineral, 4 = powerup (8bit flag value?)
+/*0x0E0*/ u8        resourceType;       // Type of resource chunk carried by this worker. (see ResourceCarried::Enum)
 /*0x0E1*/ u8        wireframeRandomizer;
 /*0x0E2*/ u8        secondaryOrderState;
 /*0x0E3*/ u8        recentOrderTimer;   // Counts down from 15 to 0 when most orders are given, or when the unit moves after reaching a patrol location
