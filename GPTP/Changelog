@@ -1,3 +1,17 @@
+Version 5.930:
+
+- hooks\orders\interceptor_return_order hook added
+- hooks\orders\larva_order hook added
+- hooks\orders\harvest_orders hooks added
+- hooks\orders\burrow_orders hooks added
+- function_00493920 added in hooks\orders\shield_recharge_orders (recharge stopped on the ordered unit)
+- added orders_InitCreepGrowth, orders_StopCreepGrowth to hooks\orders\larva_creep_spawn
+- added orders_HoldPosition2 to hooks\orders\base_orders\stopholdpos_orders
+- added the list of OrderId that use orders_Spell() from hooks\orders\spells\cast_order
+- minor fixes and changes
+
+-----------
+
 Version 5.920:
 
 - minor fix in liftland_inject.cpp (removal of sub esp)
