@@ -41,6 +41,7 @@
 #include "hooks/interface/buttonsets.h"
 #include "hooks/orders/building_making/building_protoss.h"
 #include "hooks/orders/building_making/building_terran.h"
+#include "hooks/orders/burrow_orders.h"
 #include "hooks/recv_commands/burrow_tech.h"
 #include "hooks/orders/spells/cast_order.h"
 #include "hooks/recv_commands/CMDRECV_Build.h"
@@ -62,8 +63,11 @@
 #include "hooks/orders/spells/feedback_spell.h"
 #include "hooks/give_unit.h"
 #include "hooks/orders/spells/hallucination_spell.h"
+#include "hooks/orders/harvest_orders.h"
 #include "hooks/orders/infestation.h"
+#include "hooks/orders/interceptor_return_order.h"
 #include "hooks/orders/larva_creep_spawn.h"
+#include "hooks/orders/larva_order.h"
 #include "hooks/orders/liftland.h"
 #include "hooks/orders/load_unload_orders.h"
 #include "hooks/load_unload_proc.h"
@@ -202,7 +206,11 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectMoveOrdersHooks();
 	hooks::injectShieldRechargeOrdersHooks();
 	hooks::injectSpiderMineHooks();
-	hooks::injectPowerupOrderHooks();	
+	hooks::injectPowerupOrderHooks();
+	hooks::injectInterceptorReturnOrderHook();
+	hooks::injectLarvaOrderHook();
+	hooks::injectHarvestOrdersHooks();
+	hooks::injectBurrowOrdersHooks();
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
