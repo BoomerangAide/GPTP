@@ -295,10 +295,10 @@ bool CUnit::isValidCaster() const {
 		&& !(this->status & UnitStatus::IsHallucination);
 }
 
-//Identical to function @ 0x00401DC0
+//Identical to function getUnitMovableState at 0x00401DC0
 //Returns:	0 - Unit has not reached destination
-//					1 - Unit has reached destination
-//					2 - Unit cannot move
+//			1 - Unit has reached destination
+//			2 - Unit cannot move
 u32 CUnit::getMovableState() {
 	if (this->moveTarget.pt != this->sprite->position)
 		return 0;
@@ -642,7 +642,6 @@ void CUnit::performAnotherOrder(u8 orderId, s16 x, s16 y, CUnit* target, u16 tar
 
 //Identical to @ 0x004743D0
 void CUnit::setSecondaryOrder(u8 orderId) {
-	assert(this);
 	if (this->secondaryOrderId == orderId)
 		return;
 	this->secondaryOrderId = orderId;
