@@ -6,11 +6,12 @@
 namespace {
 
 void insertFirstOrder(CUnit* unit, u8 orderId);										//749D0
+void actUnitReturnToIdle(CUnit* unit);												//75420
 u8 hasOverlay(CUnit* unit);															//7B720
 void rechargeShieldsProc(CUnit* target, CUnit* battery);							//934B0
 bool unitCanRechargeShields_Helper(CUnit* target, CUnit* battery);					//93520
 void IterateUnitsAtLocationTargetProc_ShieldBattery(CUnit* unit, Box16* coords);	//E8280
-void makeToHoldPosition(CUnit* unit);												//EB5B0
+void makeToHoldPosition_Helper(CUnit* unit);										//EB5B0
 bool orderToMoveToTarget(CUnit* unit, CUnit* target);								//EB980
 
 } //unnamed namespace
@@ -18,6 +19,37 @@ bool orderToMoveToTarget(CUnit* unit, CUnit* target);								//EB980
 const int BATTERY_RANGE = 0x80; //(128)
 
 namespace hooks {
+	
+//Initial name was Harvest5, but is unrelated to harvesting,
+//and despite being used by OrderId::Harvest5 order, it 
+//doesn't look like an ordinary order, so I broke the name.
+void function_00493920(CUnit* unit) {
+
+	CImage* current_image = unit->sprite->images.head;
+
+	while (current_image != NULL) {
+
+		if (
+			current_image->id >= ImageId::RechargeShields_Small &&
+			current_image->id <= ImageId::RechargeShields_Large
+		)
+		{
+			current_image->free();
+			current_image = NULL;
+		}
+		else
+			current_image = current_image->link.next;
+
+	}
+
+	if (unit->orderQueueHead == NULL)
+		unit->order(units_dat::ReturnToIdleOrder[unit->id], 0, 0, NULL, UnitId::None, false);
+
+	actUnitReturnToIdle(unit);
+
+}
+
+;	
 
 //The order process ran by a shield battery attempting the
 //recharge shield order
@@ -110,13 +142,13 @@ void orders_RechargeShields1(CUnit* unit) {
 					bStopThere = true;
 				else
 				{
-					makeToHoldPosition(unit);
+					makeToHoldPosition_Helper(unit);
 					unit->mainOrderState = 2;
 				}
 			}
 			else
 			if(movableState == 1) { //unit reached destination
-				makeToHoldPosition(unit);
+				makeToHoldPosition_Helper(unit);
 				unit->mainOrderState = 2;
 			}
 			else {					//probably movableState == 2 (== unit unmovable)
@@ -188,6 +220,20 @@ void insertFirstOrder(CUnit* unit, u8 orderId) {
 		MOV AL, orderId
 		MOV ECX, unit
 		CALL Func_InsertFirstOrder
+		POPAD
+	}
+
+}
+
+;
+	
+const u32 Func_ActUnitReturnToIdle = 0x00475420;
+void actUnitReturnToIdle(CUnit* unit) {
+
+	__asm {
+		PUSHAD
+		MOV EAX, unit
+		CALL Func_ActUnitReturnToIdle
 		POPAD
 	}
 
@@ -309,7 +355,8 @@ bool orderToMoveToTarget(CUnit* unit, CUnit* target) {
 ;
 
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 	__asm {
 		PUSHAD
 		MOV ESI, unit
