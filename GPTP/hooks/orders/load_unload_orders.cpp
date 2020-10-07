@@ -22,7 +22,7 @@ Bool32 function_004E6EF0(CUnit* unit, CUnit** unitTargetOffset);													//E
 u32 function_004E76C0(CUnit* transport, CUnit* loaded_unit, Point16* pos);											//E76C0
 void loadUnitProc(CUnit* unit, CUnit* unitToLoad);																	//E78E0	(Hooked)
 Bool32 unloadUnitProc(CUnit* unit);																					//E7F70 (Hooked)
-void makeToHoldPosition(CUnit* unit);																				//EB5B0
+void makeToHoldPosition_Helper(CUnit* unit);																		//EB5B0
 bool SetMoveTarget_xy(CUnit* unit, int x, int y);																	//EB820
 bool function_004EB900(CUnit* unit, CUnit* target);																	//EB900
 bool orderToMoveToTarget(CUnit* unit, CUnit* target);																//EB980
@@ -156,7 +156,7 @@ namespace hooks {
 								orderToMoveToTarget(unit,unitToLoad);
 							else {
 
-								makeToHoldPosition(unit);
+								makeToHoldPosition_Helper(unit);
 
 								if(
 									unitToLoad->mainOrderId != OrderId::EnterTransport &&
@@ -975,10 +975,9 @@ Bool32 unloadUnitProc(CUnit* unit) {
 
 ;
 
-//not related with assigning orders, but only with
-//destinations of orders
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 
 	__asm {
 		PUSHAD
