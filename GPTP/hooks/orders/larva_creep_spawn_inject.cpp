@@ -3,7 +3,6 @@
 
 namespace {
 
-//0x0049D660
 void __declspec(naked) function_0049D660_Wrapper() {
 
 	static CUnit* main_building;
@@ -11,7 +10,6 @@ void __declspec(naked) function_0049D660_Wrapper() {
 	__asm {
 		PUSH EBP
 		MOV EBP, ESP
-		SUB ESP, 0x08
 		MOV main_building, ESI
 		PUSHAD
 	}
@@ -29,7 +27,6 @@ void __declspec(naked) function_0049D660_Wrapper() {
 
 ;
 
-//0x004E8C80
 void __declspec(naked) function_004E8C80_Wrapper(){
 
 	static CUnit* main_building;
@@ -60,8 +57,55 @@ void __declspec(naked) function_004E8C80_Wrapper(){
 }
 
 ;
+	
+void __declspec(naked) orders_StopCreepGrowth_Wrapper(){
 
-//0x004EA780
+	static CUnit* unit;
+
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_StopCreepGrowth(unit);
+
+	__asm {
+		POPAD
+		MOV ESP, EBP
+		POP EBP
+		RET
+	}
+
+}
+
+;
+
+void __declspec(naked) orders_InitCreepGrowth_Wrapper(){
+
+	static CUnit* unit;
+
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_InitCreepGrowth(unit);
+
+	__asm {
+		POPAD
+		MOV ESP, EBP
+		POP EBP
+		RET
+	}
+
+}
+
+;
+
 void __declspec(naked) secondaryOrd_SpawningLarva_Wrapper(){
 
 	static CUnit* unit;
@@ -69,7 +113,6 @@ void __declspec(naked) secondaryOrd_SpawningLarva_Wrapper(){
 	__asm {
 		PUSH EBP
 		MOV EBP, ESP
-		SUB ESP, 0x08
 		MOV unit, ESI
 		PUSHAD
 	}
@@ -87,7 +130,6 @@ void __declspec(naked) secondaryOrd_SpawningLarva_Wrapper(){
 
 ;
 
-//0x004EA880
 void __declspec(naked) secondaryOrd_SpreadCreepSpawningLarva_Wrapper(){
 
 	static CUnit* unit;
@@ -115,6 +157,8 @@ namespace hooks {
 	void injectLarvaCreepSpawnHooks() {
 		jmpPatch(function_0049D660_Wrapper,						0x0049D660, 1);
 		jmpPatch(function_004E8C80_Wrapper,						0x004E8C80);
+		jmpPatch(orders_StopCreepGrowth_Wrapper,				0x004E95E0, 1);
+		jmpPatch(orders_InitCreepGrowth_Wrapper,				0x004E96D0, 1);		
 		jmpPatch(secondaryOrd_SpawningLarva_Wrapper,			0x004EA780, 1);
 		jmpPatch(secondaryOrd_SpreadCreepSpawningLarva_Wrapper,	0x004EA880, 3);	
 	}
