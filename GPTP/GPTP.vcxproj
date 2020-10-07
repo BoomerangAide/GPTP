@@ -178,6 +178,14 @@
     <ClCompile Include="hooks\load_unload_proc_inject.cpp" />
     <ClCompile Include="hooks\main\game_hooks.cpp" />
     <ClCompile Include="hooks\main\game_hooks_inject.cpp" />
+    <ClCompile Include="hooks\orders\burrow_orders.cpp" />
+    <ClCompile Include="hooks\orders\burrow_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\harvest_orders.cpp" />
+    <ClCompile Include="hooks\orders\harvest_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\larva_order.cpp" />
+    <ClCompile Include="hooks\orders\larva_order_inject.cpp" />
+    <ClCompile Include="hooks\orders\interceptor_return_order.cpp" />
+    <ClCompile Include="hooks\orders\interceptor_return_order_inject.cpp" />
     <ClCompile Include="hooks\orders\0_orders\orders_root.cpp" />
     <ClCompile Include="hooks\orders\0_orders\orders_root_inject.cpp" />
     <ClCompile Include="hooks\orders\powerup.cpp" />
@@ -373,6 +381,10 @@
     <ClInclude Include="hooks\interface\updateSelectedUnitsData.h" />
     <ClInclude Include="hooks\load_unload_proc.h" />
     <ClInclude Include="hooks\main\game_hooks.h" />
+    <ClInclude Include="hooks\orders\burrow_orders.h" />
+    <ClInclude Include="hooks\orders\harvest_orders.h" />
+    <ClInclude Include="hooks\orders\larva_order.h" />
+    <ClInclude Include="hooks\orders\interceptor_return_order.h" />    
     <ClInclude Include="hooks\orders\0_orders\orders_root.h" />
     <ClInclude Include="hooks\orders\powerup.h" />
     <ClInclude Include="hooks\orders\shield_recharge_orders.h" />    
