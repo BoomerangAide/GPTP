@@ -76,7 +76,7 @@ void orders_ResetCollision2(CUnit* unit) {
 
 ;
 
-//Used by SCV after construction, and possibly others
+//Used by SCV after construction, and others
 void orders_ResetCollision1(CUnit* unit) {
 
 	unit->sprite->elevationLevel = units_dat::Elevation[unit->id];
