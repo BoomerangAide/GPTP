@@ -35,7 +35,7 @@ bool isUnitVisible(CUnit* unit);													//E5DB0
 bool isTargetVisible(CUnit* unit, CUnit* target);									//E5E30
 u8 getRightClickActionOrder(CUnit* unit);											//E5EA0
 void setNextWaypoint_Sub4EB290(CUnit* unit);										//EB290
-void makeToHoldPosition(CUnit* unit);												//EB5B0
+void makeToHoldPosition_Helper(CUnit* unit);										//EB5B0
 bool moveToTarget(CUnit* unit, CUnit* target);										//EB720
 bool SetMoveTarget_xy(CUnit* unit, int x, int y);									//EB820
 bool function_004EB900(CUnit* unit, CUnit* target);									//EB900
@@ -52,18 +52,14 @@ void orders_ReaverAttack1(CUnit* unit) {
 	if(target == NULL) {
 
 		if(unit->orderQueueHead != NULL) {
-			//656A2:
 			unit->userActionFlags |= 1;
 			prepareForNextOrder(unit);
 		}
-		else {
-			//656B2:
-			if(unit->pAI != NULL)
-				unit->orderComputerCL(OrderId::ComputerAI);
-			else
-				//656C6:
-				unit->orderComputerCL(units_dat::ReturnToIdleOrder[unit->id]);
-		}
+		else
+		if(unit->pAI != NULL)
+			unit->orderComputerCL(OrderId::ComputerAI);
+		else
+			unit->orderComputerCL(units_dat::ReturnToIdleOrder[unit->id]);
 
 	}
 	else {
@@ -1133,7 +1129,7 @@ void orders_AttackMoveEP(CUnit* unit) {
 			SAI_GetRegionIdFromPxEx(unit->orderTarget.pt.x,unit->orderTarget.pt.y)
 		)
 		{
-			makeToHoldPosition(unit);
+			makeToHoldPosition_Helper(unit);
 			unit->orderToIdle();
 		}
 		else { //78E65
@@ -1157,7 +1153,7 @@ void orders_AttackMoveEP(CUnit* unit) {
 					jump_to_78EAE = true;
 				else //78E91
 				if(function_00476610(unit,(s32)unit->orderTarget.pt.x,(s32)unit->orderTarget.pt.y))
-					makeToHoldPosition(unit);
+					makeToHoldPosition_Helper(unit);
 
 			}
 			else
@@ -1937,10 +1933,9 @@ u8 getRightClickActionOrder(CUnit* unit) {
 
 ;
 
-//not related with assigning orders, but only with
-//destinations of orders
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 
 	__asm {
 		PUSHAD
