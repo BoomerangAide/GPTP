@@ -18,7 +18,7 @@ void function_004A01F0(CUnit* unit);												//A01F0
 CUnit* createUnit(u32 unitId, int x, int y, u32 playerId);							//A09D0
 void iscript_OpcodeCases(CImage* image, u32 offset_, u32 unk1, u32 unk2);			//D74C0
 void function_004D8500(CImage* image);												//D8500
-void makeToHoldPosition(CUnit* unit);												//EB5B0
+void makeToHoldPosition_Helper(CUnit* unit);										//EB5B0
 bool function_004EB9C0(CUnit* unit, int x, int y);									//EB9C0
 
 } //unnamed namespace
@@ -53,7 +53,7 @@ namespace hooks {
 
 			}
 			else { //E4DA9
-				makeToHoldPosition(unit);
+				makeToHoldPosition_Helper(unit);
 				unit->mainOrderState = 2;
 			}
 
@@ -560,10 +560,9 @@ CUnit* createUnit(u32 unitId, int x, int y, u32 playerId) {
 
 ;
 
-//not related with assigning orders, but only with
-//destinations of orders
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 
 	__asm {
 		PUSHAD
