@@ -17,7 +17,7 @@ void function_00494BB0(CUnit* unit,int x, int y);							//94BB0
 bool isTargetVisible(CUnit* unit, CUnit* target);							//E5E30
 bool canEnterNydusCanal_Helper(CUnit* unit, CUnit* nydusCanal);				//E8C20
 void setNextWaypoint_Sub4EB290(CUnit* unit);								//EB290
-void makeToHoldPosition(CUnit* unit);										//EB5B0
+void makeToHoldPosition_Helper(CUnit* unit);								//EB5B0
 bool moveToTarget(CUnit* unit, CUnit* target);								//EB720
 bool SetMoveTarget_xy(CUnit* unit, int x, int y);							//EB820
 bool function_004EB900(CUnit* unit, CUnit* target);							//EB900
@@ -352,11 +352,11 @@ void orders_Follow(CUnit* unit) {
 							)
 								unit->orderToIdle();
 							else
-								makeToHoldPosition(unit);
+								makeToHoldPosition_Helper(unit);
 
 						}
 						else
-							makeToHoldPosition(unit);
+							makeToHoldPosition_Helper(unit);
 
 					}
 
@@ -689,10 +689,9 @@ void setNextWaypoint_Sub4EB290(CUnit* unit) {
 
 ;
 
-//not related with assigning orders, but only with
-//destinations of orders
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 
 	__asm {
 		PUSHAD
