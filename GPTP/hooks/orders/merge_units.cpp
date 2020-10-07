@@ -12,18 +12,18 @@
 
 namespace {
 
-	bool advanceRemainingBuildTime_Sub466940(CUnit* unit);					//0x00466940
-	u8 function_0046A820(CUnit* unit);										//0x0046A820
-	void orderImmediate(CUnit* unit, u8 order);								//0x00474B40
-	void actUnitReturnToIdle(CUnit* unit);									//0x00475420
-	void playMorphingCompleteSound(CUnit* unit);							//0x0048F440
-	void mergeStatusIntoUnit_Sub493180(CUnit* unit_dst, CUnit* unit_src);	//0x00493180
-	void function_0049B440(CUnit* unit, u32 soundId);			 			//0x0049B440
-	void replaceUnitWithType(CUnit* unit, u16 newUnitId);					//0x0049FED0
-	void changeUnitButtonSet_Sub4E5D60(CUnit* unit, u16 unitId);			//0x004E5D60
-	void setNextWaypoint_Sub4EB290(CUnit* unit);							//0x004EB290
-	void makeToHoldPosition(CUnit* unit);									//0x004EB5B0
-	bool delayedSetMoveTarget_xy_Sub4EB960(CUnit* unit, u16 x, u16 y);		//0x004EB960
+bool advanceRemainingBuildTime_Sub466940(CUnit* unit);					//66940
+u8 function_0046A820(CUnit* unit);										//6A820
+void orderImmediate(CUnit* unit, u8 order);								//74B40
+void actUnitReturnToIdle(CUnit* unit);									//75420
+void playMorphingCompleteSound(CUnit* unit);							//8F440
+void mergeStatusIntoUnit_Sub493180(CUnit* unit_dst, CUnit* unit_src);	//93180
+void function_0049B440(CUnit* unit, u32 soundId);			 			//9B440
+void replaceUnitWithType(CUnit* unit, u16 newUnitId);					//9FED0
+void changeUnitButtonSet_Sub4E5D60(CUnit* unit, u16 unitId);			//E5D60
+void setNextWaypoint_Sub4EB290(CUnit* unit);							//EB290
+void makeToHoldPosition_Helper(CUnit* unit);							//EB5B0
+bool delayedSetMoveTarget_xy_Sub4EB960(CUnit* unit, u16 x, u16 y);		//EB960
 
 } //unnamed namespace
 
@@ -206,7 +206,7 @@ void orders_WarpingDarkArchon(CUnit* unit) {
 
 											//unit unmovable			
 			if(unit->mainOrderState != 0 && unit->getMovableState() == 2) {
-				makeToHoldPosition(unit);
+				makeToHoldPosition_Helper(unit);
 				unit->orderToIdle();
 			}
 			else {
@@ -392,7 +392,7 @@ void orders_WarpingArchon(CUnit* unit) {
 
 											//unit unmovable
 			if(unit->mainOrderState != 0 && unit->getMovableState() == 2) {
-				makeToHoldPosition(unit);
+				makeToHoldPosition_Helper(unit);
 				unit->orderToIdle();
 			}
 			else {
@@ -671,7 +671,8 @@ void setNextWaypoint_Sub4EB290(CUnit* unit) {
 ;
 
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 
   __asm {
     PUSHAD
