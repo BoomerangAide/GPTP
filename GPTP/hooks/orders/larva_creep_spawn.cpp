@@ -7,6 +7,7 @@ namespace {
 
 	u8 function_00414680(u32 unitId, int x, int y);								//14680
 	void AI_TrainingOverlord(CUnit* main_building, CUnit* larva);				//35770
+	void removeOrderFromUnitQueue(CUnit* unit, COrder* order);					//742D0
 	void updateUnitStrength(CUnit* unit);										//9FA40
 	void function_004A01F0(CUnit* unit);										//A01F0
 	CUnit* CreateUnit(u32 unitId, int x, int y, u32 playerId);					//A09D0
@@ -83,6 +84,86 @@ bool function_004E8C80(CUnit* unit, CUnit* main_building) {
 		bReturnValue = false;
 
 	return bReturnValue;
+
+}
+
+;
+	
+void orders_StopCreepGrowth(CUnit* unit)
+{
+
+	unit->userActionFlags |= 1;
+
+	if (unit->pAI != NULL) {
+
+		if (unit->mainOrderId != OrderId::Die) {
+
+			while (
+				unit->orderQueueTail != NULL &&
+				(
+					orders_dat::CanBeInterrupted[unit->orderQueueTail->orderId] != 0 ||
+					unit->orderQueueTail->orderId == OrderId::ComputerAI
+				)
+			)
+				removeOrderFromUnitQueue(unit, unit->orderQueueTail);
+
+			unit->performAnotherOrder(OrderId::ComputerAI, 0, 0, NULL, UnitId::None);
+
+		}
+
+	}
+	else
+		unit->order(units_dat::ReturnToIdleOrder[unit->id], 0, 0, NULL, UnitId::None, true);
+
+	prepareForNextOrder(unit);
+
+	if (unit->secondaryOrderId != OrderId::Nothing2) {
+		unit->secondaryOrderId = OrderId::Nothing2;
+		unit->secondaryOrderPos.y = 0;
+		unit->secondaryOrderPos.x = 0;
+		unit->currentBuildUnit = NULL;
+		unit->secondaryOrderState = 0;
+	}
+
+}
+
+;
+
+void orders_InitCreepGrowth(CUnit* unit)
+{
+
+	unit->userActionFlags |= 1;
+
+	if (unit->pAI != NULL) {
+
+		if (unit->mainOrderId != OrderId::Die) {
+
+			while (
+				unit->orderQueueTail != NULL &&
+				(
+					orders_dat::CanBeInterrupted[unit->orderQueueTail->orderId] != 0 ||
+					unit->orderQueueTail->orderId == OrderId::ComputerAI
+				)
+			)
+				removeOrderFromUnitQueue(unit, unit->orderQueueTail);
+
+			unit->performAnotherOrder(OrderId::ComputerAI, 0, 0, NULL, UnitId::None);
+
+		}
+
+	}
+	else
+		unit->order(units_dat::ReturnToIdleOrder[unit->id], 0, 0, NULL, UnitId::None, true);
+
+	prepareForNextOrder(unit);
+
+	if (unit->secondaryOrderId != OrderId::SpreadCreep) {
+		unit->secondaryOrderId = OrderId::SpreadCreep;
+		unit->secondaryOrderPos.y = 0;
+		unit->secondaryOrderPos.x = 0;
+		unit->currentBuildUnit = NULL;
+		unit->secondaryOrderState = 0;
+	}
 
 }
 
@@ -220,148 +301,163 @@ void secondaryOrd_SpreadCreepSpawningLarva(CUnit* unit) {
 
 namespace {
 
-	const u32 Func_Sub414680 = 0x00414680;
-	u8 function_00414680(u32 unitId, int x, int y) {
+const u32 Func_Sub414680 = 0x00414680;
+u8 function_00414680(u32 unitId, int x, int y) {
 
-		static u8 return_value;
+	static u8 return_value;
 
-		__asm {
-			PUSHAD
-			MOV ECX, x
-			MOV EAX, y
-			MOV EDX, unitId
-			CALL Func_Sub414680
-			MOV return_value, AL
-			POPAD
-		}
-
-		return return_value;
-
+	__asm {
+		PUSHAD
+		MOV ECX, x
+		MOV EAX, y
+		MOV EDX, unitId
+		CALL Func_Sub414680
+		MOV return_value, AL
+		POPAD
 	}
+
+	return return_value;
+
+}
+
+;
+
+const u32 Func_AI_TrainingOverlord = 0x00435770;
+void AI_TrainingOverlord(CUnit* main_building, CUnit* larva) {
+
+	__asm {
+		PUSHAD
+		MOV EAX, larva
+		MOV ECX, main_building
+		CALL Func_AI_TrainingOverlord
+		POPAD
+	}
+
+}
+
+;
 	
-	;
+const u32 Func_removeOrderFromUnitQueue = 0x004742D0;
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 
-	const u32 Func_AI_TrainingOverlord = 0x00435770;
-	void AI_TrainingOverlord(CUnit* main_building, CUnit* larva) {
-
-		__asm {
-			PUSHAD
-			MOV EAX, larva
-			MOV ECX, main_building
-			CALL Func_AI_TrainingOverlord
-			POPAD
-		}
-
+	__asm {
+		PUSHAD
+		MOV ECX, unit
+		MOV EAX, order
+		CALL Func_removeOrderFromUnitQueue
+		POPAD
 	}
 
-	;
+}
 
-	const u32 Func_UpdateUnitStrength = 0x0049FA40;
-	void updateUnitStrength(CUnit* unit) {
+;	
 
-		__asm {
-			PUSHAD
-			MOV EAX, unit
-			CALL Func_UpdateUnitStrength
-			POPAD
-		}
+const u32 Func_UpdateUnitStrength = 0x0049FA40;
+void updateUnitStrength(CUnit* unit) {
 
+	__asm {
+		PUSHAD
+		MOV EAX, unit
+		CALL Func_UpdateUnitStrength
+		POPAD
 	}
 
-	;
+}
 
-	const u32 Func_Sub4A01F0 = 0x004A01F0;
-	void function_004A01F0(CUnit* unit) {
+;
 
-		__asm {
-			PUSHAD
-			MOV EAX, unit
-			CALL Func_Sub4A01F0
-			POPAD
-		}
+const u32 Func_Sub4A01F0 = 0x004A01F0;
+void function_004A01F0(CUnit* unit) {
 
+	__asm {
+		PUSHAD
+		MOV EAX, unit
+		CALL Func_Sub4A01F0
+		POPAD
 	}
 
-	;
+}
 
-	const u32 Func_CreateUnit = 0x004A09D0;
-	CUnit* CreateUnit(u32 unitId, int x, int y, u32 playerId) {
+;
 
-		static CUnit* unit_created;
+const u32 Func_CreateUnit = 0x004A09D0;
+CUnit* CreateUnit(u32 unitId, int x, int y, u32 playerId) {
 
-		__asm {
-			PUSHAD
-			PUSH playerId
-			PUSH y
-			MOV ECX, unitId
-			MOV EAX, x
-			CALL Func_CreateUnit
-			MOV unit_created, EAX
-			POPAD
-		}
+	static CUnit* unit_created;
 
-		return unit_created;
-
+	__asm {
+		PUSHAD
+		PUSH playerId
+		PUSH y
+		MOV ECX, unitId
+		MOV EAX, x
+		CALL Func_CreateUnit
+		MOV unit_created, EAX
+		POPAD
 	}
 
-	;
+	return unit_created;
 
-	const u32 Func_IterateUnitsAtLocationTargetProc = 0x004E8280;
-	//hardcoding the larva count function, keeping the return value
-	//though it's unused here
-	u32 IterateUnitsAtLocationTargetProc_LarvaCount(CUnit* unit, Box16* coords) {
+}
 
-		static u32 return_value;
+;
 
-		__asm {
-			PUSHAD
-			PUSH unit
-			MOV EAX, coords
-			MOV EBX, 0x004E8C80
-			CALL Func_IterateUnitsAtLocationTargetProc
-			MOV return_value, EAX
-			POPAD
-		}
+const u32 Func_IterateUnitsAtLocationTargetProc = 0x004E8280;
+//hardcoding the larva count function, keeping the return value
+//though it's unused here
+u32 IterateUnitsAtLocationTargetProc_LarvaCount(CUnit* unit, Box16* coords) {
 
-		return return_value;
+	static u32 return_value;
 
+	__asm {
+		PUSHAD
+		PUSH unit
+		MOV EAX, coords
+		MOV EBX, 0x004E8C80
+		CALL Func_IterateUnitsAtLocationTargetProc
+		MOV return_value, EAX
+		POPAD
 	}
 
-	;
+	return return_value;
 
-	const u32 Func_Sub4E8DA0 = 0x004E8DA0;
-	void function_004E8DA0(CUnit* unit) {
+}
 
-		__asm {
-			PUSHAD
-			MOV EDI, unit
-			CALL Func_Sub4E8DA0
-			POPAD
-		}
+;
 
+const u32 Func_Sub4E8DA0 = 0x004E8DA0;
+void function_004E8DA0(CUnit* unit) {
+
+	__asm {
+		PUSHAD
+		MOV EDI, unit
+		CALL Func_Sub4E8DA0
+		POPAD
 	}
 
-	;
+}
 
-	const u32 Func_Sub4E8E10 = 0x004E8E10;
-	bool function_004E8E10(CUnit* unit, Point32* coords) {
+;
 
-		static Bool32 return_pre_value;
+const u32 Func_Sub4E8E10 = 0x004E8E10;
+bool function_004E8E10(CUnit* unit, Point32* coords) {
 
-		__asm {
-			PUSHAD
-			MOV EDI, coords
-			MOV EAX, unit
-			CALL Func_Sub4E8E10
-			MOV return_pre_value, EAX
-			POPAD
-		}
+	static Bool32 return_pre_value;
 
-		return (return_pre_value != 0);
-
+	__asm {
+		PUSHAD
+		MOV EDI, coords
+		MOV EAX, unit
+		CALL Func_Sub4E8E10
+		MOV return_pre_value, EAX
+		POPAD
 	}
-	
-	;
+
+	return (return_pre_value != 0);
+
+}
+
+;
 
 } //Unnamed namespace
 
