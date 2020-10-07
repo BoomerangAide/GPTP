@@ -6,6 +6,7 @@
 namespace {
 
 CUnit* MedicHeal_TargetAcquire(CUnit* medic);							//422A0
+CUnit* findRandomAttackTarget(CUnit* unit);								//42FC0
 CUnit* findBestAttackTarget(CUnit* unit);								//43080
 u32 doMedicHeal(CUnit* unit, CUnit* target);							//63C40
 void function_004655F0(CUnit* unit);									//655F0
@@ -14,6 +15,7 @@ void orderImmediate(CUnit* unit, u8 order);								//74B40
 void function_00476FC0(CUnit* unit, CUnit* target, u32 unk1, u32 unk2);	//76FC0
 Bool32 function_004770E0(CUnit* unit);									//770E0
 void orders_PlayerGuard_Helper(CUnit* unit);							//774A0
+Bool32 attackApplyCooldown(CUnit* unit);								//78B40
 u32 RandBetween(u32 min, u32 max, u32 someIndex);						//DC550
 void setNextWaypoint_Sub4EB290(CUnit* unit);							//EB290
 
@@ -332,6 +334,78 @@ void orders_PlayerGuard(CUnit* unit) {
 } //void function_004774A0(CUnit* unit)
 
 ;
+	
+//Initially unidentified function 00478D10
+//Probably default Hold Position order
+//Used byOrderId::HoldPosition2
+void orders_HoldPosition2(CUnit* unit)
+{
+
+	if (unit->mainOrderState == 0) {
+
+		setNextWaypoint_Sub4EB290(unit);
+
+		if (unit->nextTargetWaypoint != unit->moveTarget.pt) {
+			unit->nextTargetWaypoint.x = unit->moveTarget.pt.x;
+			unit->nextTargetWaypoint.y = unit->moveTarget.pt.y;
+		}
+
+		unit->status |= UnitStatus::HoldingPosition;
+
+		if(unit->subunit != NULL)
+			unit->subunit->status |= UnitStatus::HoldingPosition;
+
+		unit->mainOrderState = 1;
+
+		if (attackApplyCooldown(unit)) {
+
+			if (
+				(
+					unit->subunit == NULL ||
+					!(units_dat::BaseProperty[unit->subunit->id] & UnitProperty::Subunit) ||
+					unit->id == UnitId::TerranGoliath ||
+					unit->id == UnitId::Hero_AlanSchezar
+				) &&
+				unit->nextMovementWaypoint != unit->orderTarget.pt
+			)
+			{
+				unit->nextMovementWaypoint.x = unit->orderTarget.pt.x;
+				unit->nextMovementWaypoint.y = unit->orderTarget.pt.y;
+			}
+
+		}
+		else
+		if (unit->mainOrderTimer == 0) {
+
+			unit->mainOrderTimer = 15;
+			unit->orderTarget.unit = findRandomAttackTarget(unit);
+
+			if (unit->orderTarget.unit != NULL)
+				unit->orderQueueTimer = 0;
+
+		}
+
+	}
+
+}
+
+;
+
+//Initially orders_HoldPositionSuicidal @ 004EB5B0
+//Hooked because used by OrderId::HoldPosition3 and OrderId::HoldPosition4
+//Often directly called instead of being used as a regular order.
+void makeToHoldPosition(CUnit* unit) {
+
+	setNextWaypoint_Sub4EB290(unit);
+
+	if (unit->nextTargetWaypoint != unit->moveTarget.pt) {
+		unit->nextTargetWaypoint.x = unit->moveTarget.pt.x;
+		unit->nextTargetWaypoint.y = unit->moveTarget.pt.y;
+	}
+
+}
+
+;	
 
 } //namespace hooks
 
@@ -359,6 +433,25 @@ CUnit* MedicHeal_TargetAcquire(CUnit* medic) {
 }
 
 ;
+	
+const u32 Func_findRandomAttackTarget = 0x00442FC0;
+CUnit* findRandomAttackTarget(CUnit* unit) {
+
+	static CUnit* target;
+
+	__asm {
+		PUSHAD
+		MOV ESI, unit
+		CALL Func_findRandomAttackTarget
+		MOV target, EAX
+		POPAD
+	}
+
+	return target;
+
+}
+
+;	
 
 const u32 Func_Sub443080 = 0x00443080;
 //named according to attack_priority_inject.cpp
@@ -523,6 +616,25 @@ void orders_PlayerGuard_Helper(CUnit* unit) {
 		CALL Func_Sub4774A0
 		POPAD
 	}
+}
+
+;
+	
+const u32 Func_attackApplyCooldown = 0x00478B40;
+Bool32 attackApplyCooldown(CUnit* unit) {
+
+	static u32 result;
+
+	__asm {
+		PUSHAD
+		MOV EAX, unit
+		CALL Func_attackApplyCooldown
+		MOV result, EAX
+		POPAD
+	}
+
+	return result;
+
 }
 
 ;
