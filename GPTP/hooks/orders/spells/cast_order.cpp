@@ -18,6 +18,13 @@ void setNextWaypoint_Sub4EB290(CUnit* unit);						//EB290
 
 namespace hooks {
 
+//Used by: 
+//OrderId::FireYamatoGun1, OrderId::MagnaPulse (lockdown),
+//OrderId::DarkSwarm, OrderId::CastParasite, OrderId::SummonBroodlings,
+//OrderId::EmpShockwave, OrderId::PsiStorm, OrderId::Irradiate,
+//OrderId::Plague, OrderId::Consume, OrderId::Ensnare,
+//OrderId::StasisField, OrderId::Restoration, OrderId::CastDisruptionWeb,
+//OrderId::CastOpticalFlare, OrderId::CastMaelstrom	
 void orders_Spell(CUnit* unit) {
 
 	s32 spellCost;
