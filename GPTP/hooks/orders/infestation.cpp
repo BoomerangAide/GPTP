@@ -18,7 +18,7 @@ void changeUnitButtonSet_Sub_4E5D60(CUnit* unit, u16 unitId);				//E5D60
 void hideAndDisableUnit(CUnit* unit);										//E6340
 void showAndEnableUnit(CUnit* unit);										//E6490
 void setNextWaypoint_Sub4EB290(CUnit* unit);								//EB290
-void makeToHoldPosition(CUnit* unit);										//EB5B0
+void makeToHoldPosition_Helper(CUnit* unit);								//EB5B0
 
 } //unnamed namespace
 
@@ -231,7 +231,7 @@ namespace hooks {
 			if(scbw::checkUnitCollisionPos(unitInfesting, &unitInfesting->sprite->position, &actualpos)) {
 
 				scbw::setUnitPosition(unitInfesting, actualpos.x, actualpos.y);
-				makeToHoldPosition(unitInfesting);
+				makeToHoldPosition_Helper(unitInfesting);
 				showAndEnableUnit(unitInfesting);
 
 				if(unitInfesting->orderQueueHead == NULL) {
@@ -513,10 +513,9 @@ void showAndEnableUnit(CUnit* unit) {
 
 ;
 
-//not related with assigning orders, but only with
-//destinations of orders
 const u32 Func_OrdersHoldPositionSuicidal = 0x004EB5B0;
-void makeToHoldPosition(CUnit* unit) {
+//Hooked in hooks\orders\base_orders\stopholdpos_orders
+void makeToHoldPosition_Helper(CUnit* unit) {
 
 	__asm {
 		PUSHAD
