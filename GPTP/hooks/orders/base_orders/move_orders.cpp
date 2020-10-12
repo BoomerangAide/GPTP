@@ -67,7 +67,7 @@ void orders_CarrierIgnore2(CUnit* unit) {
 ;
 
 //Function used by OrderId::StayinRange
-//Not seen in action, so untested
+//Seen used by Siege Tank
 void orders_StayInRange(CUnit* unit) {
 	
 	bool bGoliathSpecialCode = false;
@@ -125,7 +125,7 @@ void orders_StayInRange(CUnit* unit) {
 
 				}
 
-				if (!bDontMoveToTarget || moveToTarget(unit,target)) {
+				if (bDontMoveToTarget || moveToTarget(unit,target)) {
 					unit->mainOrderState = 1;
 					bGoliathSpecialCode = (unit->id == UnitId::TerranGoliath || unit->id == UnitId::Hero_AlanSchezar);
 				}
@@ -170,6 +170,9 @@ void orders_StayInRange(CUnit* unit) {
 									target,
 									unit->getMaxWeaponRange(weaponId)
 								);
+							
+							if (bDontMoveToTarget)
+								makeToHoldPosition_Helper(unit);							
 
 						}
 
