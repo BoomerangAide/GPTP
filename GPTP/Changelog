@@ -1,3 +1,9 @@
+Version 5.931:
+
+- fixed a mistake in orders_StayInRange() in hooks\orders\base_orders\move_orders.cpp
+
+-----------
+
 Version 5.930:
 
 - hooks\orders\interceptor_return_order hook added
