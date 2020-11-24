@@ -44,6 +44,7 @@
 #include "hooks/orders/burrow_orders.h"
 #include "hooks/recv_commands/burrow_tech.h"
 #include "hooks/orders/spells/cast_order.h"
+#include "hooks/orders/cloak_nearby_units_order.h"
 #include "hooks/recv_commands/CMDRECV_Build.h"
 #include "hooks/recv_commands/CMDRECV_Cancel.h"
 #include "hooks/recv_commands/CMDRECV_LiftOff.h"
@@ -57,6 +58,7 @@
 #include "hooks/recv_commands/CMDRECV_Stimpack.h"
 #include "hooks/recv_commands/CMDRECV_Stop.h"
 #include "hooks/create_init_units.h"
+#include "hooks/orders/spells/defense_matrix.h"
 #include "hooks/orders/base_orders/die_order.h"
 #include "hooks/orders/enter_nydus.h"
 #include "hooks/utils/ExtendSightLimit.h"
@@ -78,14 +80,18 @@
 #include "hooks/orders/base_orders/move_orders.h"
 #include "hooks/orders/spells/nuke_orders.h"
 #include "hooks/orders/0_orders/orders_root.h"
+#include "hooks/orders/base_orders/patrol_order.h"
 #include "hooks/orders/powerup.h"
 #include "hooks/orders/spells/recall_spell.h"
 #include "hooks/recv_commands/receive_command.h"
 #include "hooks/orders/repair_order.h"
 #include "hooks/utils/replace_unit.h"
+#include "hooks/orders/rescuable_order.h"
 #include "hooks/orders/research_upgrade_orders.h"
 #include "hooks/orders/reset_collision.h"
 #include "hooks/right_click_CMDACT.h"
+#include "hooks/orders/base_orders/rightclick_order.h"
+#include "hooks/orders/spells/scanner_orders.h"
 #include "hooks/interface/select_larva.h"
 #include "hooks/interface/selection.h"
 #include "hooks/orders/shield_recharge_orders.h"
@@ -211,6 +217,12 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectLarvaOrderHook();
 	hooks::injectHarvestOrdersHooks();
 	hooks::injectBurrowOrdersHooks();
+	hooks::injectCloakNearbyUnitsOrderHook();
+	hooks::injectRightClickOrderHooks();
+	hooks::injectScannerOrdersHook();
+	hooks::injectDefensiveMatrixHooks();
+	hooks::injectPatrolOrderHook();
+	hooks::injectRescuableOrderHook();	
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
