@@ -134,10 +134,10 @@ void orders_SCVBuild2(CUnit* unit) {
 
 			u32 movableState = unit->getMovableState();
 
-			if(movableState == 2) //unmovable
+			if(movableState == MovableState::UnmovableAtDestination)
 				unit->orderToIdle();
 			else
-			if(movableState != 0) { //reached destination if 1
+			if(movableState != MovableState::NotReachedDestination) {
 
 				scbw::refreshConsole();
 
@@ -172,7 +172,7 @@ void orders_SCVBuild2(CUnit* unit) {
 		} //if(unit->mainOrderState == 2)
 		else
 		if(unit->mainOrderState == 3) {
-			if(unit->getMovableState() != 0)
+			if(unit->getMovableState() != MovableState::NotReachedDestination)
 				unit->mainOrderState = 4;
 		}
 		else
@@ -435,7 +435,7 @@ void orders_SCVBuild2(CUnit* unit) {
 
 				if(!bEndThere) { //67F4C
 
-					if(!(unit->orderQueueHead == NULL)) {
+					if(unit->orderQueueHead != NULL) {
 						unit->userActionFlags |= 1;
 						prepareForNextOrder(unit);
 					}
@@ -502,7 +502,7 @@ void orders_SCVBuild2(CUnit* unit) {
 
 		if(!bEndThere) { //67F4C
 
-			if(!(unit->orderQueueHead == NULL)) {
+			if(unit->orderQueueHead != NULL) {
 				unit->userActionFlags |= 1;
 				prepareForNextOrder(unit);
 			}
