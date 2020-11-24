@@ -5,21 +5,21 @@
 
 namespace {
 
-CUnit* MedicHeal_TargetAcquire(CUnit* medic);								//422A0
-Bool32 AI_OrderHeal(CUnit* unit, CUnit* target);							//63530
-u32 doMedicHeal(CUnit* unit, CUnit* target);								//63C40
-void removeOrderFromUnitQueue(CUnit* unit, COrder* order);					//742D0
-void function_4748E0(CUnit* unit, int x, int y, u8 orderId);				//748E0
-void function_474940(CUnit* unit, CUnit* target, u8 orderId);				//74940
-void orderImmediate(CUnit* unit, u8 order);									//74B40
-void orderInterrupt(CUnit* unit, CUnit* target, u16 x, u16 y, u32 orderId);	//74C30
-void actUnitReturnToIdle(CUnit* unit);										//75420
-void unitOrderMoveToTargetUnit(CUnit* unit, CUnit* target);					//79FE0
-Bool32 AI_CastSpellBehaviour(CUnit* unit, u32 unknown);						//A13C0
-void setNextWaypoint_Sub4EB290(CUnit* unit);								//EB290
-bool moveToTarget(CUnit* unit, CUnit* target);								//EB720
-bool SetMoveTarget_xy(CUnit* unit, int x, int y);							//EB820
-bool function_004EB900(CUnit* unit, CUnit* target);							//EB900
+CUnit* MedicHeal_TargetAcquire(CUnit* medic);									//422A0
+Bool32 AI_OrderHeal(CUnit* unit, CUnit* target);								//63530
+u32 doMedicHeal(CUnit* unit, CUnit* target);									//63C40
+void removeOrderFromUnitQueue(CUnit* unit, COrder* order);						//742D0
+void function_004748E0(CUnit* unit, int x, int y, u8 orderId, COrder* order);	//748E0
+void function_00474940(CUnit* unit, CUnit* target, u8 orderId, COrder* order);	//74940
+void orderImmediate(CUnit* unit, u8 order);										//74B40
+void orderInterrupt(CUnit* unit, CUnit* target, u16 x, u16 y, u32 orderId);		//74C30
+void actUnitReturnToIdle(CUnit* unit);											//75420
+void unitOrderMoveToTargetUnit(CUnit* unit, CUnit* target);						//79FE0
+Bool32 AI_CastSpellBehaviour(CUnit* unit, u32 unknown);							//A13C0
+void setNextWaypoint_Sub4EB290(CUnit* unit);									//EB290
+bool moveToTarget(CUnit* unit, CUnit* target);									//EB720
+bool SetMoveTarget_xy(CUnit* unit, int x, int y);								//EB820
+bool function_004EB900(CUnit* unit, CUnit* target);								//EB900
 
 } //unnamed namespace
 
@@ -108,9 +108,9 @@ void orders_HealMove(CUnit* unit) {
 					unitOrderMoveToTargetUnit(unit,newTarget);
 
 					if(oldTarget != NULL)
-						function_474940(unit,oldTarget,OrderId::HealMove);
+						function_00474940(unit,oldTarget,OrderId::HealMove, NULL);
 					else
-						function_4748E0(unit,oldPos.x,oldPos.y,OrderId::HealMove);
+						function_004748E0(unit,oldPos.x,oldPos.y,OrderId::HealMove, NULL);
 		
 				}
 
@@ -236,7 +236,7 @@ void orders_MedicHeal1(CUnit* unit) {
 
 			if(	target != NULL &&
 				function_004EB900(unit,target) != 0 &&
-				unit->getMovableState() != 2 //unit not unmovable
+				unit->getMovableState() != MovableState::UnmovableAtDestination
 			)
 			{
 				if(unit->isTargetWithinMinRange(target,30)) {
@@ -373,20 +373,20 @@ void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 
 ;
 
-//Equivalent to function @ 0x004748E0
-//also used in hooks\utils\utils.cpp and in unhooked orders_Patrol
-void function_4748E0(CUnit* unit, int x, int y, u8 orderId) {
-	unit->performAnotherOrder(orderId, x, y, NULL, UnitId::None);
+//Used in hooks\orders\base_orders\patrol_order.cpp, hooks\orders\medic_orders.cpp 
+//and hooks\recv_commands\CMDRECV_QueuedOrder.cpp
+void function_004748E0(CUnit* unit, int x, int y, u8 orderId, COrder* order) {
+	unit->performAnotherOrder(orderId, x, y, NULL, UnitId::None, order);
 }
 
 ;
 
 //Equivalent to function @ 0x00474940, also used in hooks\utils\utils.cpp
-void function_474940(CUnit* unit, CUnit* target, u8 orderId) {
+void function_00474940(CUnit* unit, CUnit* target, u8 orderId, COrder* order) {
 	if (target == NULL)
-		unit->performAnotherOrder(orderId, 0, 0, NULL, UnitId::None);
+		unit->performAnotherOrder(orderId, 0, 0, NULL, UnitId::None, order);
 	else
-		unit->performAnotherOrder(orderId, target->sprite->position.x, target->sprite->position.y, target, UnitId::None);
+		unit->performAnotherOrder(orderId, target->sprite->position.x, target->sprite->position.y, target, UnitId::None, order);
 }
 
 ;
