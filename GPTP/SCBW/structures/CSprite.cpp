@@ -137,6 +137,11 @@ CImage* CSprite::createOverlay(u32 imageId, s8 x, s8 y, u32 direction) {
 }
 
 //Identical to function @ 0x00498EA0
+//EAX = sprite
+//ESI = imageId
+//[EBP+0x08] = x OR y
+//[EBP+0x0C] = y OR x
+//[EBP+0x10] = direction
 CImage* CSprite::createTopOverlay(u32 imageId, s8 x, s8 y, u32 direction) {
   assert(this);
   CImage *overlay = unusedImages.popHead();
