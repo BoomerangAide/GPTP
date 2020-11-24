@@ -218,9 +218,9 @@ void orders_ReturnHarvest(CUnit* unit){
 
 			int movableState = unit->getMovableState();
 
-			if (movableState != 0) {		//0 = unit not at destination
+			if (movableState != MovableState::NotReachedDestination) {
 
-				if (movableState == 2) {	//2 = unit unmovable
+				if (movableState == MovableState::UnmovableAtDestination) {
 					unit->orderTarget.unit = NULL;
 					unit->mainOrderState = 0;
 				}
@@ -359,7 +359,7 @@ void orders_HarvestMinerals1(CUnit* unit) {
 			
 			if (
 				unit->isTargetWithinMinRange(target, 10) ||
-				unit->getMovableState() != 0					//0= "not reached destination"
+				unit->getMovableState() != MovableState::NotReachedDestination
 			)
 			{
 
@@ -398,9 +398,9 @@ void orders_HarvestMinerals1(CUnit* unit) {
 			
 			int movableState = unit->getMovableState();
 
-			if (movableState != 0) {
+			if (movableState != MovableState::NotReachedDestination) {
 
-				if (movableState != 2) { //unit can move
+				if (movableState != MovableState::UnmovableAtDestination) {
 					if (unit->resourceType & ResourceCarried::Minerals)
 						unit->orderComputerCL(OrderId::ReturnMinerals);
 					else
@@ -498,14 +498,14 @@ void orders_Harvest1(CUnit* unit) {
 
 			int movableState = unit->getMovableState();
 
-			if (movableState != 0) { //0 is "not reached destination"
+			if (movableState != MovableState::NotReachedDestination) {
 
 				if (target == NULL || !unit_isGeyserUnitEx(unit, target)) {
 					makeToHoldPosition_Helper(unit);
 					unit->orderToIdle();
 				}
 				else
-				if(movableState == 2)
+				if(movableState == MovableState::UnmovableAtDestination)
 					unit->mainOrderState = 0;
 				else
 				if(unit->resourceType & ResourceCarried::Vespene)
