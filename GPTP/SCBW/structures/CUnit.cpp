@@ -296,17 +296,15 @@ bool CUnit::isValidCaster() const {
 }
 
 //Identical to function getUnitMovableState at 0x00401DC0
-//Returns:	0 - Unit has not reached destination
-//			1 - Unit has reached destination
-//			2 - Unit cannot move
+//Use MovableState::Enum
 u32 CUnit::getMovableState() {
 	if (this->moveTarget.pt != this->sprite->position)
-		return 0;
+		return MovableState::NotReachedDestination;
 	else 
 	if (!(this->status & UnitStatus::Unmovable))
-		return 1;
+		return MovableState::ReachedDestination;
 	else
-		return 2;
+		return MovableState::UnmovableAtDestination;
 }
 
 //-------- Positions and dimensions --------//
@@ -589,12 +587,11 @@ void CUnit::orderToIdle() {
 		this->userActionFlags |= 1;
 		prepareForNextOrder(this);
 	}
-	else {
-		if (this->pAI)
-			this->orderTo(OrderId::ComputerAI);
-		else
-			this->orderTo(units_dat::ReturnToIdleOrder[this->id]);
-	}
+	else
+	if (this->pAI != NULL)
+		this->orderTo(OrderId::ComputerAI);
+	else
+		this->orderTo(units_dat::ReturnToIdleOrder[this->id]);
 
 }
 
