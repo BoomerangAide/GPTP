@@ -3,8 +3,8 @@
 
 //Helper functions
 namespace {
-void secondaryOrder_Cloak(CUnit* unit);			//0x00491790
-CUnit** getAllUnitsInBounds(Box16* coords);		//0x0042FF80
+CUnit** getAllUnitsInBounds(Box16* coords);		//2FF80
+void secondaryOrder_Cloak(CUnit* unit);			//91790
 } //unnamed namespace
 
 namespace hooks {
@@ -82,6 +82,25 @@ void cloakNearbyUnitsHook(CUnit* cloaker) {
 /**** Helper function definitions. Do not change anything below this! ****/
 
 namespace {
+	
+const u32 Func_GetAllUnitsInBounds = 0x0042FF80;
+CUnit** getAllUnitsInBounds(Box16* coords) {
+
+	static CUnit** units_in_bounds;
+
+	__asm {
+		PUSHAD
+		MOV EAX, coords
+		CALL Func_GetAllUnitsInBounds
+		MOV units_in_bounds, EAX
+		POPAD
+	}
+
+	return units_in_bounds;
+
+}
+
+;	
 
 //Equivalent to secondaryOrd_Cloak @ 0x00491790
 void secondaryOrder_Cloak(CUnit* unit) {
@@ -108,25 +127,6 @@ void secondaryOrder_Cloak(CUnit* unit) {
 		scbw::refreshConsole();
 
 	}
-
-}
-
-;
-
-const u32 Func_GetAllUnitsInBounds = 0x0042FF80;
-CUnit** getAllUnitsInBounds(Box16* coords) {
-
-	static CUnit** units_in_bounds;
-
-	__asm {
-		PUSHAD
-		MOV EAX, coords
-		CALL Func_GetAllUnitsInBounds
-		MOV units_in_bounds, EAX
-		POPAD
-	}
-
-	return units_in_bounds;
 
 }
 
