@@ -44,6 +44,14 @@ enum Enum {
 };
 }
 
+namespace MovableState {
+enum Enum : u8 {
+	NotReachedDestination = 0,
+	ReachedDestination = 1,
+	UnmovableAtDestination = 2
+};
+}
+
 //Based on BWAPI; for use with units_dat::BaseProperty[]
 namespace UnitProperty {
 enum Enum : u32 {
