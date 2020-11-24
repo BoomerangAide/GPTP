@@ -137,7 +137,7 @@ void orders_RechargeShields1(CUnit* unit) {
 
 			u32 movableState = unit->getMovableState();
 
-			if(movableState == 0) { //not reached destination
+			if(movableState == MovableState::NotReachedDestination) {
 				if(!unit->isTargetWithinMinRange(battery, BATTERY_RANGE))
 					bStopThere = true;
 				else
@@ -147,11 +147,11 @@ void orders_RechargeShields1(CUnit* unit) {
 				}
 			}
 			else
-			if(movableState == 1) { //unit reached destination
+			if(movableState == MovableState::ReachedDestination) {
 				makeToHoldPosition_Helper(unit);
 				unit->mainOrderState = 2;
 			}
-			else {					//probably movableState == 2 (== unit unmovable)
+			else {  //MovableState::UnmovableAtDestination
 				unit->orderToIdle();
 				bStopThere = true;
 			}
