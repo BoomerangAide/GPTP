@@ -221,7 +221,7 @@ void orders_StrafeUnit2(CUnit* unit) {
 
 			}
 			else
-				bNotEndThere = (unit->getMovableState() != 0); //unit has reached destination
+				bNotEndThere = (unit->getMovableState() != MovableState::NotReachedDestination);
 
 			if (bNotEndThere) {
 
@@ -953,7 +953,7 @@ void orders_SapUnit(CUnit* unit) {
 				
 				if(
 					!unit->isTargetWithinMinRange(target,4) &&
-					unit->getMovableState() != 2
+					unit->getMovableState() != MovableState::UnmovableAtDestination
 				)
 				{ //78998
 
@@ -1137,7 +1137,7 @@ void orders_AttackMoveEP(CUnit* unit) {
 			bool jump_to_78EAE = false;
 
 			if(
-				unit->getMovableState() != 0 &&
+				unit->getMovableState() != MovableState::NotReachedDestination &&
 				(unit->orderTarget.pt.x != unit->sprite->position.x ||
 				 unit->orderTarget.pt.y != unit->sprite->position.y)
 			)
