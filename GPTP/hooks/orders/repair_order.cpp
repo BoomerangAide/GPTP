@@ -119,11 +119,11 @@ namespace hooks {
 
 				if(!bEndThere && !jump_to_default_switch && unit->mainOrderState == 6) {
 
-					if(unit->getMovableState() == 0) { //not reached destination
+					if(unit->getMovableState() == MovableState::NotReachedDestination) {
 						function_004EB900(unit,target); //may cause unit to move or become idle
 						bEndThere = true;
 					}
-					else { //reached destination or unmovable
+					else {
 
 						if(!(unit->isTargetWithinMinRange(target, 5))) {
 							unit->mainOrderState = 1; //don't continue directly into this case
