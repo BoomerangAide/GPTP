@@ -24,8 +24,8 @@ void loadUnitProc(CUnit* unit, CUnit* unitToLoad) {
 	int counter = 0;
 
 	static const CUnit* unitTable_0059CB58 = (CUnit*) 0x0059CB58;	//array of CUnit structures
-	static u32* u32_0x006BEE84 = (u32*)(0x006BEE84);
-	static u32* u32_0x006BEE8C = (u32*)(0x006BEE8C);
+	static Path** path_0x006BEE84 = (Path**)(0x006BEE84);
+	static Path** path_0x006BEE8C = (Path**)(0x006BEE8C);
 
 	if(units_dat::SpaceProvided[unit->id] != 0) {
 
@@ -138,17 +138,17 @@ void loadUnitProc(CUnit* unit, CUnit* unitToLoad) {
 		unitToLoad->status = (unitToLoad->status & ~UnitStatus::IsBuilding) | UnitStatus::InBuilding;
 
 		if(unitToLoad->path != NULL) {
+			
+			u32* pathNextPos = (u32*)(&unitToLoad->path->next);
 
-			u32* path_0x4 = (u32*)((u32)unitToLoad->path + 4);
+			*pathNextPos = ((u32)unitToLoad->path - (u32)*path_0x006BEE8C) / 128 + 1;
 
-			*path_0x4 = ((u32)unitToLoad->path - *u32_0x006BEE8C) / 128 + 1;
-
-			if(*u32_0x006BEE84 == 0)
+			if(*path_0x006BEE84 == NULL)
 				unitToLoad->path = NULL;
 			else
-				unitToLoad->path = (void*)((*u32_0x006BEE84 - *u32_0x006BEE8C) / 128 + 1);
+				unitToLoad->path = (Path*)(((u32)*path_0x006BEE84 - (u32)*path_0x006BEE8C) / 128 + 1);
 
-			*u32_0x006BEE84 = (u32)unitToLoad->path;
+			*path_0x006BEE84 = unitToLoad->path;
 			unitToLoad->path = NULL;
 
 		}
@@ -175,17 +175,17 @@ void loadUnitProc(CUnit* unit, CUnit* unitToLoad) {
 
 			if(subUnit->path != NULL) {
 
-				u32* path_0x4 = (u32*)((u32)subUnit->path + 4);
+				u32* pathNextPos = (u32*)(&subUnit->path->next);
 
-				*path_0x4 = ((u32)subUnit->path - *u32_0x006BEE8C) / 128 + 1;
+				*pathNextPos = ((u32)subUnit->path - (u32)*path_0x006BEE8C) / 128 + 1;
 
-				if(*u32_0x006BEE84 == 0)
+				if(*path_0x006BEE84 == NULL)
 					subUnit->path = NULL;
 				else
-					subUnit->path = (void*)((*u32_0x006BEE84 - *u32_0x006BEE8C) / 128 + 1);
+					subUnit->path = (Path*)(((u32)*path_0x006BEE84 - (u32)*path_0x006BEE8C) / 128 + 1);
 
-				*u32_0x006BEE84 = (u32)subUnit->path;
-				subUnit->path = NULL; 
+				*path_0x006BEE84 = subUnit->path;
+				subUnit->path = NULL;
 
 			}
 
