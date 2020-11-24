@@ -133,7 +133,7 @@ void orders_Spell(CUnit* unit) {
 
 				if(result_00492620 == 0) {
 
-					if(unit->getMovableState() == 2) //unmovable
+					if(unit->getMovableState() == MovableState::UnmovableAtDestination)
 						unit->orderToIdle();
 
 				}
@@ -143,7 +143,7 @@ void orders_Spell(CUnit* unit) {
 						unit->spellCooldown == 0 &&
 						function_00476640(unit,orderWeaponId) && //is ready to fire weapon (angle,range...) maybe?
 						!(unit->movementFlags & MovementFlags::Accelerating) &&
-						unit->getMovableState() != 0
+						unit->getMovableState() != MovableState::NotReachedDestination
 					) 
 					{ //92A38
 
