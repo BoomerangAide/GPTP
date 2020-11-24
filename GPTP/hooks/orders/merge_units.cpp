@@ -202,10 +202,8 @@ void orders_WarpingDarkArchon(CUnit* unit) {
 
 		if(distanceBetweenUnits > 20) {
 
-			//94724
-
-											//unit unmovable			
-			if(unit->mainOrderState != 0 && unit->getMovableState() == 2) {
+			//94724		
+			if(unit->mainOrderState != 0 && unit->getMovableState() == MovableState::UnmovableAtDestination) {
 				makeToHoldPosition_Helper(unit);
 				unit->orderToIdle();
 			}
@@ -271,7 +269,7 @@ void orders_WarpingDarkArchon(CUnit* unit) {
 
 				} //if(distanceBetweenUnits <= 19)
 
-			} //if(unit->mainOrderState == 0 || unit->getMovableState() != 2)
+			} //if(unit->mainOrderState == 0 || unit->getMovableState() != MovableState::UnmovableAtDestination)
 
 		} //if(distanceBetweenUnits > 20)
 		else {
@@ -389,9 +387,7 @@ void orders_WarpingArchon(CUnit* unit) {
 		if(distanceBetweenUnits > 2) {
 
 			//94944
-
-											//unit unmovable
-			if(unit->mainOrderState != 0 && unit->getMovableState() == 2) {
+			if(unit->mainOrderState != 0 && unit->getMovableState() == MovableState::UnmovableAtDestination) {
 				makeToHoldPosition_Helper(unit);
 				unit->orderToIdle();
 			}
@@ -458,7 +454,7 @@ void orders_WarpingArchon(CUnit* unit) {
 
 				} //if(distanceBetweenUnits <= 19)
 
-			} //if(unit->mainOrderState == 0 || unit->getMovableState() != 2)
+			} //if(unit->mainOrderState == 0 || unit->getMovableState() != MovableState::UnmovableAtDestination)
 
 		} //if(distanceBetweenUnits > 20)
 		else {
