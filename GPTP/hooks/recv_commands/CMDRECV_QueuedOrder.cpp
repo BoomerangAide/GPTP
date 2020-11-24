@@ -5,8 +5,8 @@
 
 namespace {
 
-void function_4748E0(CUnit* unit, int x, int y, u8 orderId);								//748E0
-void function_474940(CUnit* unit, CUnit* target, u8 orderId);								//74940
+void function_004748E0(CUnit* unit, int x, int y, u8 orderId, COrder* order);				//748E0
+void function_00474940(CUnit* unit, CUnit* target, u8 orderId, COrder* order);				//74940
 void queueNewOrder_Helper(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
 						Point16 unkPos1, Point16 unkPos2, u32 unkQueuedOrderType);			//74B90
 void function_00475470(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 unitId,
@@ -22,21 +22,21 @@ void queueNewOrder(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u32 un
 {
 
 	//omitting the test <=4, probably bug case thus no performance impact
-
+	
 	if (unkQueuedOrderType == 0)
-		unit->performAnotherOrder(orderId, 0, 0, NULL, UnitId::None);
+		unit->performAnotherOrder(orderId, 0, 0, NULL, UnitId::None); //if not ignored, target would be the unkOrder value
 	else
 	if (unkQueuedOrderType == 1)
-		function_474940(unit,target,orderId);
+		function_00474940(unit,target,orderId, NULL);
 	else
 	if (unkQueuedOrderType == 2)
-		unit->performAnotherOrder(orderId,x,y,NULL,unitId);
+		unit->performAnotherOrder(orderId,x,y,NULL,unitId, NULL);
 	else
 	if (unkQueuedOrderType == 3)
-		function_4748E0(unit,x,y,orderId);
+		function_004748E0(unit,x,y,orderId, NULL);
 	else
 	if (unkQueuedOrderType == 4)
-		unit->performAnotherOrder(orderId, unkPos2.x, unkPos2.y, *(CUnit**)&unkPos1, UnitId::None);
+		unit->performAnotherOrder(orderId, unkPos2.x, unkPos2.y, *(CUnit**)&unkPos1, UnitId::None, NULL);
 
 }
 
@@ -107,19 +107,20 @@ void function_004754F0(CUnit* unit, u32 orderId, int x, int y, CUnit* target, u3
 namespace {
 
 //Equivalent to function @ 0x004748E0
-//also used in hooks\orders\medic_orders.cpp and in unhooked orders_Patrol
-void function_4748E0(CUnit* unit, int x, int y, u8 orderId) {
-	unit->performAnotherOrder(orderId, x, y, NULL, UnitId::None);
+//Used in hooks\orders\base_orders\patrol_order.cpp, hooks\orders\medic_orders.cpp 
+//and hooks\recv_commands\CMDRECV_QueuedOrder.cpp
+void function_004748E0(CUnit* unit, int x, int y, u8 orderId, COrder* order) {
+	unit->performAnotherOrder(orderId, x, y, NULL, UnitId::None, order);
 }
 
 ;
 
 //Equivalent to function @ 0x00474940, also used in hooks\orders\medic_orders.cpp
-void function_474940(CUnit* unit, CUnit* target, u8 orderId) {
+void function_00474940(CUnit* unit, CUnit* target, u8 orderId, COrder* order) {
 	if (target == NULL)
-		unit->performAnotherOrder(orderId, 0, 0, NULL, UnitId::None);
+		unit->performAnotherOrder(orderId, 0, 0, NULL, UnitId::None, order);
 	else
-		unit->performAnotherOrder(orderId, target->sprite->position.x, target->sprite->position.y, target, UnitId::None);
+		unit->performAnotherOrder(orderId, target->sprite->position.x, target->sprite->position.y, target, UnitId::None, order);
 }
 
 ;
