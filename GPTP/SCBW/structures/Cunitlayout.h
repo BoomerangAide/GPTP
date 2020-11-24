@@ -11,6 +11,7 @@ struct CImage;
 struct CSprite;
 struct COrder;
 struct CUnit;
+struct Path;
 
 struct StoredUnit {
 	union {
@@ -239,7 +240,7 @@ struct CUnitLayout {
             Target rally;
             CLink<CUnit> psi_link;
           };
-/*0x100*/ void*     path;						//use BW::Path* in BWAPI
+/*0x100*/ Path*     path;						//use BW::Path* in BWAPI
 /*0x104*/ u8        pathingCollisionInterval;  // unknown
 /*0x105*/ u8        pathingFlags;       // 0x01 = uses pathing; 0x02 = ?; 0x04 = ?
 /*0x106*/ u8        _unused_0x106;
