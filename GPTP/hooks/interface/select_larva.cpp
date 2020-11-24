@@ -5,11 +5,11 @@
 
 namespace {
 
-u32 getLarvaeUnitsFromList_Helper(CUnit** unitList, CUnit** outputList);									//0x00423190
-CUnit** getAllUnitsInBounds(Box16* coords);															//0x0042FF80
-u32 CUnitToUnitID(CUnit* unit);																		//0x0047B1D0
-Bool32 selectSingleUnitFromID(u32 unitIndex);														//0x00496D30
-void selectMultipleUnitsFromUnitList(CUnit** unitList, u32 unitsCount, Bool32 unk1, Bool32 unk2);	//0x0049AEF0
+u32 getLarvaeUnitsFromList_Helper(CUnit** unitList, CUnit** outputList);							//23190
+CUnit** getAllUnitsInBounds(Box16* coords);															//2FF80
+u32 CUnitToUnitID(CUnit* unit);																		//7B1D0
+Bool32 selectSingleUnitFromID(u32 unitIndex);														//96D30
+void selectMultipleUnitsFromUnitList(CUnit** unitList, u32 unitsCount, Bool32 unk1, Bool32 unk2);	//9AEF0
 
 } //unnamed namespace
 
