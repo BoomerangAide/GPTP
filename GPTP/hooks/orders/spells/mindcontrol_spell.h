@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-	void ordersCastMindControl(CUnit* unit);	//004F6950
+	void ordersCastMindControl(CUnit* unit);	//F6950
 
 	void injectMindControlSpellHook();
 
