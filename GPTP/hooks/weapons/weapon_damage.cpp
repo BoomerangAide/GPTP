@@ -1,6 +1,5 @@
 #include "weapon_damage.h"
 #include "../../SCBW/api.h"
-#include <algorithm>
 
 namespace {
 //Helper functions
@@ -11,7 +10,10 @@ u16 getUnitStrength(CUnit* unit, bool useGroundStrength);
 struct {
 	s32 damageType;
 	s32 unitSizeFactor[4];	 //Order: {independent, small, medium, large}
-} const damageFactor[5] = {
+}
+
+//Equivalent to array at 0x00515B88
+const damageFactor[5] = {
 	{0, 0, 0, 0, 0},				//Independent
 	{1, 0, 128, 192, 256},	//Explosive
 	{2, 0, 256, 128, 64},	 //Concussive
@@ -61,7 +63,6 @@ void weaponDamageHook(	s32		damage,
 			else
 				d_matrix_reduceAmount = target->defensiveMatrixHp;
 
-
 			damage -= d_matrix_reduceAmount;
 			target->reduceDefensiveMatrixHp(d_matrix_reduceAmount);
 
@@ -78,14 +79,14 @@ void weaponDamageHook(	s32		damage,
 
 				s32 plasmaShieldUpg = scbw::getUpgradeLevel(target->playerId, UpgradeId::ProtossPlasmaShields) * 256;
 
-				if (damage > plasmaShieldUpg) //Weird logic, Blizzard dev must have been sleepy
+				if (damage > plasmaShieldUpg)
 					damage -= plasmaShieldUpg;
 				else
 					damage = 128;
 
 			}
 
-			shieldReduceAmount = std::min(damage, target->shields);
+			shieldReduceAmount = MIN(damage, target->shields);
 			damage -= shieldReduceAmount;
 
 		}
@@ -95,7 +96,7 @@ void weaponDamageHook(	s32		damage,
 
 			const s32 armorTotal = target->getArmor() * 256;
 
-			damage -= std::min(damage, armorTotal);
+			damage -= MIN(damage, armorTotal);
 
 		}
 
