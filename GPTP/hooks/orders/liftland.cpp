@@ -114,7 +114,7 @@ void orders_BuildingLand(CUnit* unit) {
 	if(unit->mainOrderState == 1) {
 
 		//6448A
-		if(unit->getMovableState() != 0) {
+		if(unit->getMovableState() != MovableState::NotReachedDestination) {
 
 			int x,y;
 
@@ -177,7 +177,7 @@ void orders_BuildingLand(CUnit* unit) {
 
 			} //if(return_00473FB0 == 0)
 
-		} //if(unit->getMovableState()) != 0)
+		} //if(unit->getMovableState()) != MovableState::NotReachedDestination)
 
 	} //if(unit->mainOrderState == 1)
 	else
@@ -216,7 +216,7 @@ void orders_BuildingLand(CUnit* unit) {
 
 		//645C7:
 		//orderSignal is set by IScript animation
-		if( (unit->getMovableState() != 0) && (unit->orderSignal & 0x10) ) {
+		if( (unit->getMovableState() != MovableState::NotReachedDestination) && (unit->orderSignal & 0x10) ) {
 
 			CUnit* addon;
 
@@ -333,7 +333,7 @@ void orders_BuildingLand(CUnit* unit) {
 
 			}
 
-		} //if( (unit->getMovableState() != 0) && (unit->orderSignal & 0x10) )
+		} //if( (unit->getMovableState() != MovableState::NotReachedDestination) && (unit->orderSignal & 0x10) )
 
 	} //if(unit->mainOrderState == 3)
 
