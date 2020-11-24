@@ -280,7 +280,7 @@ void CMDRECV_RightClick_Proc(s16 x, s16 y, CUnit* target, u16 wUnitType, u8 bCom
 
 		*tileIndex_orderId = mapY * (*mapTileSize).width + mapX;
 
-		if (!((*activeTileArray)[*tileIndex_orderId].visibilityFlags & (1 << *ACTIVE_NATION_ID))) {
+		if (((*activeTileArray)[*tileIndex_orderId].visibilityFlags & (1 << *ACTIVE_NATION_ID)) == 0) {
 			target = function_00487FD0(x, y, wUnitType);
 			wUnitType = UnitId::None;
 		}
@@ -324,7 +324,7 @@ void CMDRECV_RightClick_Proc(s16 x, s16 y, CUnit* target, u16 wUnitType, u8 bCom
 		*saved_target = target;
 		*u8_0068C300 = OrderId::Nothing2;
 
-		//was initially a switch using values from array at 0x005153FC
+		//was initially a switch using values from array at 0x005153FC as called functions
 		if (rightClickAction == RightClickActions::NoCommand_AutoAttack || rightClickAction == RightClickActions::Unknown)
 			orderId = returnNothing2_Helper(current_unit, x, y, saved_target, wUnitType);
 		else
