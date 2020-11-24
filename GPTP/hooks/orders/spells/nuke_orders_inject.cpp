@@ -3,6 +3,46 @@
 
 namespace {
 
+void __declspec(naked) orders_NukePaintWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_NukePaint(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
+
+void __declspec(naked) orders_NukeLaunchWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_NukeLaunch(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
+
 void __declspec(naked) orders_NukeTrackWrapper() {
 
 	static CUnit* unit;
@@ -51,13 +91,55 @@ void __declspec(naked) orders_NukeGroundWrapper() {
 
 ;
 
+void __declspec(naked) orders_NukeUnitWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_NukeUnit(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
+
+void __declspec(naked) orders_NukeTrainWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_NukeTrain(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
 }//unnamed namespace
 
 namespace hooks {
 
-	void injectNukeOrdersHooks() {
-		jmpPatch(orders_NukeTrackWrapper,	0x00464D10, 2);
-		jmpPatch(orders_NukeGroundWrapper,	0x00479200, 0);
-	}
+void injectNukeOrdersHooks() {
+	jmpPatch(orders_NukePaintWrapper,	0x00463610, 1);
+	jmpPatch(orders_NukeLaunchWrapper,	0x00464730, 1);
+	jmpPatch(orders_NukeTrackWrapper,	0x00464D10, 2);
+	jmpPatch(orders_NukeGroundWrapper,	0x00479200, 0);
+	jmpPatch(orders_NukeUnitWrapper,	0x00479410, 1);
+	jmpPatch(orders_NukeTrainWrapper,	0x004E6700, 2);
+}
 
 } //hooks
