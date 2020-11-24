@@ -5,21 +5,21 @@
 
 namespace {
 
-bool isDistanceGreaterThanHaltDistance(CUnit* unit, int x, int y, u32 distance);	//01240
-void function_0042D9A0(CUnit* unit);												//2D9A0
-void AI_TrainingOverlord(CUnit* main_unit, CUnit* created_unit);					//35770
-bool function_00467030(CUnit* unit);												//67030
-CUnit* function_004678A0(CUnit* unit, u32 unitId);									//678A0
-void function_00498D70(CSprite* sprite, u32 imageId, u32 unk1, u32 unk2, u32 unk3);	//98D70
-void replaceSpriteImages(CSprite* sprite, u32 imageId, u32 imageDirection);			//99BB0
-void displayLastNetErrForPlayer(u32 playerId);										//9E530
-void updateUnitStrength(CUnit* unit);												//9FA40
-void function_004A01F0(CUnit* unit);												//A01F0
-CUnit* createUnit(u32 unitId, int x, int y, u32 playerId);							//A09D0
-void iscript_OpcodeCases(CImage* image, u32 offset_, u32 unk1, u32 unk2);			//D74C0
-void function_004D8500(CImage* image);												//D8500
-void makeToHoldPosition_Helper(CUnit* unit);										//EB5B0
-bool function_004EB9C0(CUnit* unit, int x, int y);									//EB9C0
+bool isDistanceGreaterThanHaltDistance(CUnit* unit, int x, int y, u32 distance);		//01240
+void function_0042D9A0(CUnit* unit);													//2D9A0
+void AI_TrainingOverlord(CUnit* main_unit, CUnit* created_unit);						//35770
+bool function_00467030(CUnit* unit);													//67030
+CUnit* function_004678A0(CUnit* unit, u32 unitId);										//678A0
+void createBottomOverlay(CSprite* sprite, u32 imageId, s32 x, s32 y, u32 direction);	//98D70
+void replaceSpriteImages(CSprite* sprite, u32 imageId, u32 imageDirection);				//99BB0
+void displayLastNetErrForPlayer(u32 playerId);											//9E530
+void updateUnitStrength(CUnit* unit);													//9FA40
+void function_004A01F0(CUnit* unit);													//A01F0
+CUnit* createUnit(u32 unitId, int x, int y, u32 playerId);								//A09D0
+void iscript_OpcodeCases(CImage* image, u32 offset_, u32 unk1, u32 unk2);				//D74C0
+void function_004D8500(CImage* image);													//D8500
+void makeToHoldPosition_Helper(CUnit* unit);											//EB5B0
+bool function_004EB9C0(CUnit* unit, int x, int y);										//EB9C0
 
 } //unnamed namespace
 
@@ -48,7 +48,7 @@ namespace hooks {
 
 			if(distance / 256 > distance_wanted) {
 				
-				if(unit->getMovableState() != 0)
+				if(unit->getMovableState() != MovableState::NotReachedDestination)
 					function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y);
 
 			}
@@ -73,7 +73,7 @@ namespace hooks {
 
 				if(!isDistanceGreaterThanHaltDistance(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y, distance_wanted)) {
 
-					if(unit->getMovableState() != 0)
+					if(unit->getMovableState() != MovableState::NotReachedDestination)
 						function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y);
 
 				}
@@ -104,7 +104,7 @@ namespace hooks {
 							replaceSpriteImages(builtUnit->sprite,ImageId::WarpAnchor,0);
 
 							if(isBuildingAssimilator)
-								function_00498D70(builtUnit->sprite,ImageId::VespeneGeyser,0,0,0);
+								createBottomOverlay(builtUnit->sprite,ImageId::VespeneGeyser,0,0,0);
 
 							unit->orderTarget.unit = builtUnit;
 
@@ -433,17 +433,16 @@ CUnit* function_004678A0(CUnit* unit, u32 unitId) {
 
 ;
 
-//imageId may not be really a parameter
 const u32 Func_Sub498D70 = 0x00498D70;
-void function_00498D70(CSprite* sprite, u32 imageId, u32 unk1, u32 unk2, u32 unk3) {
+void createBottomOverlay(CSprite* sprite, u32 imageId, s32 x, s32 y, u32 direction) {
 
 	__asm {
 		PUSHAD
 		MOV EAX, sprite
 		MOV ESI, imageId
-		PUSH unk1
-		PUSH unk2
-		PUSH unk3
+		PUSH direction
+		PUSH y
+		PUSH x
 		CALL Func_Sub498D70
 		POPAD
 	}
