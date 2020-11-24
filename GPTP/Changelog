@@ -1,3 +1,19 @@
+Version 5.932:
+
+- added path structure
+- added MovableState enum
+- orders_NukeTrain, orders_NukeLaunch, orders_NukePaint, orders_NukeUnit added in hooks\orders\spells\nuke_orders
+- orders_PlaceMine added in hooks\orders\spidermine
+- hooks\orders\cloak_nearby_units_order added
+- hooks\orders\base_orders\rightclick_order added
+- hooks\orders\spells\scanner_orders added
+- hooks\orders\spells\defense_matrix added
+- hooks\orders\base_orders\patrol_order added
+- hooks\orders\rescuable_order added
+- minor fixes and changes
+
+-----------
+
 Version 5.931:
 
 - fixed a mistake in orders_StayInRange() in hooks\orders\base_orders\move_orders.cpp
