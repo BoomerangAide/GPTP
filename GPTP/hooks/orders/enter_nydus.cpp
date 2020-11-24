@@ -124,10 +124,10 @@ namespace hooks {
 
 				u8 movableState = unit->getMovableState();
 
-				if(movableState == 1)	//reached destination
+				if(movableState == MovableState::ReachedDestination)
 					unit->mainOrderState = 2;
 				else
-				if(movableState != 0)	//(value is probably 2 == unmovable)
+				if(movableState != MovableState::NotReachedDestination)
 					unit->orderToIdle();
 
 			}
