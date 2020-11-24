@@ -5,6 +5,7 @@ namespace hooks {
 
 Bool32 SpiderMine_EnemyProc(CUnit* spiderMine, CUnit* target);	//40EC0
 void orders_VultureMine(CUnit* unit);							//63DF0
+void orders_PlaceMine(CUnit* unit);								//64FD0
 
 void injectSpiderMineHooks();
 
