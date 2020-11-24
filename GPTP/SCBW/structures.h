@@ -378,6 +378,38 @@ struct {
 C_ASSERT(sizeof(BinDlg) == 86); //0x56
 //static_assert(sizeof(BinDlg) == 86, "The size of the BinDlg structure is invalid");
 
+//Based on https://github.com/bwapi/bwapi/blob/master/bwapi/BWAPI/Source/BW/Path.h
+struct Path
+{
+/*0x00*/ Point16 start;
+/*0x04*/ Point16 next;
+/*0x08*/ Point16 finish;
+/*0x0C*/ u32 timeStarted;
+/*0x10*/ u32 unitID;
+/*0x14*/ u32 unitUnknown_0x38_0x3C_copy;   /* Starcraft copies field 0x38 of the unit
+                                                if the unit's flingy movement type is 0,
+                                                otherwise it will copy field 0x3C
+                                            */
+/*0x18*/ u8  isCalculating;  //1 if the path is being calculated and not yet ready
+/*0x19*/ u8  pathDelay;      //Delay before a new path is created
+/*0x1A*/ u8  unk_1A;         //unknown flag?
+/*0x1B*/ u8  pathCount;      //dup of num_areas?
+/*0x1C*/ u8  num_areas;      //Official name, number of regions following the segments
+/*0x1D*/ u8  cur_area;       //The current region index
+/*0x1E*/ u8  num_segments;   //Official name, number of Position segments
+/*0x1F*/ u8  cur_segment;    //The current position segment
+/*0x20*/ Point16 steps[1];
+}; 
+C_ASSERT(sizeof(Path) == 36); //0x24
+
+// note: u16 areas[num_areas] follow after steps[num_segments]
+// The last entry of the above struct can be viewed as follows:
+// Position steps[num_segments];
+// u16      regions[num_areas];  //region ID for SAI_Paths->regions; typically fills the rest of the struct with region IDs
+								 //to the destination, and cut off if there isn't enough room
+
+//End of Path.h based
+
 struct SMK_Structure {
 /*0x00*/ u32		smkOverlayOffset;
 /*0x04*/ u16		flags;				//use SmkFlags::Enum
