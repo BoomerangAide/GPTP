@@ -46,6 +46,30 @@ void __declspec(naked) orders_VultureMineWrapper() {
 }
 
 ;
+	
+void __declspec(naked) orders_PlaceMineWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_PlaceMine(unit);
+
+	__asm {
+		POPAD
+		MOV ESP, EBP
+		POP EBP
+		RETN
+	}
+
+}
+
+;
 
 } //unnamed namespace
 
@@ -54,6 +78,7 @@ namespace hooks {
 void injectSpiderMineHooks() {
 	jmpPatch(SpiderMine_EnemyProcWrapper,	0x00440EC0, 0);
 	jmpPatch(orders_VultureMineWrapper,		0x00463DF0, 2);
+	jmpPatch(orders_PlaceMineWrapper,		0x00464FD0, 0);
 }
 
 } //hooks
