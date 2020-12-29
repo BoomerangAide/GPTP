@@ -178,6 +178,14 @@
     <ClCompile Include="hooks\load_unload_proc_inject.cpp" />
     <ClCompile Include="hooks\main\game_hooks.cpp" />
     <ClCompile Include="hooks\main\game_hooks_inject.cpp" />
+    <ClCompile Include="hooks\orders\junkyarddog_order.cpp" />
+    <ClCompile Include="hooks\orders\junkyarddog_order_inject.cpp" />
+    <ClCompile Include="hooks\orders\warpin.cpp" />
+    <ClCompile Include="hooks\orders\warpin_inject.cpp" />
+    <ClCompile Include="hooks\orders\doodad_orders.cpp" />
+    <ClCompile Include="hooks\orders\doodad_orders_inject.cpp" />
+    <ClCompile Include="hooks\orders\critter_order.cpp" />
+    <ClCompile Include="hooks\orders\critter_order_inject.cpp" />    
     <ClCompile Include="hooks\orders\rescuable_order.cpp" />
     <ClCompile Include="hooks\orders\rescuable_order_inject.cpp" />
     <ClCompile Include="hooks\orders\base_orders\patrol_order.cpp" />
@@ -206,8 +214,8 @@
     <ClCompile Include="hooks\orders\shield_recharge_orders_inject.cpp" />    
     <ClCompile Include="hooks\orders\base_orders\attack_orders.cpp" />
     <ClCompile Include="hooks\orders\base_orders\attack_orders_inject.cpp" />
-    <ClCompile Include="hooks\orders\base_orders\die_order.cpp" />
-    <ClCompile Include="hooks\orders\base_orders\die_order_inject.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\die_orders.cpp" />
+    <ClCompile Include="hooks\orders\base_orders\die_orders_inject.cpp" />
     <ClCompile Include="hooks\orders\base_orders\move_orders.cpp" />
     <ClCompile Include="hooks\orders\base_orders\move_orders_inject.cpp" />    
     <ClCompile Include="hooks\orders\base_orders\stopholdpos_orders.cpp" />
@@ -393,6 +401,10 @@
     <ClInclude Include="hooks\interface\updateSelectedUnitsData.h" />
     <ClInclude Include="hooks\load_unload_proc.h" />
     <ClInclude Include="hooks\main\game_hooks.h" />
+    <ClInclude Include="hooks\orders\junkyarddog_order.h" />
+    <ClInclude Include="hooks\orders\warpin.h" />
+    <ClInclude Include="hooks\orders\doodad_orders.h" />
+    <ClInclude Include="hooks\orders\critter_order.h" />    
     <ClInclude Include="hooks\orders\rescuable_order.h" />
     <ClInclude Include="hooks\orders\base_orders\patrol_order.h" />
     <ClInclude Include="hooks\orders\spells\defense_matrix.h" />
@@ -407,7 +419,7 @@
     <ClInclude Include="hooks\orders\powerup.h" />
     <ClInclude Include="hooks\orders\shield_recharge_orders.h" />    
     <ClInclude Include="hooks\orders\base_orders\attack_orders.h" />
-    <ClInclude Include="hooks\orders\base_orders\die_order.h" />
+    <ClInclude Include="hooks\orders\base_orders\die_orders.h" />
     <ClInclude Include="hooks\orders\base_orders\move_orders.h" />    
     <ClInclude Include="hooks\orders\base_orders\stopholdpos_orders.h" />
     <ClInclude Include="hooks\orders\building_making\building_morph.h" />
