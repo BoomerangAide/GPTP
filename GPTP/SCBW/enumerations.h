@@ -103,7 +103,7 @@ enum Enum : u32 {
   CanBeChased           = 0x00000080,  /**< @todo Unknown */
   RequiresDetection     = 0x00000100,
   Cloaked               = 0x00000200,
-  DoodadStatesThing     = 0x00000400,  ///< Unknown. ++protoss unpowered buildings have this flag set
+  DoodadStatesThing     = 0x00000400,  /**< Unknown. ++protoss unpowered buildings have this flag set */
   CloakingForFree       = 0x00000800,  /**< Requires no energy to cloak */
   CanNotReceiveOrders   = 0x00001000,
   NoBrkCodeStart        = 0x00002000,  /**< Unbreakable code section in iscript */
@@ -132,7 +132,7 @@ namespace BUTTON_STATE {
 enum Enum {
 	Disabled = -1,
 	Invisible= 0,
-  Enabled   = 1
+	Enabled   = 1
 };
 }
 
