@@ -3,8 +3,9 @@
 
 namespace hooks {
 
-void orders_Die(CUnit* unit);		//79480
+void orders_SelfDestructing(CUnit* unit);	//75710
+void orders_Die(CUnit* unit);				//79480
 
-void injectDieOrderHook();
+void injectDieOrdersHook();
 
 } //hooks
