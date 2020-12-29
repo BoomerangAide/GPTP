@@ -58,8 +58,10 @@
 #include "hooks/recv_commands/CMDRECV_Stimpack.h"
 #include "hooks/recv_commands/CMDRECV_Stop.h"
 #include "hooks/create_init_units.h"
+#include "hooks/orders/critter_order.h"
 #include "hooks/orders/spells/defense_matrix.h"
-#include "hooks/orders/base_orders/die_order.h"
+#include "hooks/orders/base_orders/die_orders.h"
+#include "hooks/orders/critter_order.h"
 #include "hooks/orders/enter_nydus.h"
 #include "hooks/utils/ExtendSightLimit.h"
 #include "hooks/orders/spells/feedback_spell.h"
@@ -68,6 +70,7 @@
 #include "hooks/orders/harvest_orders.h"
 #include "hooks/orders/infestation.h"
 #include "hooks/orders/interceptor_return_order.h"
+#include "hooks/orders/junkyarddog_order.h"
 #include "hooks/orders/larva_creep_spawn.h"
 #include "hooks/orders/larva_order.h"
 #include "hooks/orders/liftland.h"
@@ -115,6 +118,7 @@
 #include "hooks/orders/unit_making/unit_train.h"
 #include "hooks/interface/updateSelectedUnitsData.h"
 #include "hooks/utils/utils.h"
+#include "hooks/orders/warpin.h"
 #include "hooks/interface/status_display/wireframe.h"
 #include "hooks/weapons/wpnspellhit.h"
 
@@ -158,7 +162,7 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectMakeNydusExitHook();
 	hooks::injectUnitMorphHooks();
 	hooks::injectWireframeHook();
-	hooks::injectDieOrderHook();
+	hooks::injectDieOrdersHook();
 	hooks::injectBuildingTerranHook();
 	hooks::injectBuildingProtossHooks();
 	hooks::injectUnitTrainHooks();
@@ -223,6 +227,10 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectDefensiveMatrixHooks();
 	hooks::injectPatrolOrderHook();
 	hooks::injectRescuableOrderHook();	
+	hooks::injectCritterOrderHook();
+	hooks::injectDoodadOrdersHooks();
+	hooks::injectWarpinOrderHook();
+	hooks::injectJunkYardDogOrderHook();	
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
