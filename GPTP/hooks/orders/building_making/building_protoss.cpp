@@ -451,7 +451,6 @@ void createBottomOverlay(CSprite* sprite, u32 imageId, s32 x, s32 y, u32 directi
 
 ;
 
-//named based on old removed unit_morph hooks set 
 const u32 Func_Sub499BB0 = 0x00499BB0;
 void replaceSpriteImages(CSprite *sprite, u32 imageId, u32 imageDirection) {
 	__asm {
