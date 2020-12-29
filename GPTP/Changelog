@@ -1,3 +1,14 @@
+Version 5.940:
+
+- renamed hooks\orders\base_orders\die_order to hooks\orders\base_orders\die_orders
+- added orders_SelfDestructing in hooks\orders\base_orders\die_orders
+- added orders_Critter in hooks\orders\critter_order
+- hooks\orders\doodad_orders added
+- hooks\orders\warpin added
+- hooks\orders\junkyarddog_order added
+
+-----------
+
 Version 5.932:
 
 - added path structure
