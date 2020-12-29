@@ -373,6 +373,7 @@ void removeOrderFromUnitQueue(CUnit* unit, COrder* order) {
 
 ;
 
+//Equivalent to function @ 0x004748E0
 //Used in hooks\orders\base_orders\patrol_order.cpp, hooks\orders\medic_orders.cpp 
 //and hooks\recv_commands\CMDRECV_QueuedOrder.cpp
 void function_004748E0(CUnit* unit, int x, int y, u8 orderId, COrder* order) {
