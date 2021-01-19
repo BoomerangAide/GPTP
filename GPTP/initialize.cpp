@@ -61,7 +61,7 @@
 #include "hooks/orders/critter_order.h"
 #include "hooks/orders/spells/defense_matrix.h"
 #include "hooks/orders/base_orders/die_orders.h"
-#include "hooks/orders/critter_order.h"
+#include "hooks/orders/doodad_orders.h"
 #include "hooks/orders/enter_nydus.h"
 #include "hooks/utils/ExtendSightLimit.h"
 #include "hooks/orders/spells/feedback_spell.h"
