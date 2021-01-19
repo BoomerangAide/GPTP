@@ -12,3 +12,4 @@ How to use:
 For a more complete information, check out https://github.com/BoomerangAide/GPTP-For-VS2008/blob/Update-4/GPTP/readme.txt
 
 Special thanks to A_of_s_t, RavenWolf, pastelmind, Heinermann, xAngelSpiritx, bajadulce, KYSXD and many others...
+Also special thanks to anybody that may have reported a bug or mistake in GPTP 2008 or this one, leading to improvement.
