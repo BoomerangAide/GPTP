@@ -392,7 +392,7 @@ void CUnit::damageWith(s32 damage, u8 weaponId, CUnit* attacker,
 	}
 }
 
-const u32 Func_DamageUnitHp = 0x004797B0;
+const u32 Func_DamageUnitHp = 0x004797B0;  //Note: hooked in hooks/weapons/weapon_damage files
 void CUnit::damageHp(s32 damage, CUnit* attacker, s32 attackingPlayer, bool notify) {
 	assert(this);
 
@@ -1101,7 +1101,6 @@ bool CUnit::giveTo(u8 playerId) {
 
 //Identical to function @ 0x00475A50
 bool CUnit::isDead() const {
-	assert(this);
 	return (!this->sprite) || (this->mainOrderId == OrderId::Die);
 }
 
