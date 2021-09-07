@@ -5,14 +5,14 @@
 
 namespace {
 
-Bool32 spreadsCreep(u32 unitId, Bool32 defaultReturn);		//13870
-void function_004148F0(int x, int y, u32 unitId);			//148F0
-void CreateBuildingLarva(CUnit* main_building);				//9D660
-Bool32 function_0049EC30(CUnit* unit);						//9EC30
-void updateUnitStrength(CUnit* unit);						//9FA40
-void function_004A01F0(CUnit* unit);						//A01F0
-CUnit* createUnit(u32 unitId, int x, int y, u32 playerId);	//A09D0
-CUnit* FindBestUnit(Box16* coords, u32 searchProc);			//E8830
+Bool32 spreadsCreep(u32 unitId, Bool32 defaultReturn);					//13870
+void function_004148F0(int x, int y, u32 unitId);						//148F0
+void CreateBuildingLarva(CUnit* main_building);							//9D660
+Bool32 function_0049EC30(CUnit* unit);									//9EC30
+void updateUnitStrength(CUnit* unit);									//9FA40
+void function_004A01F0(CUnit* unit);									//A01F0
+CUnit* createUnit(u32 unitId, int x, int y, u32 playerId);				//A09D0
+CUnit* FindBestUnit(Box16* coords, u32 searchProc, CBullet* bullet);	//E8830
 	
 } //unnamed namespace
 
@@ -51,8 +51,8 @@ void CreateInitialMeleeBuildings(u8 raceId, u32 playerId) {
 	searchBox.bottom = buildingSizeY / 2 + ((startPositions[playerId].y - (s16)(buildingSizeY / 2)) & 0x0000FFE0)  + buildingSizeY / 2 - 1;
 	searchBox.right = buildingSizeX / 2 + ((startPositions[playerId].x - (s16)(buildingSizeX / 2)) & 0x0000FFE0) + buildingSizeX / 2 - 1;
 
-	//yes, the return value is unused for some reason
-	FindBestUnit(&searchBox,Func_Sub49D640);
+	//proc an effect on each valid target, without caring about returning a value
+	FindBestUnit(&searchBox,Func_Sub49D640, NULL);
 
 	created_unit = 
 		createUnit(
@@ -392,7 +392,7 @@ CUnit* createUnit(u32 unitId, int x, int y, u32 playerId) {
 ;
 
 const u32 Func_FindBestUnit = 0x004E8830;
-CUnit* FindBestUnit(Box16* coords, u32 searchProc) {
+CUnit* FindBestUnit(Box16* coords, u32 searchProc, CBullet* bullet) {
 
 	static CUnit* unit;
 
@@ -400,6 +400,7 @@ CUnit* FindBestUnit(Box16* coords, u32 searchProc) {
 		PUSHAD
 		MOV EAX, coords
 		MOV EDI, searchProc
+		MOV EBX, bullet
 		CALL Func_FindBestUnit
 		MOV unit, EAX
 		POPAD
