@@ -5,7 +5,39 @@ extern const u32 Func_DoWeaponDamage; //Defined in CUnit.cpp
 
 namespace {
 
-//Inject with JmpPatch
+void __declspec(naked) killTargetUnitCheck_Wrapper() {
+
+	static CUnit* target;
+	static CUnit* attacker;
+	static s32 damage;
+	static u32 attackingPlayerId;
+	static Bool32 bNotify;
+
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV damage, EAX
+		MOV target, ECX
+		MOV EAX, [EBP+0x08]
+		MOV attacker, EAX
+		MOV EAX, [EBP+0x0C]
+		MOV attackingPlayerId, EAX
+		MOV EAX, [EBP+0x10]
+		MOV bNotify, EAX
+		PUSHAD
+	}
+
+	hooks::killTargetUnitCheck(target, damage, attacker, attackingPlayerId, bNotify);
+
+	__asm {
+		POPAD
+		POP EBP
+		RETN 0xC
+	}
+}
+
+;
+
 void __declspec(naked) weaponDamageWrapper() {
 
 	static CUnit* target;
@@ -44,12 +76,15 @@ void __declspec(naked) weaponDamageWrapper() {
 	}
 }
 
+;
+
 } //unnamed namespace
 
 namespace hooks {
 
 void injectWeaponDamageHook() {
-	jmpPatch(weaponDamageWrapper, 0x00479930, 1);
+	jmpPatch(killTargetUnitCheck_Wrapper,	0x004797B0, 0);
+	jmpPatch(weaponDamageWrapper,			0x00479930, 1);
 }
 
 } //hooks
