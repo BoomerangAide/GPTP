@@ -3,15 +3,15 @@
 
 namespace hooks {
 
-void UnitStatAct_Default(BinDlg* dialog);		//00425EE0
-void UnitStatAct_Powerup(BinDlg* dialog);		//00426EE0
-void UnitStatAct_Standard(BinDlg* dialog);		//00426F50
-void UnitStatAct_Egg(BinDlg* dialog);			//00427260
-void UnitStatAct_Archon(BinDlg* dialog);		//004273E0
-void UnitStatAct_CarrierReaver(BinDlg* dialog);	//004274A0
-void UnitStatAct_Building(BinDlg* dialog);		//00427890
-void UnitStatAct_Dropship(BinDlg* dialog);		//00427C90
-void UnitStatAct_Overlord(BinDlg* dialog);		//00427D30
+void UnitStatAct_Default(BinDlg* dialog);		//25EE0
+void UnitStatAct_Powerup(BinDlg* dialog);		//26EE0
+void UnitStatAct_Standard(BinDlg* dialog);		//26F50
+void UnitStatAct_Egg(BinDlg* dialog);			//27260
+void UnitStatAct_Archon(BinDlg* dialog);		//273E0
+void UnitStatAct_CarrierReaver(BinDlg* dialog);	//274A0
+void UnitStatAct_Building(BinDlg* dialog);		//27890
+void UnitStatAct_Dropship(BinDlg* dialog);		//27C90
+void UnitStatAct_Overlord(BinDlg* dialog);		//27D30
 
 void injectUnitStatActHooks();
 
