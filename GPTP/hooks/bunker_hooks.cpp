@@ -16,7 +16,8 @@ void setImageDirection(CImage *image, s8 direction);				//D5F80
 
 namespace hooks {
 
-/// Checks whether the unit can attack from inside a bunker.
+/// This is actually the order ran by units within a bunker.
+/// See ordersIDCases from hooks\orders\0_orders\orders_root.cpp
 void unitAttackFromInsideBunkerHook(CUnit* unit) {
 
 	if (
