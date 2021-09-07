@@ -1,3 +1,19 @@
+Version 5.950:
+
+- added ordersIDCases to orders_root
+- hooks\right_click_returnedOrders added, and functions moved in from hooks\recv_commands\CMDRECV_RightClick
+- Added PortraitId enum and use it in hooks\interface\status_display\unit_portrait
+- added displayUpdatePortrait hack in hooks\interface\status_display\unit_portrait_inject
+- unlocked DamageOverlay in images_dat now that use is confirmed
+- added killTargetUnitCheck in hooks\weapons\weapon_damage
+- hooks\weapons\weapon_impact added
+- hooks\weapons\wpnsplash added
+- Fixed mistake in helper function FindBestUnit where it appear
+- changed some comments to reflect new knowledge
+- minor fixes and changes
+
+-----------
+
 Version 5.940b (bugfix version):
 
 - fixed a mistake in hooks\orders\research_upgrade_orders.cpp
