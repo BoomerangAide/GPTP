@@ -2,9 +2,10 @@
 #include "../../../SCBW/structures.h"
 
 namespace hooks {
+	
+	u16 setBuildingSelPortrait(CUnit* unit, u16 unitId);	//26C60
+	void displayUpdatePortraitHack(u16* portraitId, CUnit** unit, u32* unkParam);
 
-	u16 setBuildingSelPortrait(CUnit* unit, u16 unitId);	//00426C60
-
-	void injectUnitPortraitHook();
+	void injectUnitPortraitHooks();
 
 }
