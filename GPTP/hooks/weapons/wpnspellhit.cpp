@@ -260,7 +260,7 @@ namespace hooks {
 				base_damage,
 				bullet->weaponType,
 				bullet->sourceUnit,
-				bullet->srcPlayer,
+				bullet->srcPlayerId,
 				bullet->direction1,
 				damageDivisor
 			);
@@ -318,7 +318,7 @@ namespace hooks {
 
 	//bullet is not normally part of the function, so if the function is called
 	//in an unexpected way, it may not contain the correct value.
-	///...
+	//...
 	//In the original code, the parameters are gotten from CBullet as:
 	//attacker from bullet->sourceUnit
 	//x and y from bullet->sprite->position
