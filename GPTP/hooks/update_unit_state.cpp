@@ -5,9 +5,9 @@
 
 namespace {
 //Helper function: Returns true if the unit's HP <= 33%.
-bool unitHpIsInRedZone(CUnit* unit);					//0x004022C0
-void RestoreAllUnitStats(CUnit* unit);					//0x00492F70 (hooked by hooks\update_status_effects.cpp)
-void setAllImageGroupFlagsPal11(CSprite* sprite);		//0x00497430
+bool unitHpIsInRedZone(CUnit* unit);				//022C0
+void RestoreAllUnitStats(CUnit* unit);				//92F70 (hooked by hooks\update_status_effects.cpp)
+void setAllImageGroupFlagsPal11(CSprite* sprite);	//97430
 } //unnamed namespace
 
 namespace hooks {
