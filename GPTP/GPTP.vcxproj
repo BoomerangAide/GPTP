@@ -128,6 +128,8 @@
     <ClCompile Include="hooks\cloak_nearby_units_inject.cpp" />
     <ClCompile Include="hooks\cloak_tech.cpp" />
     <ClCompile Include="hooks\cloak_tech_inject.cpp" />
+    <ClCompile Include="hooks\right_click_returnedOrders.cpp" />
+    <ClCompile Include="hooks\right_click_returnedOrders_inject.cpp" />
     <ClCompile Include="hooks\create_init_units.cpp" />
     <ClCompile Include="hooks\create_init_units_inject.cpp" />
     <ClCompile Include="hooks\detector.cpp" />
@@ -341,6 +343,10 @@
     <ClCompile Include="hooks\utils\replace_unit_inject.cpp" />
     <ClCompile Include="hooks\utils\utils.cpp" />
     <ClCompile Include="hooks\utils\utils_inject.cpp" />
+    <ClCompile Include="hooks\weapons\wpnsplash.cpp" />
+    <ClCompile Include="hooks\weapons\wpnsplash_inject.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_impact.cpp" />
+    <ClCompile Include="hooks\weapons\weapon_impact_inject.cpp" />    
     <ClCompile Include="hooks\weapons\weapon_cooldown.cpp" />
     <ClCompile Include="hooks\weapons\weapon_cooldown_inject.cpp" />
     <ClCompile Include="hooks\weapons\weapon_damage.cpp" />
@@ -376,6 +382,7 @@
     <ClInclude Include="hooks\bunker_hooks.h" />
     <ClInclude Include="hooks\cloak_nearby_units.h" />
     <ClInclude Include="hooks\cloak_tech.h" />
+    <ClInclude Include="hooks\right_click_returnedOrders.h" />
     <ClInclude Include="hooks\create_init_units.h" />
     <ClInclude Include="hooks\detector.h" />
     <ClInclude Include="hooks\give_unit.h" />
@@ -481,6 +488,8 @@
     <ClInclude Include="hooks\utils\ExtendSightLimit.h" />
     <ClInclude Include="hooks\utils\replace_unit.h" />
     <ClInclude Include="hooks\utils\utils.h" />
+    <ClInclude Include="hooks\weapons\wpnsplash.h" />
+    <ClInclude Include="hooks\weapons\weapon_impact.h" />    
     <ClInclude Include="hooks\weapons\weapon_cooldown.h" />
     <ClInclude Include="hooks\weapons\weapon_damage.h" />
     <ClInclude Include="hooks\weapons\weapon_fire.h" />
@@ -495,6 +504,7 @@
     <ClInclude Include="SCBW\enumerations\IconId.h" />
     <ClInclude Include="SCBW\enumerations\ImageId.h" />
     <ClInclude Include="SCBW\enumerations\OrderId.h" />
+    <ClInclude Include="SCBW\enumerations\PortraitId.h" />
     <ClInclude Include="SCBW\enumerations\SoundId.h" />
     <ClInclude Include="SCBW\enumerations\SpriteId.h" />
     <ClInclude Include="SCBW\enumerations\TechId.h" />
