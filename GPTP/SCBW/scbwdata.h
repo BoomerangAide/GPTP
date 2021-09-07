@@ -319,16 +319,16 @@ namespace images_dat {
 SCBW_DATA(const DatLoad*, imagesDat, 0x00514010);
 
 //SCBW_DATA(const u32*,  ???,		imagesDat[0].address);	//00668AA0 //"GRP File" according to EUDDB
-SCBW_DATA(const u8*,  IsTurnable,   imagesDat[1].address);	//0066E860
-SCBW_DATA(const u8*,  IsClickable,  imagesDat[2].address);	//0066C150
+SCBW_DATA(const u8*,	IsTurnable,		imagesDat[1].address);	//0066E860
+SCBW_DATA(const u8*,	IsClickable,	imagesDat[2].address);	//0066C150
 //SCBW_DATA(const u8*,  ???,		imagesDat[3].address);	//0066D4D8 //"Use Full Iscript" according to EUDDB
 //SCBW_DATA(const u8*,  ???,		imagesDat[4].address);	//00667718 //"Draw If Cloaked" according to EUDDB
-SCBW_DATA(const u8*,  RLE_Function, imagesDat[5].address);	//00669E28
-SCBW_DATA(const u8*,  Remapping,    imagesDat[6].address);	//00669A40
+SCBW_DATA(const u8*,	RLE_Function,	imagesDat[5].address);	//00669E28
+SCBW_DATA(const u8*,	Remapping,		imagesDat[6].address);	//00669A40
 //SCBW_DATA(const u32*,  ???,		imagesDat[7].address);	//0066EC48 //"Iscript ID" according to EUDDB
 //SCBW_DATA(const u32*,  ???,		imagesDat[8].address);	//0066C538 //"Shields Overlay" according to EUDDB
 //SCBW_DATA(const u32*,  ???,		imagesDat[9].address);	//0066B1B0 //"Attack Overlay" according to EUDDB
-//SCBW_DATA(const u32*,  ???,		imagesDat[10].address);	//0066A210 //"Damage Overlay" according to EUDDB
+SCBW_DATA(const u32*,	DamageOverlay,	imagesDat[10].address);	//0066A210
 //SCBW_DATA(const u32*,  ???,		imagesDat[11].address);	//00667B00 //"Special Overlay" according to EUDDB
 //SCBW_DATA(const u32*,  ???,		imagesDat[12].address);	//00666778 //"Landing Dust Overlay" according to EUDDB
 //SCBW_DATA(const u32*,  ???,		imagesDat[13].address);	//0066D8C0 //"Lift-off Dust Overlay" according to EUDDB
@@ -369,6 +369,7 @@ SCBW_DATA(const Point32*, angleDistance,        0x00512D28);
 SCBW_DATA(CUnit***,	tempUnitsListsArray,					0x006BB938);
 SCBW_DATA(u32*,		tempUnitsListCurrentArrayCount,			0x006BEE64);
 SCBW_DATA(u32*,		tempUnitsListArraysCountsListLastIndex,	0x006BEE6C);
+//Internal reminder: 0x006BEE6C[i] <=> 0x006BEE70[i-1]
 
 // Font & Drawing
 namespace graphics { class Font; class Bitmap; }
