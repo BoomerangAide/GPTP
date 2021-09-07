@@ -3,6 +3,7 @@
 
 namespace hooks {
 
+void ordersIDCases(CUnit* unit);		//EBED0
 void secondaryOrdersRoot(CUnit* unit);	//EC170
 void mainOrdersRoot(CUnit* unit);		//EC4D0
 
