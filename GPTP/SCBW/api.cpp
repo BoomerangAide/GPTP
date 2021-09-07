@@ -94,6 +94,7 @@ bool canBeEnteredBy(CUnit* transport, CUnit* unit) {
 }
 
 //Identical to function @ 0x00475CE0
+//AL = weaponId, EDX = target, [EBP+08] = attacker
 bool canWeaponTargetUnit(u8 weaponId, CUnit* target, CUnit* attacker) {
 
 	if (weaponId >= WEAPON_TYPE_COUNT)
