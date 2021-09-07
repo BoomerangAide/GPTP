@@ -222,6 +222,84 @@ static u32 mainOrder_func_offsets[][3] {
 };
 
 namespace hooks {
+	
+//Called from a global unitUpdate function
+//Deal with some automatic orders like
+//being in a bunker
+void ordersIDCases(CUnit* unit) {
+
+	if (
+		unit->mainOrderId != OrderId::TurretAttack &&
+		unit->mainOrderId != OrderId::Nothing2 &&
+		unit->mainOrderId != OrderId::Neutral &&
+		unit->mainOrderId != OrderId::Medic &&
+		unit->mainOrderId != OrderId::MedicHeal1
+	)
+	{
+
+		if (
+			unit->mainOrderId == OrderId::PlayerGuard || 
+			unit->mainOrderId == OrderId::TurretGuard ||
+			unit->mainOrderId == OrderId::StayinRange ||
+			unit->mainOrderId == OrderId::EnterTransport
+		)
+		{
+			if (unit->status & UnitStatus::InBuilding)
+				unit->orderComputerCL(OrderId::BunkerGuard);
+			else
+				unit->orderComputerCL(OrderId::Nothing2);
+		}
+		else {
+
+			switch (unit->mainOrderId)
+			{
+
+				case OrderId::Die:
+				case OrderId::Powerup1:
+				case OrderId::InfestMine4:
+				case OrderId::HarvestGas3:
+				case OrderId::Powerup2:
+				case OrderId::NukeLaunch:
+				case OrderId::ResetCollision1:
+				case OrderId::ResetCollision2:
+					EAX_order(unit, mainOrder_func_offsets[unit->mainOrderId][0]);
+					break;
+
+				default:
+
+					if (unit->orderQueueTimer != 0)
+						unit->orderQueueTimer--;
+					else {
+
+						unit->orderQueueTimer = 8;
+
+						if (unit->mainOrderId == OrderId::BunkerGuard)
+							EAX_order(unit, 0x004790A0); //see unitCanAttackInsideBunker in hooks\bunker_hooks
+						else
+						if(unit->mainOrderId == OrderId::Pickup4)
+							EAX_order(unit, mainOrder_func_offsets[OrderId::Pickup4][0]);
+						else
+						if (unit->mainOrderId == OrderId::ComputerAI) {
+							if(unit->status & UnitStatus::InBuilding)
+								EAX_order(unit, 0x004790A0); //see unitCanAttackInsideBunker in hooks\bunker_hooks
+						}
+						else
+						if(unit->mainOrderId == OrderId::RescuePassive)
+							EAX_order(unit, mainOrder_func_offsets[OrderId::RescuePassive][0]);
+
+					}
+
+					break;
+
+			}
+
+		}
+
+	}
+
+}
+
+;
 
 //Also known as 004EC170 performSecondaryOrders
 //Less complex than the one about main orders, so
