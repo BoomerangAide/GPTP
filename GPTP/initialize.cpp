@@ -94,6 +94,7 @@
 #include "hooks/orders/reset_collision.h"
 #include "hooks/right_click_CMDACT.h"
 #include "hooks/orders/base_orders/rightclick_order.h"
+#include "hooks/right_click_returnedOrders.h"
 #include "hooks/orders/spells/scanner_orders.h"
 #include "hooks/interface/select_larva.h"
 #include "hooks/interface/selection.h"
@@ -112,6 +113,7 @@
 #include "hooks/orders/base_orders/stopholdpos_orders.h"
 #include "hooks/recv_commands/train_cmd_receive.h"
 #include "hooks/orders/unit_making/unit_morph.h"
+#include "hooks/interface/status_display/unit_portrait.h"
 #include "hooks/interface/status_display/unit_stat_act.h"
 #include "hooks/interface/status_display/unit_stat_cond.h"
 #include "hooks/interface/status_display/unit_stat_selection.h"
@@ -119,8 +121,10 @@
 #include "hooks/interface/updateSelectedUnitsData.h"
 #include "hooks/utils/utils.h"
 #include "hooks/orders/warpin.h"
+#include "hooks/weapons/weapon_impact.h"
 #include "hooks/interface/status_display/wireframe.h"
 #include "hooks/weapons/wpnspellhit.h"
+#include "hooks/weapons/wpnsplash.h"
 
 /// This function is called when the plugin is loaded into StarCraft.
 /// You can enable/disable each group of hooks by commenting them.
@@ -207,7 +211,7 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectCMDRECV_ResearchUpgradeHooks();
 	hooks::injectReplaceUnitWithTypeHook();
 	hooks::injectCMDRECV_StimpackHook();
-	hooks::injectCMDRECV_RightClickHooks();
+	hooks::injectCMDRECV_RightClickHook();
 	hooks::injectRightClickCMDACT_Hooks();
 	hooks::injectCMDRECV_QueuedOrderHooks();
 	hooks::injectResetCollisionHooks();
@@ -230,7 +234,11 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectCritterOrderHook();
 	hooks::injectDoodadOrdersHooks();
 	hooks::injectWarpinOrderHook();
-	hooks::injectJunkYardDogOrderHook();	
+	hooks::injectJunkYardDogOrderHook();
+	hooks::injectRightClickReturnedOrdersHooks();
+	hooks::injectUnitPortraitHooks();
+	hooks::injectWeaponImpactHook();
+	hooks::injectWpnSplashHooks();
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
