@@ -34,7 +34,7 @@ struct CBullet {
   /*0x48*/ u16          flingyAcceleration;
   /*0x4A*/ u8           currentDirection;
   /*0x4B*/ u8           velocityDirection; //seems to always be the same as currentDirection
-  /*0x4C*/ u8           srcPlayer; // the player ID of the bullet owner
+  /*0x4C*/ u8           srcPlayerId; // the player ID of the bullet owner
   /*0x4D*/ u8           behaviourTypeInternal; // 0 = none
                                                // 1 = fly
                                                // 2 = fly & follow target
