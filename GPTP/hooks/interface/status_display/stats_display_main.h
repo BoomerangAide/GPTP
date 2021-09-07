@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-void function_00458120();			//00458120
+void function_00458120();	//58120
 
 void injectStatsDisplayMainHook();
 
