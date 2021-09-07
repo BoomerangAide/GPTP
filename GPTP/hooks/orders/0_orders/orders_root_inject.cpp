@@ -2,6 +2,26 @@
 #include <hook_tools.h>
 
 namespace {
+	
+void __declspec(naked) ordersIDCasesWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::ordersIDCases(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
 
 void __declspec(naked) secondaryOrdersRootWrapper() {
 
@@ -48,6 +68,7 @@ void __declspec(naked) mainOrdersRoottWrapper() {
 namespace hooks {
 
 void injectOrdersRootHooks() {
+	jmpPatch(ordersIDCasesWrapper,			0x004EBED0,	5);
 	jmpPatch(secondaryOrdersRootWrapper,	0x004EC170,	1);
 	jmpPatch(mainOrdersRoottWrapper,		0x004EC4D0,	3);
 }
