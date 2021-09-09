@@ -228,45 +228,41 @@ namespace hooks {
 //being in a bunker
 void ordersIDCases(CUnit* unit) {
 
-	if (
-		unit->mainOrderId != OrderId::TurretAttack &&
-		unit->mainOrderId != OrderId::Nothing2 &&
-		unit->mainOrderId != OrderId::Neutral &&
-		unit->mainOrderId != OrderId::Medic &&
-		unit->mainOrderId != OrderId::MedicHeal1
-	)
+	switch (unit->mainOrderId)
 	{
 
-		if (
-			unit->mainOrderId == OrderId::PlayerGuard || 
-			unit->mainOrderId == OrderId::TurretGuard ||
-			unit->mainOrderId == OrderId::StayinRange ||
-			unit->mainOrderId == OrderId::EnterTransport
-		)
-		{
+		case OrderId::Die:
+			PUSH_order(unit, mainOrder_func_offsets[unit->mainOrderId][0]);
+			break;
+
+		case OrderId::TurretAttack:
+		case OrderId::Nothing2:
+		case OrderId::Neutral:
+		case OrderId::Medic:
+		case OrderId::MedicHeal1:
+			break;
+
+		case OrderId::PlayerGuard:
+		case OrderId::TurretGuard:
+		case OrderId::StayinRange:
+		case OrderId::EnterTransport:
 			if (unit->status & UnitStatus::InBuilding)
 				unit->orderComputerCL(OrderId::BunkerGuard);
 			else
 				unit->orderComputerCL(OrderId::Nothing2);
-		}
-		else {
+			break;
 
-			switch (unit->mainOrderId)
-			{
-
-				case OrderId::Die:
-				case OrderId::Powerup1:
-				case OrderId::InfestMine4:
 				case OrderId::HarvestGas3:
-				case OrderId::Powerup2:
 				case OrderId::NukeLaunch:
+		case OrderId::InfestMine4:
 				case OrderId::ResetCollision1:
 				case OrderId::ResetCollision2:
+		case OrderId::Powerup1:
+		case OrderId::Powerup2:
 					EAX_order(unit, mainOrder_func_offsets[unit->mainOrderId][0]);
 					break;
 
 				default:
-
 					if (unit->orderQueueTimer != 0)
 						unit->orderQueueTimer--;
 					else {
@@ -288,12 +284,7 @@ void ordersIDCases(CUnit* unit) {
 							EAX_order(unit, mainOrder_func_offsets[OrderId::RescuePassive][0]);
 
 					}
-
 					break;
-
-			}
-
-		}
 
 	}
 
