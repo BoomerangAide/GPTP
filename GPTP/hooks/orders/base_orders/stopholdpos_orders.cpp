@@ -356,34 +356,34 @@ void orders_HoldPosition2(CUnit* unit)
 			unit->subunit->status |= UnitStatus::HoldingPosition;
 
 		unit->mainOrderState = 1;
+		
+	}
+		
+	if (attackApplyCooldown(unit)) {
 
-		if (attackApplyCooldown(unit)) {
-
-			if (
-				(
-					unit->subunit == NULL ||
-					!(units_dat::BaseProperty[unit->subunit->id] & UnitProperty::Subunit) ||
-					unit->id == UnitId::TerranGoliath ||
-					unit->id == UnitId::Hero_AlanSchezar
-				) &&
-				unit->nextMovementWaypoint != unit->orderTarget.pt
-			)
-			{
-				unit->nextMovementWaypoint.x = unit->orderTarget.pt.x;
-				unit->nextMovementWaypoint.y = unit->orderTarget.pt.y;
-			}
-
+		if (
+			(
+				unit->subunit == NULL ||
+				!(units_dat::BaseProperty[unit->subunit->id] & UnitProperty::Subunit) ||
+				unit->id == UnitId::TerranGoliath ||
+				unit->id == UnitId::Hero_AlanSchezar
+			) &&
+			unit->nextMovementWaypoint != unit->orderTarget.pt
+		)
+		{
+			unit->nextMovementWaypoint.x = unit->orderTarget.pt.x;
+			unit->nextMovementWaypoint.y = unit->orderTarget.pt.y;
 		}
-		else
-		if (unit->mainOrderTimer == 0) {
 
-			unit->mainOrderTimer = 15;
-			unit->orderTarget.unit = findRandomAttackTarget(unit);
+	}
+	else
+	if (unit->mainOrderTimer == 0) {
 
-			if (unit->orderTarget.unit != NULL)
-				unit->orderQueueTimer = 0;
+		unit->mainOrderTimer = 15;
+		unit->orderTarget.unit = findRandomAttackTarget(unit);
 
-		}
+		if (unit->orderTarget.unit != NULL)
+			unit->orderQueueTimer = 0;
 
 	}
 
