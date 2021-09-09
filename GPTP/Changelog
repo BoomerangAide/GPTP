@@ -1,3 +1,10 @@
+Version 5.950b (bugfix version):
+- Fixed the broken hold position order
+- Fixed ordersIDCases (notably wrong summon of die order, causing crash)
+- Fixed the status showing the "real" time of hallucinations/broodlings instead of 1/10 like normal
+
+-----------
+
 Version 5.950:
 
 - added ordersIDCases to orders_root
