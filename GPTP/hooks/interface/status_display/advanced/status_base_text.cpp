@@ -59,10 +59,10 @@ void stats_text_energy_timer(BinDlg* dialog) {
 			int currentTimer;
 
 			if(unit->status & UnitStatus::IsHallucination)
-				timerMax = 1350;
+				timerMax = 135; // 1/10 of internal value for display
 			else
 			if(unit->id == UnitId::ZergBroodling)
-				timerMax = 1800;
+				timerMax = 180; // 1/10 of internal value for display
 			else
 				timerMax = 0;
 
