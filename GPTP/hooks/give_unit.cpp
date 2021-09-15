@@ -89,7 +89,7 @@ namespace hooks {
 
 			if(
 				units_dat::GroupFlags[unit->id].isZerg != 1 &&
-				units_dat::GroupFlags[unit->id].isProtoss != 1 &&
+				units_dat::GroupFlags[unit->id].isProtoss != 0 &&
 				unit->status & UnitStatus::GroundedBuilding
 			)
 				*canUpdatePoweredStatus = 1;
