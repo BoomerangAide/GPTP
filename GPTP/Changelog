@@ -1,3 +1,8 @@
+Version 5.950c (bugfix version):
+Fixed an issue in "Give Unit" hook, allowing protoss buildings to not need pylons when "rescued"
+
+-----------
+
 Version 5.950b (bugfix version):
 - Fixed the broken hold position order
 - Fixed ordersIDCases (notably wrong summon of die order, causing crash)
