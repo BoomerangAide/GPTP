@@ -3,12 +3,11 @@
 
 namespace {
 
-//004BFA80
 void __declspec(naked) templarMergePartnerWrapper() {
 
-	static CUnit* unit;				//2nd push
-	static CUnit** units_list;		//1st push
-	static u32 units_list_length;	//eax
+	static CUnit* unit;
+	static CUnit** units_list;
+	static u32 units_list_length;
 
 	static CUnit* nearestPartner;
 
@@ -35,8 +34,9 @@ void __declspec(naked) templarMergePartnerWrapper() {
 	}
 
 }
+	
+;
 
-//00493B10
 void __declspec(naked) orders_CompletingArchonSummonWrapper() {
 
 	static CUnit* unit;
@@ -60,7 +60,8 @@ void __declspec(naked) orders_CompletingArchonSummonWrapper() {
 
 }
 
-//00494690
+;
+
 void __declspec(naked) orders_WarpingDarkArchonWrapper() {
 
 	static CUnit* unit;
@@ -79,7 +80,8 @@ void __declspec(naked) orders_WarpingDarkArchonWrapper() {
 
 }
 
-//004948B0
+;
+
 void __declspec(naked) orders_WarpingArchonWrapper() {
 
 	static CUnit* unit;
@@ -97,6 +99,8 @@ void __declspec(naked) orders_WarpingArchonWrapper() {
 	}
 
 }
+
+;
 
 } //unnamed namespace
 
