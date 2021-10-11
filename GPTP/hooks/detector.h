@@ -10,8 +10,8 @@ C_ASSERT(sizeof(DetectorCheckParam) == 8);
 
 namespace hooks {
 
-bool unitCanDetectHook(CUnit* unit);
-void getCloakedTargetVisibility(CUnit* detector, DetectorCheckParam* param);
+bool unitCanDetectHook(CUnit* unit);											//03430
+void getCloakedTargetVisibility(CUnit* detector, DetectorCheckParam* param);	//408A0
 
 void injectDetectorHooks();
 
