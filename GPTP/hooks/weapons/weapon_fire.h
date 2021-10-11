@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-void fireWeaponHook(CUnit* unit, u8 weaponId);
+void fireWeaponHook(CUnit* unit, u8 weaponId);	//79C90
 
 void injectWeaponFireHooks();
 
