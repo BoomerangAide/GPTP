@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-void orders_Spell(CUnit* unit);	//00492850
+void orders_Spell(CUnit* unit);	//92850
 
 void injectCastOrderHooks();
 
