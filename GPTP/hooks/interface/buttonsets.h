@@ -3,13 +3,13 @@
 
 namespace hooks {
 
-void updateButtonSetEx();						//00458BC0  updateButtonSetEx
-void updateButtonSet_Sub458D50();				//00458D50  sub_458D50
-void updateButtonSet();							//00458DE0  updateButtonSet
-void updateButtonSet_Sub4591D0();				//004591D0  sub_4591D0
-void updateCurrentButtonset();					//004599A0  updateCurrentButtonset
+void updateButtonSetEx();						//58BC0
+void updateButtonSet_Sub458D50();				//58D50
+void updateButtonSet();							//58DE0
+void updateButtonSet_Sub4591D0();				//591D0
+void updateCurrentButtonset();					//599A0
 
-void statbtn_BIN_CustomCtrlID(BinDlg* dialog);	//00459AD0 statbtn_BIN_CustomCtrlID
+void statbtn_BIN_CustomCtrlID(BinDlg* dialog);	//59AD0
 
 BUTTON_SET* getButtonSet(int index);
 
