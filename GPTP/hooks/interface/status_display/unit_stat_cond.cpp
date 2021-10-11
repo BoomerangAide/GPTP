@@ -357,14 +357,17 @@ bool function_00424A10() {
 	else
 	if(
 		(
-			unit->id != UnitId::ZergOverlord ||
-			UpgradesSc->currentLevel[unit->playerId][UpgradeId::VentralSacs] != 0
+			!(unit->status & UnitStatus::IsHallucination) &&
+			(
+				unit->id != UnitId::ZergOverlord ||
+				UpgradesSc->currentLevel[unit->playerId][UpgradeId::VentralSacs] != 0
+			)
 		) &&
 		units_dat::SpaceProvided[unit->id] != 0
 	)
 		return_value = !(unit->status & UnitStatus::Completed);
 	else
-	if(unit->status & UnitStatus::GroundedBuilding)
+	if(!(unit->status & UnitStatus::GroundedBuilding))
 		return_value = (
 			!(unit->status & UnitStatus::Completed) ||
 			unitIsTrainingOrMorphing(unit)
