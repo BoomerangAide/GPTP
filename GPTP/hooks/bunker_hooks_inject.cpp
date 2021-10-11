@@ -3,27 +3,6 @@
 
 namespace {
 
-const u32 Hook_UnitCanAttackInsideBunkerYes = 0x004790DC;
-void __declspec(naked) unitCanAttackInsideBunkerWrapper() {
-
-	static CUnit* unit;
-
-	__asm {
-		MOV unit, EAX
-		PUSHAD
-	}
-
-	hooks::unitAttackFromInsideBunkerHook(unit);
-
-	__asm {
-		POPAD
-		RETN
-	}
-
-}
-
-;
-
 void __declspec(naked) createBunkerAttackThingyWrapper() {
 
 	static CUnit* unit;
@@ -48,7 +27,6 @@ void __declspec(naked) createBunkerAttackThingyWrapper() {
 namespace hooks {
 
 void injectBunkerHooks() {
-  jmpPatch(unitCanAttackInsideBunkerWrapper,	0x004790A0, 2);
   jmpPatch(createBunkerAttackThingyWrapper,		0x00477FD0, 3);
 }
 
