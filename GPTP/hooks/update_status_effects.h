@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-void updateStatusEffects(CUnit* unit);
+void updateStatusEffects(CUnit* unit);	//92F70
 
 void injectUpdateStatusEffects();
 
