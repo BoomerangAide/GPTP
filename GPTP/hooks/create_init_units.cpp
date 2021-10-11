@@ -52,7 +52,7 @@ void CreateInitialMeleeBuildings(u8 raceId, u32 playerId) {
 	searchBox.right = buildingSizeX / 2 + ((startPositions[playerId].x - (s16)(buildingSizeX / 2)) & 0x0000FFE0) + buildingSizeX / 2 - 1;
 
 	//proc an effect on each valid target, without caring about returning a value
-	FindBestUnit(&searchBox,Func_Sub49D640, NULL);
+	FindBestUnit(&searchBox, Func_Sub49D640, NULL);
 
 	created_unit = 
 		createUnit(
@@ -90,18 +90,15 @@ void CreateInitialMeleeBuildings(u8 raceId, u32 playerId) {
 
 void CreateInitialMeleeUnits() {
 
-	u32 playerId;
-	u8* raceIdOffset;
+	PLAYER current_player;
+	u32 playerId = PLAYABLE_PLAYER_COUNT;
 
-	playerId = 8;
-	raceIdOffset = (u8*)0x0057F009;
+	while(playerId > 0) {
 
-	while(raceIdOffset != (u8*)0x0057EEE9) {
-
-		raceIdOffset -= 0x24;
 		playerId--;
+		current_player = playerTable[playerId];
 
-		if(*(raceIdOffset-1) == 2 || *(raceIdOffset-1) == 1) {
+		if(current_player.type == PlayerType::Human || current_player.type == PlayerType::Computer) {
 
 			//0 is use map settings,1 is Workers, 2 is Workers + Main Building
 			u8 startingUnits = (u8)(*(u16*)(0x00596871));
@@ -121,9 +118,9 @@ void CreateInitialMeleeUnits() {
 
 			if(startingUnits == 2) {
 
-				CreateInitialMeleeBuildings(*raceIdOffset,playerId);
+				CreateInitialMeleeBuildings(current_player.race,playerId);
 
-				if(*raceIdOffset == RaceId::Zerg)
+				if(current_player.race == RaceId::Zerg)
 					CreateInitialOverlord(playerId);
 
 			}
@@ -133,13 +130,13 @@ void CreateInitialMeleeUnits() {
 				u8 unitId;
 				CUnit* created_unit;
 
-				if(*raceIdOffset == RaceId::Zerg)
+				if(current_player.race == RaceId::Zerg)
 					unitId = UnitId::ZergDrone;
 				else
-				if(*raceIdOffset == RaceId::Terran)
+				if(current_player.race == RaceId::Terran)
 					unitId = UnitId::TerranSCV;
 				else
-				if(*raceIdOffset == RaceId::Protoss)
+				if(current_player.race == RaceId::Protoss)
 					unitId = UnitId::ProtossProbe;
 				else
 					unitId = UnitId::None;
@@ -155,13 +152,13 @@ void CreateInitialMeleeUnits() {
 
 				}
 
-				if(*raceIdOffset == RaceId::Zerg)
+				if(current_player.race == RaceId::Zerg)
 					unitId = UnitId::ZergDrone;
 				else
-				if(*raceIdOffset == RaceId::Terran)
+				if(current_player.race == RaceId::Terran)
 					unitId = UnitId::TerranSCV;
 				else
-				if(*raceIdOffset == RaceId::Protoss)
+				if(current_player.race == RaceId::Protoss)
 					unitId = UnitId::ProtossProbe;
 				else
 					unitId = UnitId::None;
@@ -177,13 +174,13 @@ void CreateInitialMeleeUnits() {
 
 				}
 
-				if(*raceIdOffset == RaceId::Zerg)
+				if(current_player.race == RaceId::Zerg)
 					unitId = UnitId::ZergDrone;
 				else
-				if(*raceIdOffset == RaceId::Terran)
+				if(current_player.race == RaceId::Terran)
 					unitId = UnitId::TerranSCV;
 				else
-				if(*raceIdOffset == RaceId::Protoss)
+				if(current_player.race == RaceId::Protoss)
 					unitId = UnitId::ProtossProbe;
 				else
 					unitId = UnitId::None;
@@ -199,13 +196,13 @@ void CreateInitialMeleeUnits() {
 
 				}
 
-				if(*raceIdOffset == RaceId::Zerg)
+				if(current_player.race == RaceId::Zerg)
 					unitId = UnitId::ZergDrone;
 				else
-				if(*raceIdOffset == RaceId::Terran)
+				if(current_player.race == RaceId::Terran)
 					unitId = UnitId::TerranSCV;
 				else
-				if(*raceIdOffset == RaceId::Protoss)
+				if(current_player.race == RaceId::Protoss)
 					unitId = UnitId::ProtossProbe;
 				else
 					unitId = UnitId::None;
