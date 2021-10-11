@@ -3,8 +3,7 @@
 
 namespace hooks {
 
-void unitAttackFromInsideBunkerHook(CUnit* unit);
-void createBunkerAttackThingyHook(CUnit* unit);
+void createBunkerAttackThingyHook(CUnit* unit);		//77FD0
 
 void injectBunkerHooks();
 
