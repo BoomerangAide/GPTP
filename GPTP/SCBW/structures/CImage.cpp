@@ -5,10 +5,11 @@
 #include <cassert>
 
 void CImage::playIscriptAnim(IscriptAnimation::Enum animation) {
-  assert(this);
+
   u32 animation_ = (u8)animation;
 
   const u32 Func_PlayIscriptAnim = 0x004D8470;  //AKA playImageIscript();
+	
   __asm {
     PUSHAD
     PUSH animation_
@@ -16,7 +17,10 @@ void CImage::playIscriptAnim(IscriptAnimation::Enum animation) {
     CALL Func_PlayIscriptAnim
     POPAD
   }
+	
 }
+
+;
 
 //should be equivalent to ImageDestructor @ 0x004D4CE0 with ESI = image
 void CImage::free() 
@@ -41,11 +45,15 @@ void CImage::free()
 
 }
 
+;
+
 //Loosely based on code at @ 0x004D5A50
 void CImage::setRemapping(ColorRemapping::Enum remapping) {
   assert(this);
   this->coloringData = colorShift[remapping].data;
 }
+
+;
 
 //Identical to function @ 0x004D5A50
 void CImage::initializeData(CSprite *parent, u16 imageId, s8 x, s8 y) {
@@ -75,7 +83,11 @@ void CImage::initializeData(CSprite *parent, u16 imageId, s8 x, s8 y) {
     this->coloringData = colorShift[images_dat::Remapping[imageId]].data;
 }
 
+;
+
 GrpFrame* CImage::getCurrentFrame() const {
 	assert(this);
 	return &this->grpOffset->frames[this->frameIndex];
 }
+
+;
