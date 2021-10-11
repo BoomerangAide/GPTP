@@ -4,51 +4,53 @@
 
 namespace {
 
-	void __declspec(naked) orders_UpgradeWrapper() {
+void __declspec(naked) orders_UpgradeWrapper() {
 
-		static CUnit* unit;
+	static CUnit* unit;
 
-		__asm {
-			PUSH EBP
-			MOV EBP, ESP
-			MOV unit, EAX
-			PUSHAD
-		}
-
-		hooks::orders_Upgrade(unit);
-
-		__asm {
-			POPAD
-			MOV ESP, EBP
-			POP EBP
-			RETN
-		}
-
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV unit, EAX
+		PUSHAD
 	}
 
-	;
+	hooks::orders_Upgrade(unit);
 
-	void __declspec(naked) orders_ResearchTechWrapper() {
-
-		static CUnit* unit;
-
-		__asm {
-			PUSH EBP
-			MOV EBP, ESP
-			MOV unit, EAX
-			PUSHAD
-		}
-
-		hooks::orders_ResearchTech(unit);
-
-		__asm {
-			POPAD
-			MOV ESP, EBP
-			POP EBP
-			RETN
-		}
-
+	__asm {
+		POPAD
+		MOV ESP, EBP
+		POP EBP
+		RETN
 	}
+
+}
+
+;
+
+void __declspec(naked) orders_ResearchTechWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_ResearchTech(unit);
+
+	__asm {
+		POPAD
+		MOV ESP, EBP
+		POP EBP
+		RETN
+	}
+
+}
+
+;
 
 }//unnamed namespace
 
