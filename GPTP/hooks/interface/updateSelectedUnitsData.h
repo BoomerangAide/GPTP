@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-	void updateSelectedUnitData();	//004C38B0
+	void updateSelectedUnitData();	//C38B0
 
 	void injectUpdateSelectedUnitsDataHook();
 
