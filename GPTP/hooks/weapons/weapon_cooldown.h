@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-u32 getModifiedWeaponCooldownHook(CUnit* unit, u8 weaponId);
+u32 getModifiedWeaponCooldownHook(CUnit* unit, u8 weaponId);	//75DC0
 
 void injectWeaponCooldownHook();
 
