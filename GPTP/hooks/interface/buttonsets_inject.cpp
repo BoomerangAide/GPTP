@@ -165,7 +165,7 @@ void injectButtonSetHooks() {
 	//jmpPatch(getButtonSetPatch_For_Sub4591D0,	Func_Sub_4591ED, 2);
 	jmpPatch(updateButtonSetExWrapper,			0x00458BC0, 1);
 	jmpPatch(updateButtonSet_Sub458D50Wrapper,	0x00458D50, 2);
-	jmpPatch(updateButtonSetWrapper,			0x00458DE0);
+	jmpPatch(updateButtonSetWrapper,			0x00458DE0, 0);
 	jmpPatch(function_4591D0Wrapper,			0x004591D0, 1);
 	jmpPatch(updateCurrentButtonsetWrapper,		0x004599A0, 6);
 	jmpPatch(statbtn_BIN_CustomCtrlIDWrapper,	0x00459AD0, 2);
