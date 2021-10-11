@@ -47,8 +47,6 @@ void __declspec(naked) stats_QueueProgress_Wrapper() {
 
 	static BinDlg* dialog;
 
-	//Note if bug: SUB ESP, 0x20 not added
-
 	__asm {
 		PUSH EBP
 		MOV EBP, ESP
@@ -75,8 +73,6 @@ void __declspec(naked) stats_MorphProgress_Wrapper() {
 	static BinDlg* dialog;
 	static int index;
 	static u32 unk;
-
-	//Note if bug: SUB ESP, 0x14 not added
 
 	__asm {
 
