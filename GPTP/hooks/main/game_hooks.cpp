@@ -1,4 +1,4 @@
-/// This is where the magic happens; program your plug-in's core behavior here.
+/// This is where to put various behaviors that cannot fit in a hook
 
 #include "game_hooks.h"
 #include <graphics/graphics.h>
@@ -8,7 +8,7 @@
 
 namespace hooks {
 
-/// This hook is called every frame; most of your plugin's logic goes here.
+/// This hook is called every frame.
 bool nextFrame() {
 
 	if (!scbw::isGamePaused()) { //If the game is not paused
@@ -35,13 +35,19 @@ bool nextFrame() {
 	return true;
   
 }
+	
+;
 
 bool gameOn() {
 	return true;
 }
 
+;
+
 bool gameEnd() {
 	return true;
 }
+	
+;
 
 } //hooks
