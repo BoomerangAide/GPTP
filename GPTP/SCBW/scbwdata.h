@@ -432,7 +432,7 @@ SCBW_DATA(u32*,           aiSupplyReserved,     0x006CA4BC);
 
 SCBW_DATA(const Bool32*,  IS_GAME_PAUSED,       	0x006509C4);  //See scbw::isGamePaused()
 SCBW_DATA(const Bool8*,   IS_BROOD_WAR,         	0x0058F440);  //See scbw::isBroodWarMode()
-SCBW_DATA(const u32*,     CHEAT_STATE,          	0x006D5A6C);  //See scbw::isCheatEnabled()
+SCBW_DATAu32*,     CHEAT_STATE,          			0x006D5A6C);  //See scbw::isCheatEnabled()
 SCBW_DATA(const s32*,     MAX_UNIT_WIDTH,       	0x006BEE68);
 SCBW_DATA(const s32*,     MAX_UNIT_HEIGHT,      	0x006BB930);
 SCBW_DATA(const Bool32*,  IS_IN_REPLAY,         	0x006D0F14);  //See scbw::isInReplay()
@@ -444,6 +444,7 @@ SCBW_DATA(Bool32*,		  IS_PLACING_BUILDING,  	0x00640880);
 
 //-------- Format strings used by Starcraft implementations of printf --------//
 
+SCBW_DATA(const char*,	FORMATSTRING_TEXT_SPACE_TEXT,										0x00503614); //"%s %s"
 SCBW_DATA(const char*,  FORMATSTRING_COLORYELLOW_VALUE_COLORCYAN_SPACE,						0x00505708); //"\x03%d\x01 "
 SCBW_DATA(const char*,	FORMATSTRING_VALUE_SPACE,											0x00505710); //"%d "
 SCBW_DATA(const char*,	FORMATSTRING_CURRENTVALUE1_MAXVALUE1_COLOR_CURRENTVALUE2_MAXVALUE2, 0x00505714); //"%d/%d %c%d/%d"
