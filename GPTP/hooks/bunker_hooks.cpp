@@ -1,79 +1,16 @@
 #include "bunker_hooks.h"
 #include <SCBW/scbwdata.h>
-#include "../SCBW/enumerations.h"
 
 //Helper function declarations. Do NOT modify!
 namespace {
 
-CUnit* findRandomAttackTarget(CUnit* unit);							//42FC0
-Bool32 attackApplyCooldown(CUnit* unit);							//78B40
 void setThingyVisibilityFlags(CThingy *thingy);						//878F0
 CThingy* createThingy(u16 spriteId, s16 x, s16 y, u8 playerId = 0);	//88210
 void setImageDirection(CImage *image, s8 direction);				//D5F80
 
-
 } //unnamed namespace
 
 namespace hooks {
-
-/// This is actually the order ran by units within a bunker.
-/// See ordersIDCases from hooks\orders\0_orders\orders_root.cpp
-void unitAttackFromInsideBunkerHook(CUnit* unit) {
-
-	if (
-		unit->id == UnitId::TerranMarine ||
-		unit->id == UnitId::Hero_JimRaynorMarine ||
-		unit->id == UnitId::TerranGhost ||
-		unit->id == UnitId::Hero_SarahKerrigan ||
-		unit->id == UnitId::Hero_AlexeiStukov ||
-		unit->id == UnitId::Hero_SamirDuran ||
-		unit->id == UnitId::Hero_InfestedDuran ||
-		unit->id == UnitId::TerranFirebat ||
-		unit->id == UnitId::Hero_GuiMontag
-	)
-	{
-
-		Bool32 resultApplyCooldown;
-
-		unit->status |= UnitStatus::HoldingPosition;
-
-		if(unit->subunit != NULL)
-			(unit->subunit)->status |= UnitStatus::HoldingPosition;
-
-		resultApplyCooldown = attackApplyCooldown(unit);
-
-		if(resultApplyCooldown != 0) {
-
-			if(
-				unit->orderTarget.pt.x != unit->nextTargetWaypoint.x ||
-				unit->orderTarget.pt.y != unit->nextTargetWaypoint.y
-			)
-			{
-				unit->nextTargetWaypoint.x = unit->orderTarget.pt.x;
-				unit->nextTargetWaypoint.y = unit->orderTarget.pt.y;
-			}
-
-		}
-		else {
-
-			if(unit->mainOrderTimer == 0) {
-
-				unit->mainOrderTimer = 15;
-
-				unit->orderTarget.unit = findRandomAttackTarget(unit);
-
-				if(unit->orderTarget.unit != NULL)
-					unit->orderQueueTimer = 0;
-
-			} //if(unit->mainOrderTimer == 0)
-
-		} //if(resultApplyCooldown == 0)
-
-	} //if valid id
-
-}
-
-;
 
 //not checked against original code by UndeadStar
 void createBunkerAttackThingyHook(CUnit* unit) {
@@ -92,13 +29,13 @@ void createBunkerAttackThingyHook(CUnit* unit) {
 	u8 frameAngle;
 	u16 spriteId;
 
-	if (unit->id == UnitId::firebat || unit->id == UnitId::gui_montag) {
+	if (unit->id == UnitId::TerranFirebat || unit->id == UnitId::Hero_GuiMontag) {
 		frameAngle = ((unit->currentDirection1 + 8) / 16 % 16) * 16;
-		spriteId = 378; //Firebat flamethrower graphics
+		spriteId = SpriteId::FlameThrower; //Firebat flamethrower graphics
 	}
 	else {
 		frameAngle = frameDirection * 32;
-		spriteId = 377; //Bunker attack overlay
+		spriteId = SpriteId::Bunker_Overlay; //Bunker attack overlay
 	}
 
 	CThingy *bunkerAttackEffect = 
@@ -122,50 +59,14 @@ void createBunkerAttackThingyHook(CUnit* unit) {
 
 }
 
+;
+
 } //hooks
 
 
 //-------- Helper function definitions. Do NOT modify! --------//
 
 namespace {
-
-const u32 Func_findRandomAttackTarget = 0x00442FC0;
-CUnit* findRandomAttackTarget(CUnit* unit) {
-
-	static CUnit* target;
-
-	__asm {
-		PUSHAD
-		MOV ESI, unit
-		CALL Func_findRandomAttackTarget
-		MOV target, EAX
-		POPAD
-	}
-
-	return target;
-
-}
-
-;
-
-const u32 Func_attackApplyCooldown = 0x00478B40;
-Bool32 attackApplyCooldown(CUnit* unit) {
-
-	static u32 result;
-
-	__asm {
-		PUSHAD
-		MOV EAX, unit
-		CALL Func_attackApplyCooldown
-		MOV result, EAX
-		POPAD
-	}
-
-	return result;
-
-}
-	
-;
 
 const u32 Func_SetThingyVisibilityFlags = 0x004878F0;
 void setThingyVisibilityFlags(CThingy *thingy) {
