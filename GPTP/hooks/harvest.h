@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-void transferResourceToWorkerHook(CUnit* worker, CUnit* resource);
+void transferResourceToWorkerHook(CUnit* worker, CUnit* resource);	//696D0
 
 void injectHarvestResource();
 
