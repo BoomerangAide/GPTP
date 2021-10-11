@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-u32 getSightRangeHook(CUnit* unit, bool isForSpellCasting);
+u32 getSightRangeHook(CUnit* unit, bool isForSpellCasting);	//E5B40
 
 void injectSightRangeHook();
 
