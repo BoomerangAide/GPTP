@@ -1,8 +1,6 @@
 #include "selection.h"
 #include <SCBW/api.h>
 
-#pragma warning( disable: 6386 )
-
 //Helper functions declaration
 namespace {
 
@@ -638,6 +636,7 @@ namespace hooks {
 
 						//either erase the element to delete or one that was repeated
 						//after memcpy
+#pragma warning( suppress: 6386 )
 						local_temp_array_1[arrayIndex] = NULL;
 						
 						if(arrayIndex == 1) {
