@@ -4,7 +4,6 @@
 
 namespace {
 
-
 const u32 Func_CreateContextHelp = 0x00481510;
 //Identical to function @ 0x00457350
 void createContextHelpFromDialog(BinDlg* dialog, const char *text) {
@@ -26,8 +25,10 @@ void createContextHelpFromDialog(BinDlg* dialog, const char *text) {
 	}
 
 }
+	
+;
 
-//Replaces function @ 0x004576A0
+//Replaces function @ 0x004576A0 by replacing the call to it
 void __stdcall statdatalUserInteractWrapper(BinDlg *consoleIcon) {
 
 	GuiOverlay *gui = (GuiOverlay*) consoleIcon->user;
@@ -51,6 +52,8 @@ void __stdcall statdatalUserInteractWrapper(BinDlg *consoleIcon) {
 			break;
 	}
 }
+	
+;
 
 } //unnamed namespace
 
