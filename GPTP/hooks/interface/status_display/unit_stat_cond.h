@@ -3,19 +3,19 @@
 
 namespace hooks {
 
-bool UnitStatCond_Never();			//00424500
-bool UnitStatCond_Powerup();		//00424520
-bool UnitStatCond_Standard();		//00424980
-bool UnitStatCond_Egg();			//00424AC0
-bool UnitStatCond_Archon();			//00424AF0
-bool UnitStatCond_CarrierReaver();	//00424B50
-bool UnitStatCond_Dropship();		//00424F10
-bool UnitStatCond_Building();		//00425180
-bool UnitStatCond_overlord();		//00425900
+bool UnitStatCond_Never();			//24500
+bool UnitStatCond_Powerup();		//24520
+bool UnitStatCond_Standard();		//24980
+bool UnitStatCond_Egg();			//24AC0
+bool UnitStatCond_Archon();			//24AF0
+bool UnitStatCond_CarrierReaver();	//24B50
+bool UnitStatCond_Dropship();		//24F10
+bool UnitStatCond_Building();		//25180
+bool UnitStatCond_overlord();		//25900
 
-bool function_00424780();			//00424780
-bool function_00424A10();			//00424A10
-bool function_00425230();			//00425230
+bool function_00424780();			//24780
+bool function_00424A10();			//24A10
+bool function_00425230();			//25230
 
 void injectUnitStatCondHooks();
 
