@@ -18,180 +18,183 @@ void makeToHoldPosition_Helper(CUnit* unit);						//EB5B0
 
 namespace hooks {
 
-	//00464AE0
-	void ordersTankMode(CUnit* unit) {
+void ordersTankMode(CUnit* unit) {
 
-		bool bStopThere = false;
+	bool bStopThere = false;
 
-		if(unit->mainOrderState == 0) {
+	if(unit->mainOrderState == 0) {
 
-			if(unit->id == UnitId::TerranSiegeTankSiegeMode || unit->id == UnitId::Hero_EdmundDukeSiegeMode) {
+		if(unit->id == UnitId::TerranSiegeTankSiegeMode || unit->id == UnitId::Hero_EdmundDukeSiegeMode) {
 
-				if(!(unit->subunit->status & UnitStatus::NoBrkCodeStart)) {
+			if(!(unit->subunit->status & UnitStatus::NoBrkCodeStart)) {
 
+				unit->subunit->orderTo(OrderId::Nothing3,unit);
+				unitSetRetreatPoint(unit->subunit, units_dat::StartDirection[unit->subunit->id]);
+				playSubunitIscript(unit,IscriptAnimation::SpecialState1);
+				unit->mainOrderState = 2;
+
+			}
+
+		}
+		else {
+			bStopThere = true;
+			unit->orderToIdle();
+		}
+
+	} //unit->mainOrderState == 0
+
+	if(!bStopThere && unit->mainOrderState == 2) {
+
+		if(getCloserToDestination_sub402BE0(unit->subunit)) {
+
+			CImage* current_image = unit->sprite->images.head;
+
+			while(current_image != NULL) {
+				current_image->playIscriptAnim(IscriptAnimation::SpecialState2);
+				current_image = current_image->link.next;
+			}
+
+			playSubunitIscript(unit,IscriptAnimation::SpecialState2);
+			unit->orderSignal &= ~0x01; //if bit 1 is set, unset it
+			unit->mainOrderState = 3;
+
+		}
+
+	} //unit->mainOrderState == 2
+
+	if(!bStopThere && unit->mainOrderState == 3) {
+
+		if(unit->orderSignal & 1) {
+
+			u16 unitNewId;
+
+			unit->orderSignal -= 1;
+
+			if(unit->id == UnitId::Hero_EdmundDukeSiegeMode)
+				unitNewId = UnitId::Hero_EdmundDukeTankMode;
+			else
+			if(unit->id == UnitId::TerranSiegeTankSiegeMode)
+				unitNewId = UnitId::TerranSiegeTankTankMode;
+			else
+				unitNewId = unit->id;
+
+			replaceUnitWithType(unit,unitNewId);
+			orderReturnToIdle(unit);
+			orderReturnToIdle(unit->subunit);
+
+		}
+
+	} //unit->mainOrderState == 3
+
+
+} //ordersTankMode
+
+;
+
+void ordersSiegeMode(CUnit* unit) {
+
+	bool bStopThere = false;
+
+	if(unit->mainOrderState == 0) {
+
+		if(unit->id == UnitId::TerranSiegeTankTankMode || unit->id == UnitId::Hero_EdmundDukeTankMode) {
+
+			if(unit->movementFlags & MovementFlags::Accelerating)
+				makeToHoldPosition_Helper(unit);
+
+			unit->mainOrderState = 1;
+
+		}
+		else {
+
+			unit->orderToIdle();
+			bStopThere = true;
+
+		}
+
+	} //unit->mainOrderState == 0
+
+	if(!bStopThere && unit->mainOrderState == 1) {
+
+		if( !(unit->movementFlags & MovementFlags::Accelerating) ) {
+
+			if( !(unit->subunit->movementFlags & MovementFlags::Accelerating) ) {
+
+				if( !(unit->subunit->status & UnitStatus::NoBrkCodeStart) ) {
+
+					unitSetRetreatPoint(unit,units_dat::StartDirection[unit->id]);
 					unit->subunit->orderTo(OrderId::Nothing3,unit);
-					unitSetRetreatPoint(unit->subunit, units_dat::StartDirection[unit->subunit->id]);
+					unitSetRetreatPoint(unit->subunit,units_dat::StartDirection[unit->subunit->id]);
 					playSubunitIscript(unit,IscriptAnimation::SpecialState1);
 					unit->mainOrderState = 2;
 
+					if(checkForCloseUnit_sub464290(unit))
+						bStopThere = true;
+
 				}
 
 			}
-			else {
-				bStopThere = true;
-				unit->orderToIdle();
-			}
+		}
 
-		} //unit->mainOrderState == 0
+	} //unit->mainOrderState == 1
 
-		if(!bStopThere && unit->mainOrderState == 2) {
+	if(!bStopThere && unit->mainOrderState == 2) {
 
-			if(getCloserToDestination_sub402BE0(unit->subunit)) {
+		if( getCloserToDestination_sub402BE0(unit) ) {
 
-				CImage* current_image = unit->sprite->images.head;
+			if( getCloserToDestination_sub402BE0(unit->subunit) ) {
 
-				while(current_image != NULL) {
-					current_image->playIscriptAnim(IscriptAnimation::SpecialState2);
-					current_image = current_image->link.next;
-				}
+				u16 unitNewId = unit->id;
 
-				playSubunitIscript(unit,IscriptAnimation::SpecialState2);
-				unit->orderSignal &= ~0x01; //if bit 1 is set, unset it
+				//identical to @00463310
+				if(unit->id == UnitId::TerranSiegeTankTankMode)
+					unitNewId = UnitId::TerranSiegeTankSiegeMode;
+				else
+				if(unit->id == UnitId::Hero_EdmundDukeTankMode)
+					unitNewId = UnitId::Hero_EdmundDukeSiegeMode;
+				else
+					unitNewId = unit->id;					
+
+				replaceUnitWithType(unit,unitNewId);
 				unit->mainOrderState = 3;
 
 			}
 
-		} //unit->mainOrderState == 2
-		
-		if(!bStopThere && unit->mainOrderState == 3) {
+		}
 
-			if(unit->orderSignal & 1) {
+	} //unit->mainOrderState == 2
 
-				u16 unitNewId;
+	if(!bStopThere && unit->mainOrderState == 3) {
 
-				unit->orderSignal -= 1;
+		if(unit->orderSignal & 1) {
 
-				if(unit->id == UnitId::Hero_EdmundDukeSiegeMode)
-					unitNewId = UnitId::Hero_EdmundDukeTankMode;else
-				if(unit->id == UnitId::TerranSiegeTankSiegeMode)
-					unitNewId = UnitId::TerranSiegeTankTankMode;
-				else
-					unitNewId = unit->id;
+			unit->orderSignal -= 1;
 
-				replaceUnitWithType(unit,unitNewId);
+			if(unit->orderQueueHead != NULL) {
+
+				if( !(unit->orderQueueHead->orderId == OrderId::WatchTarget) ) {
+
+					unit->orderComputerCL(units_dat::ReturnToIdleOrder[unit->id]);
+					actUnitReturnToIdle(unit);
+					orderReturnToIdle(unit->subunit);
+					bStopThere = true;
+
+				}
+
+			}
+
+			if(!bStopThere) {
 				orderReturnToIdle(unit);
 				orderReturnToIdle(unit->subunit);
-
 			}
 
-		} //unit->mainOrderState == 3
+		}
 
+	} //unit->mainOrderState == 3
 
-	} //ordersTankMode
+}
 
-	//00464BD0
-	void ordersSiegeMode(CUnit* unit) {
-
-		bool bStopThere = false;
-
-		if(unit->mainOrderState == 0) {
-
-			if(unit->id == UnitId::TerranSiegeTankTankMode || unit->id == UnitId::Hero_EdmundDukeTankMode) {
-
-				if(unit->movementFlags & MovementFlags::Accelerating)
-					makeToHoldPosition_Helper(unit);
-
-				unit->mainOrderState = 1;
-
-			}
-			else {
-
-				unit->orderToIdle();
-				bStopThere = true;
-
-			}
-
-		} //unit->mainOrderState == 0
-
-		if(!bStopThere && unit->mainOrderState == 1) {
-
-			if( !(unit->movementFlags & MovementFlags::Accelerating) ) {
-
-				if( !(unit->subunit->movementFlags & MovementFlags::Accelerating) ) {
-
-					if( !(unit->subunit->status & UnitStatus::NoBrkCodeStart) ) {
-
-						unitSetRetreatPoint(unit,units_dat::StartDirection[unit->id]);
-						unit->subunit->orderTo(OrderId::Nothing3,unit);
-						unitSetRetreatPoint(unit->subunit,units_dat::StartDirection[unit->subunit->id]);
-						playSubunitIscript(unit,IscriptAnimation::SpecialState1);
-						unit->mainOrderState = 2;
-
-						if(checkForCloseUnit_sub464290(unit))
-							bStopThere = true;
-
-					}
-
-				}
-			}
-
-		} //unit->mainOrderState == 1
-
-		if(!bStopThere && unit->mainOrderState == 2) {
-
-			if( getCloserToDestination_sub402BE0(unit) ) {
-
-				if( getCloserToDestination_sub402BE0(unit->subunit) ) {
-
-					u16 unitNewId = unit->id;
-
-					//identical to @00463310
-					if(unit->id == UnitId::TerranSiegeTankTankMode)
-						unitNewId = UnitId::TerranSiegeTankSiegeMode;
-					else
-					if(unit->id == UnitId::Hero_EdmundDukeTankMode)
-						unitNewId = UnitId::Hero_EdmundDukeSiegeMode;
-					else
-						unitNewId = unit->id;					
-
-					replaceUnitWithType(unit,unitNewId);
-					unit->mainOrderState = 3;
-
-				}
-
-			}
-
-		} //unit->mainOrderState == 2
-
-		if(!bStopThere && unit->mainOrderState == 3) {
-
-			if(unit->orderSignal & 1) {
-
-				unit->orderSignal -= 1;
-
-				if(unit->orderQueueHead != NULL) {
-
-					if( !(unit->orderQueueHead->orderId == OrderId::WatchTarget) ) {
-
-						unit->orderComputerCL(units_dat::ReturnToIdleOrder[unit->id]);
-						actUnitReturnToIdle(unit);
-						orderReturnToIdle(unit->subunit);
-						bStopThere = true;
-
-					}
-
-				}
-
-				if(!bStopThere) {
-					orderReturnToIdle(unit);
-					orderReturnToIdle(unit->subunit);
-				}
-
-			}
-
-		} //unit->mainOrderState == 3
-
-	}
+;
 
 } //hooks
 
