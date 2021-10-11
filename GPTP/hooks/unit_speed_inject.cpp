@@ -3,7 +3,6 @@
 
 namespace {
 
-//Inject with jmpPatch()
 void __declspec(naked) getModifiedUnitSpeedWrapper() {
 
 	static CUnit* unit;
@@ -25,7 +24,29 @@ void __declspec(naked) getModifiedUnitSpeedWrapper() {
 
 }
 
-//Inject with jmpPatch()
+;
+
+void __declspec(naked) getModifiedUnitTurnSpeedWrapper() {
+
+	static CUnit* unit;
+	static u32 turnSpeed;
+
+	__asm {
+		MOV unit, ECX
+		PUSHAD
+	}
+
+	turnSpeed = hooks::getModifiedUnitTurnSpeedHook(unit);
+
+	__asm {
+		POPAD
+		MOV EAX, turnSpeed
+		RETN
+	}
+}
+
+;
+
 void __declspec(naked) getModifiedUnitAccelerationWrapper() {
 
 	static CUnit* unit;
@@ -46,25 +67,7 @@ void __declspec(naked) getModifiedUnitAccelerationWrapper() {
 
 }
 
-//Inject with jmpPatch()
-void __declspec(naked) getModifiedUnitTurnSpeedWrapper() {
-
-	static CUnit* unit;
-	static u32 turnSpeed;
-
-	__asm {
-		MOV unit, ECX
-		PUSHAD
-	}
-
-	turnSpeed = hooks::getModifiedUnitTurnSpeedHook(unit);
-
-	__asm {
-		POPAD
-		MOV EAX, turnSpeed
-		RETN
-	}
-}
+;
 
 } //unnamed namespace
 
@@ -72,8 +75,8 @@ namespace hooks {
 
 void injectUnitSpeedHooks() {
 	jmpPatch(getModifiedUnitSpeedWrapper,         0x0047B5F0, 2);
-	jmpPatch(getModifiedUnitAccelerationWrapper,  0x0047B8A0, 6);
 	jmpPatch(getModifiedUnitTurnSpeedWrapper,     0x0047B850, 6);
+	jmpPatch(getModifiedUnitAccelerationWrapper,  0x0047B8A0, 6);
 }
 
 } //hooks
