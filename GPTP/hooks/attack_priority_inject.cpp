@@ -3,8 +3,6 @@
 
 namespace {
 
-const u32 Hook_GetAttackPriority = 0x00442160;
-//Inject with jmpPatch()
 void __declspec(naked) getAttackPriorityWrapper() {
 
 	static CUnit* target, *attacker;
@@ -26,8 +24,8 @@ void __declspec(naked) getAttackPriorityWrapper() {
 
 }
 
-const u32 Hook_FindBestAttackTarget = 0x00443080;
-//Inject with jmpPatch()
+;
+
 void __declspec(naked) findBestAttackTargetWrapper() {
 
 	static CUnit* unit;
@@ -52,8 +50,8 @@ void __declspec(naked) findBestAttackTargetWrapper() {
 
 }
 
-const u32 Hook_FindRandomAttackTarget = 0x00442FC0;
-//Inject with jmpPatch()
+;
+
 void __declspec(naked) findRandomAttackTargetWrapper() {
 
 	static CUnit* unit;
@@ -77,14 +75,16 @@ void __declspec(naked) findRandomAttackTargetWrapper() {
 	}
 }
 
+;
+
 } //unnamed namespace
 
 namespace hooks {
 
 void injectAttackPriorityHooks() {
-	jmpPatch(getAttackPriorityWrapper,		Hook_GetAttackPriority,			3);
-	jmpPatch(findBestAttackTargetWrapper,	Hook_FindBestAttackTarget,		1);
-	jmpPatch(findRandomAttackTargetWrapper,	Hook_FindRandomAttackTarget,	1);
+	jmpPatch(getAttackPriorityWrapper,		0x00442160, 3);
+	jmpPatch(findRandomAttackTargetWrapper,	0x00442FC0,	1);
+	jmpPatch(findBestAttackTargetWrapper,	0x00443080, 1);
 }
 
 } //hooks
