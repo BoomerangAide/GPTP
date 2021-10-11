@@ -3,28 +3,6 @@
 
 namespace {
 
-//Inject with jmpPatch()
-void __declspec(naked) getSeekRangeWrapper() {
-
-	static CUnit* unit;
-	static u8 seekRange;
-
-	__asm {
-		MOV unit, EDX
-		PUSHAD
-	}
-
-	seekRange = hooks::getSeekRangeHook(unit);
-
-	__asm {
-		POPAD
-		MOVZX EAX, seekRange
-		RETN
-	}
-
-}
-
-//Inject with jmpPatch()
 void __declspec(naked) getMaxWeaponRangeWrapper() {
 
 	static CUnit* unit;
@@ -47,17 +25,37 @@ void __declspec(naked) getMaxWeaponRangeWrapper() {
 
 }
 
-} //unnamed namespace
+;
 
-//Defined in SCBW/structures/CUnit.cpp
-extern const u32 Func_GetMaxWeaponRange;
-extern const u32 Func_GetSeekRange;
+void __declspec(naked) getSeekRangeWrapper() {
+
+	static CUnit* unit;
+	static u8 seekRange;
+
+	__asm {
+		MOV unit, EDX
+		PUSHAD
+	}
+
+	seekRange = hooks::getSeekRangeHook(unit);
+
+	__asm {
+		POPAD
+		MOVZX EAX, seekRange
+		RETN
+	}
+
+}
+
+;
+
+} //unnamed namespace
 
 namespace hooks {
 
 void injectWeaponRangeHooks() {
-	jmpPatch(getSeekRangeWrapper,		0x00476000, 3);
 	jmpPatch(getMaxWeaponRangeWrapper,	0x00475870, 1);
+	jmpPatch(getSeekRangeWrapper,		0x00476000, 3);
 }
 
 } //hooks
