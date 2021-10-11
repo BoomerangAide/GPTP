@@ -2,8 +2,8 @@
 
 namespace hooks {
 
-void loadUnitProc(CUnit* unit, CUnit* unitToLoad);	//004E78E0
-Bool32 unloadUnitProc(CUnit* unit);					//004E7F70
+void loadUnitProc(CUnit* unit, CUnit* unitToLoad);	//E78E0
+Bool32 unloadUnitProc(CUnit* unit);					//E7F70
 
 void injectLoadUnloadProcHooks();
 
