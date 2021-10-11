@@ -21,6 +21,7 @@ void __declspec(naked) updateUnitEnergyWrapper() {
 
 }
 
+;
 
 void __declspec(naked) updateUnitStateWrapper() {
 
@@ -39,6 +40,8 @@ void __declspec(naked) updateUnitStateWrapper() {
 	}
 
 }
+
+;
 
 } //unnamed namespace
 
