@@ -20,7 +20,7 @@ u32 getModifiedUnitSpeedHook(CUnit* unit, u32 baseSpeed) {
 
 	if (speedModifier > 0) {
 
-		if (unit->id == UnitId::scout || unit->id == UnitId::Hero_Mojo || unit->id == UnitId::Hero_Artanis)
+		if (unit->id == UnitId::ProtossScout || unit->id == UnitId::Hero_Mojo || unit->id == UnitId::Hero_Artanis)
 			speed = 1707;
 		else {
 
@@ -39,6 +39,8 @@ u32 getModifiedUnitSpeedHook(CUnit* unit, u32 baseSpeed) {
 	return speed;
 
 }
+
+;
 
 /// Calculates the unit's acceleration, factoring in upgrades and status effects.
 ///
@@ -77,12 +79,14 @@ u32 getModifiedUnitTurnSpeedHook(CUnit* unit) {
 
 	if (modifier > 0)
 		turnSpeed *= 2;
-
-	else if (modifier < 0)
+	else
+	if (modifier < 0)
 		turnSpeed = turnSpeed - (turnSpeed / 4);
 
 	return turnSpeed;
 
 }
+
+;
 
 } //hooks
