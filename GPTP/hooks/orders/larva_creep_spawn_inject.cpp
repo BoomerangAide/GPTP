@@ -156,7 +156,7 @@ namespace hooks {
 
 	void injectLarvaCreepSpawnHooks() {
 		jmpPatch(function_0049D660_Wrapper,						0x0049D660, 1);
-		jmpPatch(function_004E8C80_Wrapper,						0x004E8C80);
+		jmpPatch(function_004E8C80_Wrapper,						0x004E8C80, 0);
 		jmpPatch(orders_StopCreepGrowth_Wrapper,				0x004E95E0, 1);
 		jmpPatch(orders_InitCreepGrowth_Wrapper,				0x004E96D0, 1);		
 		jmpPatch(secondaryOrd_SpawningLarva_Wrapper,			0x004EA780, 1);
