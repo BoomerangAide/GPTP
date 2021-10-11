@@ -77,6 +77,7 @@ void UnitStatAct_Selection(BinDlg* dialog) {
 	//update selection hp and id arrays
 	function_00424540();
 
+#pragma warning ( suppress:28182 )
 	if(dialog->controlType != DialogControlTypes::DialogBox)
 		dialog = dialog->parent;
 
