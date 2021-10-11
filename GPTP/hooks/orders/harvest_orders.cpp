@@ -1,6 +1,5 @@
 #include "harvest_orders.h"
 #include <SCBW/api.h>
-#include <logger.h>
 
 //helper functions def
 namespace {
