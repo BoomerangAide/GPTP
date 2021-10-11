@@ -1,8 +1,6 @@
 #include "weapon_damage.h"
 #include "../../hook_tools.h"
 
-extern const u32 Func_DoWeaponDamage; //Defined in CUnit.cpp
-
 namespace {
 
 void __declspec(naked) killTargetUnitCheck_Wrapper() {
