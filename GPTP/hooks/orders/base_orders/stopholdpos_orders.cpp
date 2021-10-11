@@ -15,7 +15,7 @@ void orderImmediate(CUnit* unit, u8 order);								//74B40
 void function_00476FC0(CUnit* unit, CUnit* target, u32 unk1, u32 unk2);	//76FC0
 Bool32 function_004770E0(CUnit* unit);									//770E0
 void orders_PlayerGuard_Helper(CUnit* unit);							//774A0
-Bool32 attackApplyCooldown(CUnit* unit);								//78B40
+Bool32 attackApplyCooldown_Helper(CUnit* unit);							//78B40
 u32 RandBetween(u32 min, u32 max, u32 someIndex);						//DC550
 void setNextWaypoint_Sub4EB290(CUnit* unit);							//EB290
 
@@ -334,7 +334,7 @@ void orders_PlayerGuard(CUnit* unit) {
 } //void function_004774A0(CUnit* unit)
 
 ;
-	
+
 //Initially unidentified function 00478D10
 //Probably default Hold Position order
 //Used byOrderId::HoldPosition2
@@ -356,10 +356,10 @@ void orders_HoldPosition2(CUnit* unit)
 			unit->subunit->status |= UnitStatus::HoldingPosition;
 
 		unit->mainOrderState = 1;
-		
+
 	}
-		
-	if (attackApplyCooldown(unit)) {
+
+	if (attackApplyCooldown_Helper(unit) != 0) {
 
 		if (
 			(
@@ -368,11 +368,11 @@ void orders_HoldPosition2(CUnit* unit)
 				unit->id == UnitId::TerranGoliath ||
 				unit->id == UnitId::Hero_AlanSchezar
 			) &&
-			unit->nextMovementWaypoint != unit->orderTarget.pt
+			unit->nextTargetWaypoint != unit->orderTarget.pt
 		)
 		{
-			unit->nextMovementWaypoint.x = unit->orderTarget.pt.x;
-			unit->nextMovementWaypoint.y = unit->orderTarget.pt.y;
+			unit->nextTargetWaypoint.x = unit->orderTarget.pt.x;
+			unit->nextTargetWaypoint.y = unit->orderTarget.pt.y;
 		}
 
 	}
@@ -386,6 +386,60 @@ void orders_HoldPosition2(CUnit* unit)
 			unit->orderQueueTimer = 0;
 
 	}
+
+}
+
+;
+
+void orders_BunkerGuard(CUnit* unit) {
+
+	if (
+		unit->id == UnitId::TerranMarine ||
+		unit->id == UnitId::Hero_JimRaynorMarine ||
+		unit->id == UnitId::TerranGhost ||
+		unit->id == UnitId::Hero_SarahKerrigan ||
+		unit->id == UnitId::Hero_AlexeiStukov ||
+		unit->id == UnitId::Hero_SamirDuran ||
+		unit->id == UnitId::Hero_InfestedDuran ||
+		unit->id == UnitId::TerranFirebat ||
+		unit->id == UnitId::Hero_GuiMontag
+	)
+	{
+
+		Bool32 resultApplyCooldown;
+
+		unit->status |= UnitStatus::HoldingPosition;
+
+		if(unit->subunit != NULL)
+			(unit->subunit)->status |= UnitStatus::HoldingPosition;
+
+		resultApplyCooldown = attackApplyCooldown_Helper(unit);
+
+		if(resultApplyCooldown != 0) {
+
+			if(unit->orderTarget.pt != unit->nextTargetWaypoint)
+			{
+				unit->nextTargetWaypoint.x = unit->orderTarget.pt.x;
+				unit->nextTargetWaypoint.y = unit->orderTarget.pt.y;
+			}
+
+		}
+		else {
+
+			if(unit->mainOrderTimer == 0) {
+
+				unit->mainOrderTimer = 15;
+
+				unit->orderTarget.unit = findRandomAttackTarget(unit);
+
+				if(unit->orderTarget.unit != NULL)
+					unit->orderQueueTimer = 0;
+
+			} //if(unit->mainOrderTimer == 0)
+
+		} //if(resultApplyCooldown == 0)
+
+	} //if valid id
 
 }
 
@@ -405,7 +459,7 @@ void makeToHoldPosition(CUnit* unit) {
 
 }
 
-;	
+;
 
 } //namespace hooks
 
@@ -433,7 +487,7 @@ CUnit* MedicHeal_TargetAcquire(CUnit* medic) {
 }
 
 ;
-	
+
 const u32 Func_findRandomAttackTarget = 0x00442FC0;
 CUnit* findRandomAttackTarget(CUnit* unit) {
 
@@ -451,7 +505,7 @@ CUnit* findRandomAttackTarget(CUnit* unit) {
 
 }
 
-;	
+;
 
 const u32 Func_Sub443080 = 0x00443080;
 //named according to attack_priority_inject.cpp
@@ -619,9 +673,9 @@ void orders_PlayerGuard_Helper(CUnit* unit) {
 }
 
 ;
-	
+
 const u32 Func_attackApplyCooldown = 0x00478B40;
-Bool32 attackApplyCooldown(CUnit* unit) {
+Bool32 attackApplyCooldown_Helper(CUnit* unit) {
 
 	static u32 result;
 
