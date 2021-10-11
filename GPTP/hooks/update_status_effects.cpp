@@ -21,7 +21,7 @@ class irradiateProc : public scbw::UnitFinderCallbackProcInterface {
 			return;
 
 		//Don't damage larvae, eggs, and lurker eggs
-		if (unit->id == UnitId::larva || unit->id == UnitId::egg || unit->id == UnitId::lurker_egg)
+		if (unit->id == UnitId::ZergLarva || unit->id == UnitId::ZergEgg || unit->id == UnitId::ZergLurkerEgg)
 			return;
 
 		//Irradiate splash damage does not affect burrowed units
@@ -29,13 +29,15 @@ class irradiateProc : public scbw::UnitFinderCallbackProcInterface {
 			return;
 
 		//Check if the unit is within distance, or is inside the same transport
-		if (irradiatedUnit->status & UnitStatus::InTransport
-			|| irradiatedUnit->getDistanceToTarget(unit) <= 32)
+		if (
+			irradiatedUnit->status & UnitStatus::InTransport ||
+			irradiatedUnit->getDistanceToTarget(unit) <= 32)
 		{
 			const s32 damage = weapons_dat::DamageAmount[WeaponId::Irradiate] * 256 / weapons_dat::Cooldown[WeaponId::Irradiate];
 			unit->damageWith(damage, WeaponId::Irradiate, irradiatedUnit->irradiatedBy, irradiatedUnit->irradiatePlayerId);
 		}
-		}
+	}
+
 };
 
 namespace hooks {
@@ -44,22 +46,26 @@ namespace hooks {
 void doIrradiateDamage(CUnit* irradiatedUnit) {
 	//Default StarCraft behavior
 
-	irradiateProc irradiation=irradiateProc(irradiatedUnit);
+	irradiateProc irradiation = irradiateProc(irradiatedUnit);
 
 	//No splash if burrowed
 	if (irradiatedUnit->status & UnitStatus::Burrowed) {
 		irradiation.proc(irradiatedUnit);
 	}
 	//If inside a transport, damage all units loaded within
-	else if (irradiatedUnit->status & UnitStatus::InTransport) {
+	else 
+	if (irradiatedUnit->status & UnitStatus::InTransport) {
 
 		CUnit* transport = irradiatedUnit->connectedUnit;
 
 		if (transport != NULL) {
 			for (int i = 0; i < units_dat::SpaceProvided[transport->id]; ++i) {
+
 				CUnit* loadedUnit = transport->getLoadedUnit(i);
+
 				if (loadedUnit)
-			irradiation.proc(loadedUnit);
+					irradiation.proc(loadedUnit);
+
 			}
 		}
 
@@ -72,7 +78,10 @@ void doIrradiateDamage(CUnit* irradiatedUnit) {
 									irradiatedUnit->getY() + 160);
 		unitFinder.forEach(irradiation);
 	}
+
 }
+
+;
 
 //Hook function for UpdateStatusEffects() (AKA RestoreAllUnitStats())
 //Note: This function is called every 8 ticks (when unit->cycleCounter reaches 8 == 0)
@@ -154,8 +163,6 @@ void updateStatusEffects(CUnit* unit) {
 
 		if (!(unit->status & UnitStatus::Invincible)) {
 
-			//s32 damage = (weapons_dat::DamageAmount[WeaponId::Plague] << 8) / 76;
-
 			s32 damage = weapons_dat::DamageAmount[WeaponId::Plague];
 
 			//randomize?
@@ -201,6 +208,7 @@ void updateStatusEffects(CUnit* unit) {
 		}
 
 	}
+
 	if (unit->acidSporeCount != 0) {
 
 		//Calculate the appropriate overlay ID
@@ -220,10 +228,13 @@ void updateStatusEffects(CUnit* unit) {
 		}
 
 	}
-	else if (previousAcidSporeCount != 0) {
+	else
+	if (previousAcidSporeCount != 0) {
 		unit->removeOverlay(ImageId::AcidSpores_1_Overlay_Small, ImageId::AcidSpores_6_9_Overlay_Large);
 	}
 
 }
+
+;
 
 } //hooks
