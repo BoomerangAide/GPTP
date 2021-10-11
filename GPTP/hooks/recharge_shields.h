@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-Bool32 unitCanRechargeShieldsHook(CUnit* target, CUnit* battery);
+Bool32 unitCanRechargeShieldsHook(CUnit* target, CUnit* battery);	//93520
 
 void injectRechargeShieldsHooks();
 
