@@ -70,6 +70,7 @@ void killAllHangarUnits(CUnit* unit) {
 
 }
 
+;
 
 //Identical to 00468770 sub_468770
 //Not hooked but used by hooked unitDestructorSpecialHook
@@ -102,6 +103,8 @@ void freeResourceContainer(CUnit* resource) {
 
 }
 
+;
+
 //Hooked down there instead of a specific inject.cpp
 void unitDestructorSpecialHook(CUnit* unit) {
 
@@ -119,8 +122,8 @@ void unitDestructorSpecialHook(CUnit* unit) {
 
 	//Destroy nuclear missiles mid-launch
 	if (
-		unit->id == UnitId::ghost || 
-		unit->id == UnitId::sarah_kerrigan || 
+		unit->id == UnitId::TerranGhost || 
+		unit->id == UnitId::Hero_SarahKerrigan || 
 		unit->id == UnitId::Hero_AlexeiStukov|| 
 		unit->id == UnitId::Hero_SamirDuran|| 
 		unit->id == UnitId::Hero_InfestedDuran
@@ -138,8 +141,9 @@ void unitDestructorSpecialHook(CUnit* unit) {
 	//Is a harvestable mineral patch or gas building
 	if (
 		(unit->id >= UnitId::ResourceMineralField && unit->id <= UnitId::ResourceMineralFieldType3) ||
-		(	(unit->id == UnitId::TerranRefinery || unit->id == UnitId::ProtossAssimilator || unit->id == UnitId::ZergExtractor)
-			&& unit->status & UnitStatus::Completed
+		(	
+			(unit->id == UnitId::TerranRefinery || unit->id == UnitId::ProtossAssimilator || unit->id == UnitId::ZergExtractor) &&
+			unit->status & UnitStatus::Completed
 		)	/*this test is equivalent to function unit_isGeyserUnit @ 004688B0*/
 	  ) 
 	{
@@ -263,7 +267,9 @@ void unitDestructorSpecialHook(CUnit* unit) {
 
 }
 
-//-------- Actual hooking --------//
+;
+
+//-------- Hooking that usually happen in an inject file --------//
 
 void __declspec(naked) unitDestructorSpecialWrapper() {
 
@@ -279,8 +285,11 @@ void __declspec(naked) unitDestructorSpecialWrapper() {
 	__asm {
 		POPAD
 		RETN
-  }
+	}
+
 }
+
+;
 
 namespace hooks {
 
