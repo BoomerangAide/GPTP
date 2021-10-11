@@ -12,7 +12,7 @@ void __declspec(naked) fireWeaponWrapper() {
 	__asm {
 		PUSH EBP
 		MOV EBP, ESP
-		MOVZX EAX, [EBP+0x08]
+		MOVZX EAX, BYTE PTR [EBP+0x08]
 		MOV weaponId, AL
 		MOV unit, ESI
 		PUSHAD
@@ -28,15 +28,15 @@ void __declspec(naked) fireWeaponWrapper() {
 	}
 
 }
+	
+;
 
 } //Unnamed namespace
-
-extern const u32 Func_FireUnitWeapon;
 
 namespace hooks {
 
 void injectWeaponFireHooks() {
-	jmpPatch(fireWeaponWrapper, Func_FireUnitWeapon, 0);
+	jmpPatch(fireWeaponWrapper, 0x00479C90, 0);
 }
 
 } //hooks
