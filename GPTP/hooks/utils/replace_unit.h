@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-void replaceUnitWithType(CUnit* unit, u16 newUnitId);	//0049FED0
+void replaceUnitWithType(CUnit* unit, u16 newUnitId); //9FED0
 
 void injectReplaceUnitWithTypeHook();
 
