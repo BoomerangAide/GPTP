@@ -1,17 +1,14 @@
 //Source file for the Weapon Fire hook module.
 //This hook controls how weapons are fired.
 #include "weapon_fire.h"
-#include <SCBW/scbwdata.h>
-#include <SCBW/enumerations.h>
 #include <SCBW/api.h>
 
 
 //-------- Helper function declarations. Do NOT modify! ---------//
 
 namespace {
-typedef void (__stdcall *GetWeaponHitPosFunc)(CUnit* unit, s32 *x, s32 *y);
-GetWeaponHitPosFunc const getWeaponHitPos = (GetWeaponHitPosFunc) 0x004762C0;
-void createBullet(u8 weaponId, CUnit* source, s16 x, s16 y, u8 attackingPlayer, u8 direction);
+void getWeaponHitPos(CUnit* unit, int* x, int* y);													//762C0
+void createBullet(CUnit* source, u32 weaponId, int x, int y, u32 attackingPlayer, u32 direction);	//8C260
 } //unnamed namespace
 
 
@@ -23,17 +20,16 @@ namespace hooks {
 //This hook affects the following iscript opcodes: attackwith, attack, castspell
 //This also affects CUnit::fireWeapon().
 void fireWeaponHook(CUnit* unit, u8 weaponId) {
-	//Default StarCraft behavior
 
-	//Retrieve the spawning position for the bullet.
-	s32 x, y;
+	int x = 0, y = 0;
+	bool bStopThere = false;
 
 	if (weapons_dat::Behavior[weaponId] == WeaponBehavior::AppearOnTargetUnit) {
 
 		if (unit->orderTarget.unit == NULL)
-			return;
-
-		getWeaponHitPos(unit, &x, &y);
+			bStopThere = true;
+		else
+			getWeaponHitPos(unit, &x, &y);
 
 	}
 	else 
@@ -42,16 +38,22 @@ void fireWeaponHook(CUnit* unit, u8 weaponId) {
 		y = unit->orderTarget.pt.y;
 	}
 	else {
-		s32 forwardOffset = weapons_dat::ForwardOffset[weaponId];
 
-		x = unit->getX() + scbw::getPolarX(forwardOffset, unit->currentDirection1);
-		y = unit->getY() + scbw::getPolarY(forwardOffset, unit->currentDirection1)
-				- weapons_dat::VerticalOffset[weaponId];
+		int forwardOffset = weapons_dat::ForwardOffset[weaponId];
+
+		x = unit->sprite->position.x + (angleDistance[unit->currentDirection1].x * forwardOffset) / 256;
+		y = unit->sprite->position.y + (angleDistance[unit->currentDirection1].y * forwardOffset) / 256 - weapons_dat::VerticalOffset[weaponId];
+
+		//x = unit->getX() + scbw::getPolarX(forwardOffset, unit->currentDirection1);
+		//y = unit->getY() + scbw::getPolarY(forwardOffset, unit->currentDirection1) - weapons_dat::VerticalOffset[weaponId];
+
 	}
 
-	if (weapons_dat::FlingyId[weaponId] != 0)
-		createBullet(weaponId, unit, x, y, unit->playerId, unit->currentDirection1);
+	if (!bStopThere && weapons_dat::FlingyId[weaponId] != 0)
+		createBullet(unit, weaponId, x, y, unit->playerId, unit->currentDirection1);
 }
+
+;
 
 } //hooks
 
@@ -60,30 +62,38 @@ void fireWeaponHook(CUnit* unit, u8 weaponId) {
 
 namespace {
 
-const u32 Helper_CreateBullet = 0x0048C260;
-void createBullet(u8 weaponId, CUnit* source, s16 x, s16 y, u8 attackingPlayer, u8 direction) {
+const u32 Func_getWeaponHitPos = 0x004762C0;
+//Set x and y to values rather than having a return value
+void getWeaponHitPos(CUnit* unit, int* x, int* y) {
+	__asm {
+		PUSHAD
+		PUSH y
+		PUSH x
+		PUSH unit
+		CALL Func_getWeaponHitPos
+		POPAD
+	}
+}
 
-	static u32 attackingPlayer_;
-	static u32 direction_;
-	static s32 x_;
-	static s32 y_;
+;
 
-	attackingPlayer_ = attackingPlayer;
-	direction_ = direction;
-	x_ = x;y_ = y;
+const u32 Func_CreateBullet = 0x0048C260;
+void createBullet(CUnit* source, u32 weaponId, int x, int y, u32 attackingPlayer, u32 direction) {
 
 	__asm {
 		PUSHAD
-		PUSH direction_
-		PUSH attackingPlayer_
-		PUSH y_
-		PUSH x_
+		PUSH direction
+		PUSH attackingPlayer
+		PUSH y
+		PUSH x
 		MOV EAX, source
 		MOVZX ECX, weaponId
-		CALL Helper_CreateBullet
+		CALL Func_CreateBullet
 		POPAD
 	}
 
 }
+
+;
 
 } //unnamed namespace
