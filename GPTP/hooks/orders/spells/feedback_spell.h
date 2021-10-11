@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-	void orders_Feedback(CUnit* unit);	//0x004F6D40
+	void orders_Feedback(CUnit* unit);	//F6D40
 
 	void injectFeedbackSpellHook();
 
