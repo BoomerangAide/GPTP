@@ -3,8 +3,8 @@
 
 namespace hooks {
 
-u8 getSeekRangeHook(CUnit* unit);
-u32 getMaxWeaponRangeHook(CUnit* unit, u8 weaponId);
+u32 getMaxWeaponRangeHook(CUnit* unit, u8 weaponId);	//75870
+u8 getSeekRangeHook(CUnit* unit);						//76000
 
 void injectWeaponRangeHooks();
 
