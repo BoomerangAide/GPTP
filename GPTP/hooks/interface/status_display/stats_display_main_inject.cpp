@@ -15,6 +15,8 @@ void __declspec(naked) function_00458120_Wrapper() {
 	}
 
 }
+	
+;
 
 }//unnamed namespace
 
