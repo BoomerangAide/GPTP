@@ -10,7 +10,6 @@ s32 BTNSCOND_CanBuildUnit(CUnit* unit, u16 reqVar, u32 playerId);	//28E60
 s32 BTNSCOND_IsCloaked(CUnit* unit, u16 reqVar, u32 playerId);		//29210
 s32 BTNSCOND_CanCloak(CUnit* unit, u16 reqVar, u32 playerId);		//292C0
 
-//The injector function that should be called in initialize.cpp
 void injectBtnsCondHook();
 
 } //hooks
