@@ -35,6 +35,7 @@
 #include "hooks/interface/status_display/weapon_armor_tooltip.h"
 
 //in alphabetical order
+#include "hooks/attack_and_cooldown.h"
 #include "hooks/orders/base_orders/attack_orders.h"
 #include "hooks/interface/btns_cond.h"
 #include "hooks/orders/building_making/building_morph.h"
@@ -44,6 +45,7 @@
 #include "hooks/orders/burrow_orders.h"
 #include "hooks/recv_commands/burrow_tech.h"
 #include "hooks/orders/spells/cast_order.h"
+#include "hooks/cheat_codes.h"
 #include "hooks/orders/cloak_nearby_units_order.h"
 #include "hooks/recv_commands/CMDRECV_Build.h"
 #include "hooks/recv_commands/CMDRECV_Cancel.h"
@@ -53,6 +55,7 @@
 #include "hooks/recv_commands/CMDRECV_QueuedOrder.h"
 #include "hooks/recv_commands/CMDRECV_ResearchUpgrade.h"
 #include "hooks/recv_commands/CMDRECV_RightClick.h"
+#include "hooks/utils/CMDRECV_SaveLoadWrappers.h"
 #include "hooks/recv_commands/CMDRECV_Selection.h"
 #include "hooks/recv_commands/CMDRECV_SiegeTank.h"
 #include "hooks/recv_commands/CMDRECV_Stimpack.h"
@@ -239,6 +242,9 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	hooks::injectUnitPortraitHooks();
 	hooks::injectWeaponImpactHook();
 	hooks::injectWpnSplashHooks();
+	hooks::injectAttackAndCooldownHook();
+	hooks::injectCheatCodesHooks();
+	hooks::injectCMDRECV_SaveLoadWrappersHooks();
 
 	hooks::injectApplyUpgradeFlags();
 	hooks::injectAttackPriorityHooks();
@@ -269,11 +275,8 @@ BOOL WINAPI Plugin::InitializePlugin(IMPQDraftServer *lpMPQDraftServer) {
 	
 	hooks::injectUnitTooltipHook();
 
-	//fixes to make sc1 campaign playable from firegraft/mpqgraft self-executables
-	//jmpPatch((void*)0x150182D0, 0x004101AE);
-	//jmpPatch((void*)0x15017DD0, 0x004100B2);
-	//jmpPatch((void*)0x15017960, 0x004100C4);
-	//jmpPatch((void*)0x15014A80, 0x004100BE);
+	//fix to make sc1 campaign playable from firegraft/mpqgraft self-executables
+	jmpPatch((void*)0x15017960, 0x004100C4);	//insert a "jump to storm.dll function" instead of a "jump to firegraft function" in an array
 
 	return TRUE;
 }
