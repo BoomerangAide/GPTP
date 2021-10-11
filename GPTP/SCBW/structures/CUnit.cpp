@@ -43,11 +43,12 @@ u32 CUnit::getCurrentLifeInGame() const {
 
 //Identical to function @ 0x00475AD0
 u8 CUnit::getGroundWeapon() const {
-	assert(this);
+
 	if (this->id == UnitId::lurker && !(this->status & UnitStatus::Burrowed))
 		return WeaponId::None;
 	else
 		return units_dat::GroundWeapon[this->id];
+	
 }
 
 u8 CUnit::getAirWeapon() const {
@@ -907,8 +908,6 @@ int CUnit::canUseTech(u8 techId, u8 playerId) const {
 
 const u32 Func_CanUnitAttackTarget = 0x00476730;
 bool CUnit::canAttackTarget(CUnit* target, bool checkVisibility) const {
-	assert(this);
-	assert(target);
 
 	u32 _checkVisibility = checkVisibility ? 1 : 0;
 	static u32 result;
@@ -924,6 +923,7 @@ bool CUnit::canAttackTarget(CUnit* target, bool checkVisibility) const {
 	}
 
 	return result != 0;
+	
 }
 
 extern const u32 Func_FireUnitWeapon = 0x00479C90;
