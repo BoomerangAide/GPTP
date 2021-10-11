@@ -27,7 +27,7 @@ void function_00477510(CUnit* unit);												//77510
 void function_00477820(CUnit* unit, u8 orderId);									//77820
 bool function_00478370(CUnit* unit, u8 orderId);									//78370
 bool function_00478540(CUnit* unit);												//78540
-Bool32 attackApplyCooldown(CUnit* unit);											//78B40
+Bool32 attackApplyCooldown_Helper(CUnit* unit);										//78B40
 bool isUnitCritter(CUnit* unit);													//7B450
 void function_00495400(CUnit* unit, CUnit* target);									//95400
 u16 SAI_GetRegionIdFromPxEx(s32 x, s32 y);											//9C9F0
@@ -1211,7 +1211,7 @@ void orders_TowerAttack(CUnit* unit) {
 		unit->lockdownTimer != 0 ||
 		unit->stasisTimer != 0 ||
 		unit->maelstromTimer != 0 ||
-		attackApplyCooldown(unit) == 0 //try to perform attack here, return 0 if failed
+		attackApplyCooldown_Helper(unit) == 0 //try to perform attack here, return 0 if failed
 	)
 	{
 		
@@ -1231,7 +1231,7 @@ void orders_TowerAttack(CUnit* unit) {
 
 		SetMoveTarget_xy(unit, unit->sprite->position.x, unit->sprite->position.y);
 
-		if ((unit->orderTarget.pt.x != unit->nextTargetWaypoint.x) || (unit->orderTarget.pt.y != unit->nextTargetWaypoint.y)) {
+		if (unit->orderTarget.pt != unit->nextTargetWaypoint) {
 			unit->nextTargetWaypoint.x = unit->orderTarget.pt.x;
 			unit->nextTargetWaypoint.y = unit->orderTarget.pt.y;
 		}
@@ -1813,7 +1813,7 @@ bool isUnitCritter(CUnit* unit) {
 ;
 
 const u32 Func_attackApplyCooldown = 0x00478B40;
-Bool32 attackApplyCooldown(CUnit* unit) {
+Bool32 attackApplyCooldown_Helper(CUnit* unit) {
 
 	static u32 result;
 
