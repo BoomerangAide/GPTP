@@ -3,7 +3,7 @@
 
 namespace hooks {
 
-void stats_supply_provider(BinDlg* dialog);	//00427540
+void stats_supply_provider(BinDlg* dialog);	//27540
 
 void injectStatusSupplyProviderHook();
 
