@@ -128,6 +128,26 @@ void __declspec(naked) orders_HoldPosition2Wrapper() {
 }
 
 ;
+	
+void __declspec(naked) orders_BunkerGuardWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::orders_BunkerGuard(unit);
+
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
 
 void __declspec(naked) makeToHoldPositionWrapper() {
 
@@ -160,6 +180,7 @@ void injectStopHoldPosOrdersHooks() {
 	jmpPatch(orders_GuardWrapper,				0x00475B90, 2);
 	jmpPatch(function_004774A0_Wrapper,			0x004774A0, 3);
 	jmpPatch(orders_HoldPosition2Wrapper,		0x00478D10, 1);
+	jmpPatch(orders_BunkerGuardWrapper,			0x004790A0, 2);
 	jmpPatch(makeToHoldPositionWrapper,			0x004EB5B0, 2);	
 }
 
