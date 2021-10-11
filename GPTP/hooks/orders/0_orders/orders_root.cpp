@@ -270,14 +270,14 @@ void ordersIDCases(CUnit* unit) {
 						unit->orderQueueTimer = 8;
 
 						if (unit->mainOrderId == OrderId::BunkerGuard)
-							EAX_order(unit, 0x004790A0); //see unitCanAttackInsideBunker in hooks\bunker_hooks
+							EAX_order(unit, 0x004790A0);
 						else
 						if(unit->mainOrderId == OrderId::Pickup4)
 							EAX_order(unit, mainOrder_func_offsets[OrderId::Pickup4][0]);
 						else
 						if (unit->mainOrderId == OrderId::ComputerAI) {
 							if(unit->status & UnitStatus::InBuilding)
-								EAX_order(unit, 0x004790A0); //see unitCanAttackInsideBunker in hooks\bunker_hooks
+								EAX_order(unit, 0x004790A0);	//OrderId::BunkerGuard
 						}
 						else
 						if(unit->mainOrderId == OrderId::RescuePassive)
