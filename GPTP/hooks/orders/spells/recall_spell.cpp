@@ -5,13 +5,13 @@
 
 namespace {
 
-	bool setThingyVisibilityFlags(CThingy* thingy);									//0x004878F0
-	CThingy* createThingy(u32 spriteId, s16 x, s16 y, u32 playerId);				//0x00488210
-	void setUnitStatTxtErrorMsg(char* message);										//0x0048CCB0
-	void playUnitSFX(u32 soundId, u16 x, u16 y, u32 unk1, u32 unk2);				//0x0048EC10
-	u32 RandomizeShort(u32 unknown_index);											//0x004DC4A0
-	u32 IterateUnitsAtLocationTargetProc_RecallTargets(CUnit* unit, Box16* coords);	//0x004E8280
-	void function_004EBAE0(CUnit* unit, s32 x, s32 y);								//0x004EBAE0
+	bool setThingyVisibilityFlags(CThingy* thingy);									//878F0
+	CThingy* createThingy(u32 spriteId, s16 x, s16 y, u32 playerId);				//88210
+	void setUnitStatTxtErrorMsg(char* message);										//8CCB0
+	void playUnitSFX(u32 soundId, u16 x, u16 y, u32 unk1, u32 unk2);				//8EC10
+	u32 RandomizeShort(u32 unknown_index);											//DC4A0
+	u32 IterateUnitsAtLocationTargetProc_RecallTargets(CUnit* unit, Box16* coords);	//E8280
+	void function_004EBAE0(CUnit* unit, s32 x, s32 y);								//EBAE0
 
 } //unnamed namespace
 
@@ -277,8 +277,6 @@ namespace hooks {
 
 namespace {
 
-	//original referenced name was sub_4878F0, but using
-	//the name from bunker_hooks.cpp since it got meaning
 	const u32 Func_SetThingyVisibilityFlags = 0x004878F0;
 	bool setThingyVisibilityFlags(CThingy* thingy) {
 
