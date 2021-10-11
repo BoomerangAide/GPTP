@@ -73,8 +73,15 @@ void CMDRECV_Liftoff(s16 x, s16 y) {
 			*u32_0066FF60 = 0x17;
 		else
 		if(
-			parseRequirementOpcodes(unit,OrderId::BuildingLiftoff,*ACTIVE_NATION_ID,0x00514CF8,*u16_00665610) &&
-			x < *maxBoxRightValue && y < *maxBoxBottomValue
+			parseRequirementOpcodes(
+				unit,
+				OrderId::BuildingLiftoff,
+				*ACTIVE_NATION_ID,
+				0x00514CF8,
+				orders_dat::RequirementsOffset[OrderId::BuildingLiftoff]
+			) &&
+			x < *maxBoxRightValue &&
+			y < *maxBoxBottomValue
 		)
 		{
 			unit->orderTo(OrderId::BuildingLiftoff, x, y);
