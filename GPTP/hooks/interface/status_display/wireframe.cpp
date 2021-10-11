@@ -37,5 +37,7 @@ u16 statdata_UnitWireframeUpdate_Fragment(CUnit* unit) {
 	return unitId;
 
 }
+	
+;
 
 } //hooks
