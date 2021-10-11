@@ -3,10 +3,9 @@
 
 namespace hooks {
 
-	void orders_BuildingLand(CUnit* unit);
-	void orders_BuildingLiftoff(CUnit* unit);
+	void orders_BuildingLand(CUnit* unit);		//64360
+	void orders_BuildingLiftoff(CUnit* unit);	//649B0
 
-	//The injector function that should be called in initialize.cpp
 	void injectLiftLandHooks();
 
 } //hooks
