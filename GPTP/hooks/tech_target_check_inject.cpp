@@ -4,8 +4,6 @@
 
 namespace {
 
-const u32 Func_GetTechUseErrorMessage = 0x00491E80;
-
 void __declspec(naked) getTechUseErrorMessageWrapper() {
 
 	static CUnit* target;
@@ -34,12 +32,14 @@ void __declspec(naked) getTechUseErrorMessageWrapper() {
 
 }
 
+;
+
 } //Unnamed namespace
 
 namespace hooks {
 
 void injectTechTargetCheckHooks() {
-	jmpPatch(getTechUseErrorMessageWrapper, Func_GetTechUseErrorMessage, 4);
+	jmpPatch(getTechUseErrorMessageWrapper, 0x00491E80, 4);
 }
 
 } //hooks
