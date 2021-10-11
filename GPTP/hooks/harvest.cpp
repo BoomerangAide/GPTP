@@ -2,8 +2,8 @@
 #include "../SCBW/api.h"
 
 //Helper functions
-void updateMineralPatchImage(CUnit* mineralPatch);
-void setResourceAmountCarried(CUnit* worker, u8 amountCarried, u32 chunkImageId, bool isMineral);
+void updateMineralPatchImage(CUnit* mineralPatch);													//68830
+void setResourceAmountCarried(CUnit* worker, u8 amountCarried, u32 chunkImageId, bool isMineral);	//F3AF0
 
 //-------- Actual hooks --------//
 
