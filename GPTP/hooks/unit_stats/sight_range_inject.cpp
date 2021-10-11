@@ -1,8 +1,6 @@
 #include "sight_range.h"
 #include <hook_tools.h>
 
-extern const u32 Func_GetSightRange;	//Defined in CUnit.cpp
-
 namespace {
 
 void __declspec(naked) getSightRangeWrapper() {
@@ -36,12 +34,14 @@ void __declspec(naked) getSightRangeWrapper() {
 
 }
 
+;
+
 } //unnamed namespace
 
 namespace hooks {
 
 void injectSightRangeHook() {
-	jmpPatch(getSightRangeWrapper, Func_GetSightRange, 4);
+	jmpPatch(getSightRangeWrapper, 0x004E5B40, 4);
 }
 
 } //hooks
