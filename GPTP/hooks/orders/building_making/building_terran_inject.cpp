@@ -1,4 +1,3 @@
-//Injector source file for the Attack Orders hook module.
 #include "building_terran.h"
 #include <hook_tools.h>
 
