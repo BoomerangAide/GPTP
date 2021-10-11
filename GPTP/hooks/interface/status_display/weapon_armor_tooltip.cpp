@@ -1,8 +1,5 @@
 #include "weapon_armor_tooltip.h"
 #include <SCBW/api.h>
-#include <SCBW/enumerations/WeaponId.h>
-#include <cstdio>
-
 
 char buffer[128];
 
@@ -12,18 +9,20 @@ u8 getDamageFactorForTooltip(u8 weaponId, CUnit* unit) {
 
 	//Default StarCraft behavior
 	if (
-		unit->id == UnitId::firebat || 
-		unit->id == UnitId::gui_montag ||
-		unit->id == UnitId::zealot || 
-		unit->id == UnitId::fenix_zealot
+		unit->id == UnitId::TerranFirebat || 
+		unit->id == UnitId::Hero_GuiMontag ||
+		unit->id == UnitId::ProtossZealot || 
+		unit->id == UnitId::Hero_FenixZealot
 	)
 		return 2;
 
-	if (unit->id == UnitId::valkyrie)
+	if (unit->id == UnitId::TerranValkyrie)
 		return 1;
 
 	return weapons_dat::DamageFactor[weaponId];
 }
+
+;
 
 //Returns the C-string for the tooltip text of the unit's weapon icon.
 //This function is used for weapon icons and special icons.
@@ -61,12 +60,16 @@ const char* getDamageTooltipString(u8 weaponId, CUnit* unit, u16 entryStrIndex) 
 	return buffer;
 }
 
+;
+
 namespace hooks {
 
 //Returns the C-string for the tooltip text of the unit's weapon icon.
 const char* getWeaponTooltipString(u8 weaponId, CUnit* unit) {
 	return getDamageTooltipString(weaponId, unit, weapons_dat::Label[weaponId]);
 }
+	
+;
 
 //Returns the C-string for the tooltip text of the unit's armor icon.
 const char* getArmorTooltipString(CUnit* unit) {
@@ -89,6 +92,7 @@ const char* getArmorTooltipString(CUnit* unit) {
 	return buffer;
 }
 
+;
 
 //Returns the C-string for the tooltip text of the plasma shield icon.
 const char* getShieldTooltipString(CUnit* unit) {
@@ -108,7 +112,10 @@ const char* getShieldTooltipString(CUnit* unit) {
 							shieldUpgradeName, shieldStr, 0);
 
 	return buffer;
+	
 }
+	
+;
 
 //Returns the C-string for the tooltip text of the Interceptor icon (Carriers),
 //Scarab icon (Reavers), Nuclear Missile icon (Nuclear Silos), and Spider Mine
@@ -123,7 +130,7 @@ const char* getSpecialTooltipString(u16 iconUnitId, CUnit* unit) {
 		return getDamageTooltipString(WeaponId::Scarab, unit, 792);				 //"Scarabs"
 
 	if (iconUnitId == UnitId::nuclear_missile)
-		return statTxtTbl->getString(793);																	//"Nukes"
+		return statTxtTbl->getString(793);										//"Nukes"
 
 	if (iconUnitId == UnitId::spider_mine)
 		return getDamageTooltipString(WeaponId::SpiderMines, unit, 794);		//"Spider Mines"
@@ -132,5 +139,7 @@ const char* getSpecialTooltipString(u16 iconUnitId, CUnit* unit) {
 	return "";
 
 }
+	
+;
 
 } //hooks
