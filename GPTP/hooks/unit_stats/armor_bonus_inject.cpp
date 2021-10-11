@@ -1,11 +1,8 @@
 #include "armor_bonus.h"
 #include <hook_tools.h>
 
-extern const u32 Func_GetArmorBonus;	//Defined in CUnit.cpp
-
 namespace {
 
-//Inject with jmpPatch()
 void __declspec(naked) getArmorBonusWrapper() {
 
 	static CUnit* unit;
@@ -24,13 +21,15 @@ void __declspec(naked) getArmorBonusWrapper() {
 		RETN
 	}
 }
+	
+;
 
 } //unnamed namespace
 
 namespace hooks {
 
 void injectArmorBonusHook() {
-	jmpPatch(getArmorBonusWrapper, Func_GetArmorBonus, 1);
+	jmpPatch(getArmorBonusWrapper, 0x00453FC0, 1);
 }
 
 } //hooks
