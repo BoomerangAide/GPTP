@@ -239,6 +239,8 @@ void secondaryOrd_SpawningLarva(CUnit* unit) {
 
 ;
 
+//Note: this is the function called while performing the OrderId::SpreadCreep
+//order.
 void secondaryOrd_SpreadCreepSpawningLarva(CUnit* unit) {
 
 	if(
