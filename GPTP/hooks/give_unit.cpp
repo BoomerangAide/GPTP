@@ -96,7 +96,7 @@ namespace hooks {
 
 			function_00463040(unit);
 
-			if(unit->subunit != NULL && units_dat::BaseProperty[unit->subunit->id] & UnitProperty::Subunit)
+			if(unit->subunit != NULL && (units_dat::BaseProperty[unit->subunit->id] & UnitProperty::Subunit))
 				GiveUnit(unit->subunit,playerId,unkScore);
 
 			ApplySpeedUpgradeFromUnitType(unit);
