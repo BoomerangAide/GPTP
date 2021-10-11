@@ -24,15 +24,15 @@ void __declspec(naked) statdata_UnitWireframeUpdate_FragmentWrapper() {
 	}
 
 }
+	
+;
 
-}; //unnamed namespace
+} //unnamed namespace
 
 namespace hooks {
 
 void injectWireframeHook() {
 	jmpPatch(statdata_UnitWireframeUpdate_FragmentWrapper, 0x00456911, 2);
 }
-
-;
 
 } //hooks
