@@ -236,7 +236,7 @@ void __declspec(naked) function_00425230_Wrapper() {
 namespace hooks {
 
 void injectUnitStatCondHooks() {
-	jmpPatch(UnitStatCond_Never_Wrapper,		0x00424500, 0);	//jump is 5 bytes, original function is 3 bytes (though followed by plenty of unused space), issue?
+	jmpPatch(UnitStatCond_Never_Wrapper,		0x00424500, 0);
 	jmpPatch(UnitStatCond_Powerup_Wrapper,		0x00424520, 1);
 	jmpPatch(UnitStatCond_Standard_Wrapper,		0x00424980, 0);
 	jmpPatch(UnitStatCond_Egg_Wrapper,			0x00424AC0, 0);
