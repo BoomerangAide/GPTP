@@ -3,8 +3,8 @@
 
 namespace hooks {
 
-void updateUnitEnergy(CUnit* unit);		//0x004EB4B0
-void updateUnitStateHook(CUnit* unit);	//0x004EC290
+void updateUnitEnergy(CUnit* unit);		//EB4B0
+void updateUnitStateHook(CUnit* unit);	//EC290
 
 void injectUpdateUnitState();
 
