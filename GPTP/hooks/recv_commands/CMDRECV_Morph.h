@@ -3,8 +3,8 @@
 
 namespace hooks {
 
-void CMDRECV_BuildingMorph(u16 wUnitType);	//004C1910
-void CMDRECV_UnitMorph(u16 wUnitType);		//004C1990
+void CMDRECV_BuildingMorph(u16 wUnitType);	//C1910
+void CMDRECV_UnitMorph(u16 wUnitType);		//C1990
 
 void injectCMDRECV_MorphHooks();
 
