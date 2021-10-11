@@ -321,7 +321,13 @@
     <ClCompile Include="hooks\tech_target_check.cpp" />
     <ClCompile Include="hooks\tech_target_check_inject.cpp" />
     <ClCompile Include="hooks\right_click_CMDACT.cpp" />
-    <ClCompile Include="hooks\right_click_CMDACT_inject.cpp" />    
+    <ClCompile Include="hooks\right_click_CMDACT_inject.cpp" />  
+    <ClCompile Include="hooks\attack_and_cooldown.cpp" />
+    <ClCompile Include="hooks\attack_and_cooldown_inject.cpp" />
+    <ClCompile Include="hooks\cheat_codes.cpp" />
+    <ClCompile Include="hooks\cheat_codes_inject.cpp" />
+    <ClCompile Include="hooks\utils\CMDRECV_SaveLoadWrappers.cpp" />
+    <ClCompile Include="hooks\utils\CMDRECV_SaveLoadWrappers_inject.cpp" />
     <ClCompile Include="hooks\transfer_tech_upgrades.cpp" />
     <ClCompile Include="hooks\transfer_tech_upgrades_inject.cpp" />
     <ClCompile Include="hooks\unit_destructor_special.cpp" />
@@ -476,6 +482,9 @@
     <ClInclude Include="hooks\stim_packs.h" />
     <ClInclude Include="hooks\tech_target_check.h" />
     <ClInclude Include="hooks\right_click_CMDACT.h" />
+    <ClInclude Include="hooks\attack_and_cooldown.h" />
+    <ClInclude Include="hooks\cheat_codes.h" />
+    <ClInclude Include="hooks\utils\CMDRECV_SaveLoadWrappers.h" />
     <ClInclude Include="hooks\transfer_tech_upgrades.h" />
     <ClInclude Include="hooks\unit_destructor_special.h" />
     <ClInclude Include="hooks\unit_speed.h" />
