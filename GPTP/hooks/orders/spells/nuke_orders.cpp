@@ -527,9 +527,9 @@ void orders_NukeGround_Helper(CUnit* unit) {
 		POPAD
 	}
 }
-
-//original referenced name was sub_4878F0, but using
-//the name from bunker_hooks.cpp since it got meaning
+	
+;
+	
 const u32 Func_SetThingyVisibilityFlags = 0x004878F0;
 bool setThingyVisibilityFlags(CThingy* thingy) {
 
