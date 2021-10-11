@@ -24,6 +24,8 @@ void __declspec(naked) unitCanDetectWrapper() {
 
 }
 
+;
+
 void __declspec(naked) getCloakedTargetVisibilityWrapper() {
 
 	static DetectorCheckParam* param;
@@ -49,12 +51,14 @@ void __declspec(naked) getCloakedTargetVisibilityWrapper() {
 
 }
 
+;
+
 } //unnamed namespace
 
 namespace hooks {
 
 void injectDetectorHooks() {
-  jmpPatch(unitCanDetectWrapper,				0x00403430);
+  jmpPatch(unitCanDetectWrapper,				0x00403430, 7);
   jmpPatch(getCloakedTargetVisibilityWrapper,	0x004408A0, 9);
 }
 
