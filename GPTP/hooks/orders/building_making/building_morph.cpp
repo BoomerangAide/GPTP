@@ -8,7 +8,7 @@ namespace {
 void refundBuildingCost(u16 unitId, u8 playerId);					//2CE70
 void function_00433FE0(CUnit* unit);								//33FE0
 bool isValidMorph(u16 buildingId);									//5CC60
-void updateNewUnitVision(u16 unitId, int x, int y);				//5CE90
+void updateNewUnitVision(u16 unitId, int x, int y);					//5CE90
 void zergPlaceBuildingCntd(CUnit* unit);							//5D410
 void function_0047D770(CUnit* unit);								//7D770
 void function_0047DE40(CSprite* sprite, u32 unitId, int x, int y);	//7DE40
@@ -285,15 +285,13 @@ namespace hooks {
 
 		if(!bStopThere) {
 
-			static u32* const u32_00581E44 = (u32*)	0x00581E44;
-			static u32* const u32_00581ED4 = (u32*)	0x00581ED4;
-			static u16* const u16_0066345A = (u16*)	0x0066345A;
+			static u32* const scoreUnitsOwned = (u32*)	0x00581E44;
+			static u32* const scoreUnitsTotal = (u32*)	0x00581ED4;
 
 			refundBuildingCost(unit->id,unit->playerId);
 
-			//possibly related to scores?
-			u32_00581ED4[unit->playerId] = u32_00581ED4[unit->playerId] - *u16_0066345A;
-			u32_00581E44[unit->playerId] = u32_00581E44[unit->playerId] - 1;
+			scoreUnitsTotal[unit->playerId] = scoreUnitsTotal[unit->playerId] - units_dat::BuildScore[UnitId::ZergDrone];
+			scoreUnitsOwned[unit->playerId] = scoreUnitsOwned[unit->playerId] - 1;
 
 			if(unit->id == UnitId::ZergExtractor) {
 
@@ -501,8 +499,6 @@ void function_0047DE40(CSprite* sprite, u32 unitId, int x, int y) {
 
 ;
 
-//original referenced name was sub_4878F0, but using
-//the name from bunker_hooks.cpp since it got meaning
 const u32 Func_SetThingyVisibilityFlags = 0x004878F0;
 bool setThingyVisibilityFlags(CThingy* thingy) {
 
