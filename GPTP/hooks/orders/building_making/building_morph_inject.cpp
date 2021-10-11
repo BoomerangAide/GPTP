@@ -3,74 +3,74 @@
 
 namespace {
 
-	void __declspec(naked) orders_isMorphingWrapper() {
+void __declspec(naked) orders_isMorphingWrapper() {
 
-		static CUnit* building;
-		static Bool32 result;
+	static CUnit* building;
+	static Bool32 result;
 
-		__asm {
-			MOV building, EAX
-			PUSHAD
-		}
-
-		result = hooks::isMorphing(building) ? 1 : 0;
-
-		__asm {
-			POPAD
-			MOV EAX, result
-			RETN
-		}
-
+	__asm {
+		MOV building, EAX
+		PUSHAD
 	}
 
-	;
+	result = hooks::isMorphing(building) ? 1 : 0;
 
-	void __declspec(naked) orders_ZergBuildSelfWrapper() {
-
-		static CUnit* building;
-
-		__asm {
-			MOV building, EAX
-			PUSHAD
-		}
-
-		hooks::orders_ZergBuildSelf(building);
-
-		__asm {
-			POPAD
-			RETN
-		}
-
+	__asm {
+		POPAD
+		MOV EAX, result
+		RETN
 	}
 
-	;
+}
 
-	void __declspec(naked) ZergPlaceBuildingWrapper() {
+;
 
-		static CUnit* unit;
+void __declspec(naked) orders_ZergBuildSelfWrapper() {
 
-		__asm {
-			PUSH EBP
-			MOV EBP, ESP
-			MOV EAX, [EBP+0x08]
-			MOV unit, EAX
-			PUSHAD
-		}
+	static CUnit* building;
 
-		hooks::ZergPlaceBuilding(unit);
-
-		__asm {
-			POPAD
-			MOv ESP, EBp
-			POP EBP
-			RETN 4
-		}
-
+	__asm {
+		MOV building, EAX
+		PUSHAD
 	}
 
-	;
+	hooks::orders_ZergBuildSelf(building);
 
-}; //unnamed namespace
+	__asm {
+		POPAD
+		RETN
+	}
+
+}
+
+;
+
+void __declspec(naked) ZergPlaceBuildingWrapper() {
+
+	static CUnit* unit;
+
+	__asm {
+		PUSH EBP
+		MOV EBP, ESP
+		MOV EAX, [EBP+0x08]
+		MOV unit, EAX
+		PUSHAD
+	}
+
+	hooks::ZergPlaceBuilding(unit);
+
+	__asm {
+		POPAD
+		MOv ESP, EBp
+		POP EBP
+		RETN 4
+	}
+
+}
+
+;
+
+} //unnamed namespace
 
 namespace hooks {
 
@@ -80,4 +80,4 @@ namespace hooks {
 		jmpPatch(ZergPlaceBuildingWrapper,		0x0045DA40, 1);
 	}
 
-}; //hooks
+} //hooks
