@@ -1,5 +1,6 @@
 #include "status_buildmorphtrain.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions declaration
 
@@ -25,6 +26,104 @@ u32 fxnInteract(BinDlg* dialog, u32 data_struct_offset);
 namespace hooks {
 
 //00425F30
+#ifdef EVENTS_SYSTEM
+void stats_AddOnBuilder(BinDlg* dialog) {
+
+	u32* const	u32_0068C1E0 =	(u32*)	0x0068C1E0; //unknown, maybe not always store the same thing
+	u8* const	u8_0068C1E5 =	(u8*)	0x0068C1E5;	//Some kind of ID of current type of display, to not redo memory allocation
+
+	BinDlg* current_dialog;
+	CUnit* unit = *activePortraitUnit;
+	CUnit* builtUnit;
+	int slotUnitId;
+	int textId;
+
+	if (*IS_IN_REPLAY != 0 || unit->id == *LOCAL_NATION_ID) {
+
+		if (*u8_0068C1E5 != 9) {
+			function_00457310(dialog);
+			stats_MorphProgress_Helper(dialog, -40, 17);
+			*u8_0068C1E5 = 9;
+		}
+
+		if (
+			unit->mainOrderId == OrderId::BuildTerran ||
+			unit->mainOrderId == OrderId::Repair1 ||
+			unit->mainOrderId == OrderId::ConstructingBuilding ||
+			isAttemptingProtossBuild(unit)
+		)
+			builtUnit = unit->orderTarget.unit;
+		else
+		if (
+			unit->secondaryOrderId == OrderId::Train ||
+			unit->secondaryOrderId == OrderId::TrainFighter ||
+			isConstructingAddon(unit)
+		)
+			builtUnit = unit->currentBuildUnit;
+		else
+			builtUnit = NULL;
+
+		DLGsetProgressBarValue(dialog, 16, function_004669E0(builtUnit));
+
+		slotUnitId = getLastQueueSlotType(builtUnit);
+
+		if (dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog->childrenDlg;
+		else
+			current_dialog = dialog->parent->childrenDlg;
+
+		while (current_dialog != NULL && current_dialog->index != 17)
+			current_dialog = current_dialog->next;
+
+		u16 panelGraphic, iconId, itemId, tooltipTypeId;
+		char* iconText;
+		std::vector<int*> events_arg(6);
+
+		panelGraphic = 2;
+		iconId = slotUnitId;
+		tooltipTypeId = PanelTooltipTypes::SpecialPanelTooltip;
+		itemId = slotUnitId;
+		iconText = NULL;
+
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)&panelGraphic;
+		events_arg[2] = (int*)&iconId;
+		events_arg[3] = (int*)&tooltipTypeId;
+		events_arg[4] = (int*)&itemId;
+		events_arg[5] = (int*)&iconText;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_PANEL, events_arg);
+
+		current_dialog->graphic = panelGraphic;
+		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
+		current_dialog->statUser->iconId_04 = iconId;
+		current_dialog->statUser->tooltipType_06 = tooltipTypeId;
+		current_dialog->statUser->id_08 = itemId;
+
+		if(iconText != NULL)
+			current_dialog->pszText = iconText;
+
+		if (!(current_dialog->flags & BinDlgFlags::Unknown0)) {
+			current_dialog->flags |= BinDlgFlags::Unknown0;
+			updateDialog(current_dialog);
+		}
+
+		textId = 0x313 + builtUnit->getRace(); //"Mutating", "Adding On", "Opening Warp Rift"
+
+		char* progressText = (char*)statTxtTbl->getString(textId);
+		std::vector<int*> events_progress_arg(3);
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)iconId;
+		events_arg[2] = (int*)&progressText;
+
+		EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_progress_arg);
+
+		AddTextToDialog(dialog, -40, progressText);
+
+	}
+
+}
+#else
 void stats_AddOnBuilder(BinDlg* dialog) {
 
 	u32* const	u32_0068C1E0 =	(u32*)	0x0068C1E0; //unknown, maybe not always store the same thing
@@ -76,7 +175,7 @@ void stats_AddOnBuilder(BinDlg* dialog) {
 		current_dialog->graphic = 2;
 		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
 		current_dialog->statUser->iconId_04 = slotUnitId;
-		current_dialog->statUser->unknown_06 = 3;
+		current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::SpecialPanelTooltip;
 		current_dialog->statUser->id_08 = slotUnitId;
 
 		if (!(current_dialog->flags & BinDlgFlags::Unknown0)) {
@@ -90,8 +189,10 @@ void stats_AddOnBuilder(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 //004260C0
+#ifdef EVENTS_SYSTEM
 void stats_IncompleteUnit(BinDlg* dialog) {
 
 	u8* const u8_0068C1E5 = (u8*)0x0068C1E5;
@@ -110,11 +211,323 @@ void stats_IncompleteUnit(BinDlg* dialog) {
 
 	textId = 0x31F + unit->getRace(); //"Mutating" for Zerg, "Under Construction" for Terran, "Opening Warp Rift" for Protoss
 
+	char* progressText = (char*)statTxtTbl->getString(textId);
+	std::vector<int*> events_arg(3);
+
+	events_arg[0] = (int*)unit;
+
+	if (
+		unit->id == UnitId::ZergEgg ||
+		unit->id == UnitId::ZergCocoon ||
+		unit->id == UnitId::ZergLurkerEgg ||
+		unit->isRemorphingBuilding()
+	)
+		events_arg[1] = (int*)unit->buildQueue[unit->buildQueueSlot];
+	else
+		events_arg[1] = (int*)unit->id;
+
+	events_arg[2] = (int*)&progressText;
+
+	EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_arg);
+
+	AddTextToDialog(dialog, -30, progressText);
+
+}
+#else
+void stats_IncompleteUnit(BinDlg* dialog) {
+
+	u8* const u8_0068C1E5 = (u8*)0x0068C1E5;
+
+	CUnit* unit = *activePortraitUnit;
+	int textId;
+
+	stats_MorphProgress_Helper(dialog, -30, 13);
+
+	if (*u8_0068C1E5 != 6) {
+		function_00457310(dialog);
+		*u8_0068C1E5 = 6;
+	}
+
+	DLGsetProgressBarValue(dialog, 13, function_004669E0(unit));
+
+	textId = 0x31F + unit->getRace(); //"Mutating" for Zerg, "Under Construction" for Terran, "Opening Warp Rift" for Protoss
 	AddTextToDialog(dialog, -30, (char*)statTxtTbl->getString(textId));
 
 }
+#endif
 
 //004268D0
+#ifdef EVENTS_SYSTEM
+void stats_QueueProgress(BinDlg* dialog) {
+
+	char**	const	queues_buffers =	(char**)0x00519F40; //array of buffers for strings in production queues
+	u32*	const	u32_0068C1C0 =		(u32*)	0x0068C1C0; //unknown, used for empty queue slot case here
+	u32*	const	u32_0068C1E0 =		(u32*)	0x0068C1E0; //unknown, maybe not always store the same thing
+	u8*		const	u8_0068C1E5 =		(u8*)	0x0068C1E5; //to know if refreshing same info display or new one, probably
+
+	BinDlg* current_dialog;
+	CUnit* unit = *activePortraitUnit;
+
+	if (dialog->controlType == DialogControlTypes::DialogBox)
+		current_dialog = dialog->childrenDlg;
+	else
+		current_dialog = dialog->parent->childrenDlg;
+
+	while (current_dialog != NULL && current_dialog->index != 2)
+		current_dialog = current_dialog->next;
+
+	if (
+		*IS_IN_REPLAY != 0 ||
+		unit->playerId == *LOCAL_NATION_ID
+	)
+	{
+
+		CUnit* builtUnit;
+		u32 progress;
+		int queueSlot;
+		int progressNameTextId;
+		char* statusText;
+
+		if (*u8_0068C1E5 != 5) {
+			function_00457310(dialog);
+			stats_MorphProgress_Helper(dialog, -15, 8);
+			*u8_0068C1E5 = 5;
+		}
+
+		if (
+			unit->mainOrderId == OrderId::BuildTerran ||
+			unit->mainOrderId == OrderId::Repair1 ||
+			unit->mainOrderId == OrderId::ConstructingBuilding ||
+			isAttemptingProtossBuild(unit)
+		)
+			builtUnit = unit->orderTarget.unit;
+		else
+		if (
+			unit->secondaryOrderId == OrderId::Train ||
+			unit->secondaryOrderId == OrderId::TrainFighter ||
+			isConstructingAddon(unit)
+		)
+			builtUnit = unit->currentBuildUnit;
+		else
+			builtUnit = NULL;
+
+		if (builtUnit != NULL)
+			progress = function_004669E0(builtUnit);
+		else
+			progress = 0;
+
+		DLGsetProgressBarValue(dialog, 7, progress);
+
+		queueSlot = 0;
+
+		while (current_dialog != NULL) {
+
+			if (queueSlot >= 5)
+				current_dialog = NULL;
+			else {
+
+				char* slot_text;
+				int slotUnitId = unit->buildQueue[(unit->buildQueueSlot + queueSlot) % 5];
+
+				if (queueSlot == 0)
+					slot_text = (char*)FORMATSTRING_COLORYELLOW_VALUE_COLORCYAN_SPACE;	//queued slot number display (yellow)
+				else
+					slot_text = (char*)FORMATSTRING_VALUE_SPACE;						//active slot number display (cyan)
+
+				std::vector<int*> events_panelcount_arg(3);
+				int slotNumberEventArg = queueSlot + 1;
+
+				events_panelcount_arg[0] = (int*)unit;
+				events_panelcount_arg[1] = (int*)slotUnitId;
+				events_panelcount_arg[2] = &slotNumberEventArg;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_QUEUE_PANEL_COUNT, events_panelcount_arg);
+
+				SC_sprintf_s(queues_buffers[queueSlot], 8, slot_text, slotNumberEventArg);
+
+				if (queueSlot == 0 || queueSlot >= 4)
+					current_dialog->graphic = 2;
+				else
+					current_dialog->graphic = 4;
+
+				if (slotUnitId != UnitId::None) {
+
+					u16 panelGraphic, iconId, itemId, tooltipTypeId;
+					char* iconText;
+					std::vector<int*> events_arg(7);
+
+					panelGraphic = current_dialog->graphic;
+					iconId = slotUnitId;
+					tooltipTypeId = PanelTooltipTypes::SpecialPanelTooltip;
+					itemId = slotUnitId;
+					iconText = queues_buffers[queueSlot];
+
+					events_arg[0] = (int*)unit;
+					events_arg[1] = (int*)queueSlot;
+					events_arg[2] = (int*)&panelGraphic;
+					events_arg[3] = (int*)&iconId;
+					events_arg[4] = (int*)&tooltipTypeId;
+					events_arg[5] = (int*)&itemId;
+					events_arg[6] = (int*)&iconText;
+
+					EventManager::EventCalled(EventId::STATUS_DISPLAYING_QUEUE_PANEL, events_arg);
+
+					current_dialog->graphic = panelGraphic;
+					current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
+					current_dialog->statUser->iconId_04 = iconId;
+					current_dialog->statUser->tooltipType_06 = tooltipTypeId;
+					current_dialog->statUser->id_08 = itemId;
+
+					function_00418E00(current_dialog);
+
+					current_dialog->pszText = iconText;
+
+				}
+				else
+				{
+					
+					current_dialog->statUser->unkUser_00 = *u32_0068C1C0;
+					current_dialog->statUser->iconId_04 = queueSlot + 6;
+					current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::NoPanelTooltip;
+
+					disableDialog(current_dialog);
+
+					current_dialog->pszText = NULL;
+
+				}
+
+				if (!(current_dialog->flags & BinDlgFlags::Unknown0)) {
+					current_dialog->flags |= BinDlgFlags::Unknown0;
+					updateDialog(current_dialog);
+				}
+
+				current_dialog = current_dialog->next;
+				queueSlot += 1;
+
+			}
+
+		}
+
+		u32 unitId;
+
+		if (
+			unit->status & UnitStatus::GroundedBuilding &&
+			(
+				unit->status & UnitStatus::DoodadStatesThing ||
+				unit->lockdownTimer != 0 ||
+				unit->stasisTimer != 0 ||
+				unit->maelstromTimer != 0
+			)
+		){
+			progressNameTextId = 0x33C; //"<6>Disabled" (<6> means 0x6 byte for red)(Unpowered for Protoss)
+			unitId = unit->id;
+		}
+		else {
+
+			if (unit->status & UnitStatus::Completed)
+				unitId = unit->id;
+			else {
+
+				unitId = unit->buildQueue[unit->buildQueueSlot];
+
+				if (
+					unitId != UnitId::ZergHive &&
+					unitId != UnitId::ZergLair &&
+					unitId != UnitId::ZergGreaterSpire &&
+					unitId != UnitId::ZergSporeColony &&
+					unitId != UnitId::ZergSunkenColony
+				)
+					unitId = unit->id;
+
+			}
+
+			//note: original code recalculated unitId/builtUnitId, not done here
+			//to optimize things
+
+			if (unitId == UnitId::ProtossGateway || unitId == UnitId::ProtossStargate)
+				progressNameTextId = 0x303; //"Morphing" ("Building" for Terran," Opening Warp Gate" for Protoss)
+			else
+				progressNameTextId = 0x306; //"Morphing" ("Building" for Terran and Protoss)
+
+		}
+
+		//Simplified lots of code here, should work
+		statusText = (char*)statTxtTbl->getString(progressNameTextId + unit->getRace());
+
+		if (dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog->childrenDlg;
+		else
+			current_dialog = dialog->parent->childrenDlg;
+
+		while (current_dialog != NULL && current_dialog->index != -15)
+			current_dialog = current_dialog->next;
+
+		std::vector<int*> events_arg(3);
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)unitId;
+		events_arg[2] = (int*)&statusText;
+
+		EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_arg);
+
+		current_dialog->pszText = statusText;
+
+		if (!(current_dialog->flags & BinDlgFlags::Visible)) {
+
+			//26BF8
+
+			struct {
+				u32 unknown_value;		//[EBP-0x20]	[00]
+				u32 always_zero_here;	//[EBP-0x1C]	[04]
+				u32 not_allocated_2;	//[EBP-0x18]	[08]
+				u16 always_14_here;		//[EBP-0x14]	[0C]
+				s16 mouseX;				//[EBP-0x12]	[0E]
+				s16 mouseY;				//[EBP-0x10]	[10]
+				u32 ignored_3;			//[EBP-0x0C]	[14] //used to store a queueSlot+1 value from earlier
+				u16 not_allocated_1;	//[EBP-0x0A]	[16]
+				u16 ignored_2;			//[EBP-0x08]	[18] //used to store builtUnitId value from earlier
+				u32 ignored_1;			//[EBP-0x04]	[1C] //used to store queueSlot value from earlier
+			} stack_placeholder;
+
+			//not allocated on original code, but result
+			//is probably more true to the original like
+			//this
+			stack_placeholder.not_allocated_1 = 0;
+			stack_placeholder.not_allocated_2 = 0;
+
+			//Zeroed because ignored, if bugs will have to fill with
+			//real values maybe
+			stack_placeholder.ignored_1 = 0;
+			stack_placeholder.ignored_2 = 0;
+			stack_placeholder.ignored_3 = 0;
+
+			stack_placeholder.mouseY = mouse->y;
+			stack_placeholder.always_14_here = 14;
+			stack_placeholder.unknown_value = 13;
+			stack_placeholder.always_zero_here = 0;
+			stack_placeholder.mouseX = mouse->x;
+
+			if (
+				fxnInteract(current_dialog, (u32)&stack_placeholder) != 0 &&
+				!(current_dialog->flags & BinDlgFlags::Unknown0)
+			)
+			{
+				current_dialog->flags |= BinDlgFlags::Unknown0;
+				updateDialog(current_dialog);
+			}
+			
+
+		}
+
+		if(!(current_dialog->flags & BinDlgFlags::Unknown0))
+		{
+			current_dialog->flags |= BinDlgFlags::Unknown0;
+			updateDialog(current_dialog);
+		}
+
+	}
+
+}
+#else
 void stats_QueueProgress(BinDlg* dialog) {
 
 	char**	const	queues_buffers =	(char**)0x00519F40; //array of buffers for strings in production queues
@@ -202,7 +615,7 @@ void stats_QueueProgress(BinDlg* dialog) {
 
 					current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
 					current_dialog->statUser->iconId_04 = slotUnitId;
-					current_dialog->statUser->unknown_06 = 3;
+					current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::SpecialPanelTooltip;
 					current_dialog->statUser->id_08 = slotUnitId;
 
 					function_00418E00(current_dialog);
@@ -215,7 +628,7 @@ void stats_QueueProgress(BinDlg* dialog) {
 					
 					current_dialog->statUser->unkUser_00 = *u32_0068C1C0;
 					current_dialog->statUser->iconId_04 = queueSlot + 6;
-					current_dialog->statUser->unknown_06 = 6;
+					current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::NoPanelTooltip;
 
 					disableDialog(current_dialog);
 
@@ -235,6 +648,8 @@ void stats_QueueProgress(BinDlg* dialog) {
 
 		}
 
+		u32 unitId;
+
 		if (
 			unit->status & UnitStatus::GroundedBuilding &&
 			(
@@ -243,11 +658,10 @@ void stats_QueueProgress(BinDlg* dialog) {
 				unit->stasisTimer != 0 ||
 				unit->maelstromTimer != 0
 			)
-		)
+		){
 			progressNameTextId = 0x33C; //"<6>Disabled" (<6> means 0x6 byte for red)(Unpowered for Protoss)
+		}
 		else {
-
-			u32 unitId;
 
 			if (unit->status & UnitStatus::Completed)
 				unitId = unit->id;
@@ -345,6 +759,7 @@ void stats_QueueProgress(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 //00457250
 void stats_MorphProgress(BinDlg* dialog, int index, u32 unk) {
@@ -388,7 +803,7 @@ void stats_MorphProgress(BinDlg* dialog, int index, u32 unk) {
 			if (
 				fxnInteract(current_dialog, (u32)&stack_placeholder) != 0 &&
 				!(current_dialog->flags & BinDlgFlags::Unknown0)
-				)
+			)
 			{
 				current_dialog->flags |= BinDlgFlags::Unknown0;
 				updateDialog(current_dialog);
@@ -557,7 +972,7 @@ u32 function_004669E0(CUnit* unit) {
 		unitId == UnitId::ZergCocoon ||
 		unitId == UnitId::ZergLurkerEgg ||
 		unit->isRemorphingBuilding()
-		)
+	)
 		unitId = unit->buildQueue[unit->buildQueueSlot];
 
 	timeCost = units_dat::TimeCost[unitId];
