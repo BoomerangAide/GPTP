@@ -5,6 +5,7 @@ namespace hooks {
 
 bool UnitStatCond_Never();			//24500
 bool UnitStatCond_Powerup();		//24520
+//bool UnitStatCond_Selection();	//defined directly in hooks\interface\status_display\unit_stat_selection instead
 bool UnitStatCond_Standard();		//24980
 bool UnitStatCond_Egg();			//24AC0
 bool UnitStatCond_Archon();			//24AF0
