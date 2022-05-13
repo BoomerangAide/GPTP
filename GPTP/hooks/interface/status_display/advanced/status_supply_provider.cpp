@@ -1,5 +1,6 @@
 #include "status_supply_provider.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions declaration
 
@@ -12,8 +13,8 @@ void SC_sprintf_s(char* buffer, int buffer_size, const char* format_string, int 
 				  int value2);															//1F1B0
 
 void function_004246D0();																//246D0
-void StatsShieldLevel_Helper(BinDlg* dialog, u32 index);										//25510
-void StatsArmorLevel(BinDlg* dialog, u32 index);										//25600
+void StatsShieldLevel_Helper(BinDlg* dialog, u32 index);								//25510
+void StatsArmorLevel_Helper(BinDlg* dialog, u32 index);									//25600
 void AddTextToDialog(BinDlg* dialog, int index, char* textOffset);						//258B0
 void UnitStatAct_Standard_Helper(BinDlg* dialog);										//26F50
 void function_00457250(BinDlg* dialog, int index, u32 unk);								//57250
@@ -35,6 +36,226 @@ const int TEXTLABELINDEX_USED_SUPPLY = -10;
 namespace hooks {
 
 //00427540
+#ifdef EVENTS_SYSTEM
+void stats_supply_provider(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(*IS_IN_REPLAY == 0 && unit->playerId != *LOCAL_NATION_ID)
+		UnitStatAct_Standard_Helper(dialog);
+	else {
+
+		char* BUFFER_1 = (char*)0x006CA9F8;
+		char* BUFFER_2 = (char*)0x006CAC78;
+		char* BUFFER_3 = (char*)0x006CA668;
+		char* BUFFER_4 = (char*)0x006CAB08;
+
+		u8 raceId;
+		u16 unitAltType;
+		s32 supply_used;
+		s32 supply_provided;
+		s32 supply_available;
+		s32 supply_max;
+
+		//Update selectionVariableDataOffset variables (storing supply available and used)
+		function_004246D0();
+
+		if(*u8_0068C1E5 != 12) { //probably clear some cache if a non-supply unit was selected before
+			function_00457310(dialog);
+			function_00457250(dialog,TEXTLABELINDEX_USED_SUPPLY,-13);	//-13 is (probably) not TEXTLABELINDEX_MAX_SUPPLY
+			*u8_0068C1E5 = 12;
+		}
+
+		bool cancelDisplay = false;
+		std::vector<int*> events_supply_override_arg(1);
+
+		events_supply_override_arg[0] = (int*)unit;
+
+		EventManager::EventCalling(EventId::STATUS_SUPPLY_OVERRIDE, &cancelDisplay, events_supply_override_arg);
+
+		if(!cancelDisplay) {
+
+			if(units_dat::GroupFlags[unit->id].isZerg)
+				raceId = RaceId::Zerg;
+			else
+			if(units_dat::GroupFlags[unit->id].isProtoss)
+				raceId = RaceId::Protoss;
+			else
+			if(units_dat::GroupFlags[unit->id].isTerran)
+				raceId = RaceId::Terran;
+			else
+				raceId = RaceId::Neutral;
+
+			if(raceId == RaceId::Zerg || raceId == RaceId::Terran || raceId == RaceId::Protoss)
+				supply_used = raceSupply[raceId].used[unit->playerId] + 1;	//if only 1 zergling (cost: 0.5 ingame), will display 1 rather than 0 when divided by 2
+			else
+				supply_used = 0;
+
+			if(supply_used < 0)
+				supply_used++;
+
+			char* supplyUsedText = (char*)statTxtTbl->getString(0x335 + raceId); //("Control Used:","Supplies Used:" or "Psi Used:)
+			std::vector<int*> events_arg(3);
+
+			supply_used /= 2;
+
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&supplyUsedText;
+			events_arg[2] = (int*)&supply_used;
+
+			EventManager::EventCalled(EventId::STATUS_SUPPLY_USED_TEXT, events_arg);
+
+			SC_sprintf_s(
+				BUFFER_1,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)supplyUsedText,
+				supply_used
+			);
+
+			//if only 1 zergling (cost: 0.5 ingame), will display 1 rather than 0 when divided by 2
+			supply_provided = units_dat::SupplyProvided[getLastQueueSlotType(unit)] + 1;
+
+			if(supply_provided < 0)
+				supply_provided++;
+
+			char* supplyProvidedText = (char*)statTxtTbl->getString(0x32F + raceId); //("Control Provided:","Supplies Provided:" or "Psi Provided:)
+
+			supply_provided /= 2;
+
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&supplyProvidedText;
+			events_arg[2] = (int*)&supply_provided;
+
+			EventManager::EventCalled(EventId::STATUS_SUPPLY_PROVIDED_TEXT, events_arg);
+
+			SC_sprintf_s(
+				BUFFER_2,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)supplyProvidedText,
+				supply_provided
+			);
+
+			//if only 1 zergling (cost: 0.5 ingame), will display 1 rather than 0 when divided by 2
+			supply_available = scbw::getSuppliesAvailable(unit->playerId,raceId) + 1;
+
+			if(supply_available < 0)
+				supply_available++;
+
+			char* supplyTotalText = (char*)statTxtTbl->getString(0x332 + raceId); //("Total Control:","Total Supplies:" or "Total Psi:)
+
+			supply_provided /= 2;
+
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&supplyTotalText;
+			events_arg[2] = (int*)&supply_available;
+
+			EventManager::EventCalled(EventId::STATUS_SUPPLY_AVAILABLE_TEXT, events_arg);
+
+			SC_sprintf_s(
+				BUFFER_3,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)supplyTotalText,
+				supply_available
+			);
+
+			unitAltType = getLastQueueSlotType(unit);
+
+			if(units_dat::GroupFlags[unitAltType].isZerg)
+				supply_max = raceSupply[RaceId::Zerg].max[unit->playerId];
+			else
+			if(units_dat::GroupFlags[unitAltType].isTerran)
+				supply_max = raceSupply[RaceId::Terran].max[unit->playerId];
+			else
+			if(units_dat::GroupFlags[unitAltType].isProtoss)
+				supply_max = raceSupply[RaceId::Protoss].max[unit->playerId];
+			else
+				supply_max = 0;
+
+			//if only 1 zergling (cost: 0.5 ingame), will display 1 rather than 0 when divided by 2
+			supply_max += 1;
+
+			char* supplyMaxText = (char*)statTxtTbl->getString(0x338 + raceId); //("Control Max:","Supplies Max:","Psi Max:")
+
+			supply_max /= 2;
+
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&supplyMaxText;
+			events_arg[2] = (int*)&supply_max;
+
+			EventManager::EventCalled(EventId::STATUS_SUPPLY_AVAILABLE_TEXT, events_arg);
+
+			SC_sprintf_s(
+				BUFFER_4,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)supplyMaxText,
+				supply_max
+			);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_USED_SUPPLY,BUFFER_1);
+			AddTextToDialog(dialog,TEXTLABELINDEX_PROVIDED_SUPPLY,BUFFER_2);
+			AddTextToDialog(dialog,TEXTLABELINDEX_AVAILABLE_SUPPLY,BUFFER_3);
+			AddTextToDialog(dialog,TEXTLABELINDEX_MAX_SUPPLY,BUFFER_4);
+
+		}
+
+		int index = 0;
+		cancelDisplay = false;
+
+		std::vector<int*> events_shieldarmor_override_arg(2);
+
+		events_shieldarmor_override_arg[0] = (int*)unit;
+		events_shieldarmor_override_arg[1] = (int*)&index;
+
+		EventManager::EventCalling(EventId::STATUS_DISPLAYING_PANEL_SUPPLY_OR_RESOURCE_SHIELD_OVERRIDE, &cancelDisplay, events_shieldarmor_override_arg);
+
+		if (!cancelDisplay && units_dat::ShieldsEnabled[unit->id]) {
+			StatsShieldLevel_Helper(dialog, index);
+			index++;
+		}
+
+		if (index == 0) {
+
+			cancelDisplay = false;
+
+			EventManager::EventCalling(EventId::STATUS_DISPLAYING_PANEL_SUPPLY_OR_RESOURCE_ARMOR_OVERRIDE, &cancelDisplay, events_shieldarmor_override_arg);
+
+			if (
+				!cancelDisplay &&
+				(unit->id == UnitId::ZergOverlord || unit->id == UnitId::Hero_Yggdrasill)
+			)
+			{
+				StatsArmorLevel_Helper(dialog, index);
+				index++;
+			}
+
+		}
+
+		if (index == 0) {
+			
+			BinDlg* current_dialog;
+
+			if(dialog->controlType == DialogControlTypes::DialogBox)
+				current_dialog = dialog;
+			else
+				current_dialog = dialog->parent;
+
+			current_dialog = current_dialog->childrenDlg;
+
+			while(current_dialog != NULL && current_dialog->index != 9)
+				current_dialog = current_dialog->next;
+
+			hideDialog(current_dialog);
+
+		}
+
+	}
+
+} //void stats_supply_provider(BinDlg* dialog)
+#else
 void stats_supply_provider(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -148,11 +369,11 @@ void stats_supply_provider(BinDlg* dialog) {
 		AddTextToDialog(dialog,TEXTLABELINDEX_AVAILABLE_SUPPLY,BUFFER_3);
 		AddTextToDialog(dialog,TEXTLABELINDEX_MAX_SUPPLY,BUFFER_4);
 
-		if(units_dat::ShieldsEnabled[unit->id])
+		if (units_dat::ShieldsEnabled[unit->id])
 			StatsShieldLevel_Helper(dialog,0);
 		else
-		if(unit->id == UnitId::ZergOverlord || unit->id == UnitId::Hero_Yggdrasill)
-			StatsArmorLevel(dialog,0);
+		if (unit->id == UnitId::ZergOverlord || unit->id == UnitId::Hero_Yggdrasill)
+			StatsArmorLevel_Helper(dialog,0);
 		else {
 			
 			BinDlg* current_dialog;
@@ -174,6 +395,7 @@ void stats_supply_provider(BinDlg* dialog) {
 	}
 
 } //void stats_supply_provider(BinDlg* dialog)
+#endif
 
 ;
 
@@ -294,7 +516,7 @@ void StatsShieldLevel_Helper(BinDlg* dialog, u32 index) {
 ;
 
 const u32 Func_Sub425600 = 0x00425600;
-void StatsArmorLevel(BinDlg* dialog, u32 index) {
+void StatsArmorLevel_Helper(BinDlg* dialog, u32 index) {
 
 	__asm {
 		PUSHAD
