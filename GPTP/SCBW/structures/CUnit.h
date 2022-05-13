@@ -178,7 +178,7 @@ struct CUnit: public CUnitLayout {
   /// Removes the Acid Spores effect from the unit.
   void removeAcidSpores();
 
-  /// Spend an amount of energy, if no THE GATHERING cheat.
+  /// Spend an amount of energy, unless THE GATHERING cheat is enabled.
   void spendUnitEnergy(u32 energy);
   
   //////////////////////////////////////////////////////////////// @}
