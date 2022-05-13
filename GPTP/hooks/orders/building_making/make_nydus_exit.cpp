@@ -1,5 +1,6 @@
 #include "make_nydus_exit.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //helper functions def
 
@@ -16,6 +17,103 @@ void function_004E65E0(CUnit* unit, Bool32 flag);																//E65E0
 
 namespace hooks {
 
+#ifdef EVENTS_SYSTEM
+void orders_Build5(CUnit* nydus_canal) {
+
+	int x,y;
+	u32 result_f00473FB0;
+
+	x = (s16)units_dat::BuildingDimensions[UnitId::ZergNydusCanal].x;
+	y = (s16)units_dat::BuildingDimensions[UnitId::ZergNydusCanal].y;
+
+	if(x < 0)
+		x++;
+	if(y < 0)
+		y++;
+
+	x = nydus_canal->orderTarget.pt.x - (x / 2);
+	y = nydus_canal->orderTarget.pt.y - (y / 2);
+
+	if(x < 0)
+		x += 31;
+	if(y < 0)
+		y += 31;
+
+	x /= 32;
+	y /= 32;
+
+	//check if the nydus exit can be placed
+	result_f00473FB0 = function_00473FB0(
+		nydus_canal,
+		nydus_canal->playerId,
+		x,
+		y,
+		UnitId::ZergNydusCanal,
+		0,0,1,0
+	);
+
+	if(result_f00473FB0 != 0) {
+
+		playWorkerErrorSound(nydus_canal,0x358); //"You can't build there"
+
+		if(nydus_canal->orderQueueHead != NULL) {
+			nydus_canal->userActionFlags |= 1;
+			prepareForNextOrder(nydus_canal);
+		}
+		else
+		if(nydus_canal->pAI != NULL)
+			nydus_canal->orderComputerCL(OrderId::ComputerAI);
+		else
+			nydus_canal->orderComputerCL(units_dat::ReturnToIdleOrder[nydus_canal->id]);
+
+	}
+	else { //5DCDB
+
+		CUnit* nydusExit = 
+			createUnit(
+				UnitId::ZergNydusCanal,
+				nydus_canal->orderTarget.pt.x,
+				nydus_canal->orderTarget.pt.y,
+				nydus_canal->playerId
+			);
+
+		if(nydusExit == NULL) {
+			displayLastNetErrForPlayer(nydus_canal->playerId);
+			nydus_canal->orderToIdle();
+		}
+		else {
+
+			std::vector<int*> events_nydus_exit_hp_set_arg(3);
+			s32 newHp = (10 * units_dat::MaxHitPoints[nydusExit->id]) /100;
+
+			function_004E65E0(nydusExit,1);
+
+			events_nydus_exit_hp_set_arg[0] = (int*)nydus_canal;
+			events_nydus_exit_hp_set_arg[1] = (int*)nydusExit;
+			events_nydus_exit_hp_set_arg[2] = (int*)&newHp;
+
+			EventManager::EventCalled(EventId::BUILDING_NYDUS_EXIT_INITIAL_HP_SET, events_nydus_exit_hp_set_arg);
+
+			//logically equivalent to a more complex original calculation
+			nydusExit->hitPoints = newHp;
+
+			nydusExit->orderComputerCL(OrderId::ZergBuildSelf);
+
+			nydusExit->currentButtonSet = UnitId::Buttons_Blank;
+
+			function_0047D770(nydusExit);
+
+			nydus_canal->building.nydusExit = nydusExit;
+			nydusExit->building.nydusExit = nydus_canal;
+
+			nydus_canal->orderToIdle();
+
+		}
+
+	}
+
+}
+#else
 void orders_Build5(CUnit* nydus_canal) {
 
 	int x,y;
@@ -102,6 +200,7 @@ void orders_Build5(CUnit* nydus_canal) {
 	}
 
 }
+#endif
 
 ;
 
