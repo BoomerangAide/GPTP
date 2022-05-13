@@ -65,6 +65,8 @@ u32 getModifiedUnitAccelerationHook(CUnit* unit) {
 
 }
 
+;
+
 /// Calculates the unit's turn speed, factoring in upgrades and status effects.
 ///
 /// @return		The modified turning speed value.
