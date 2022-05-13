@@ -1,5 +1,6 @@
 #include "status_research_upgrade.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions declaration
 
@@ -21,6 +22,106 @@ u8*	const	u8_0068C1E5		= (u8*)	0x0068C1E5;
 namespace hooks {
 
 //Equivalent to function at 0x00426500
+#ifdef EVENTS_SYSTEM
+void stats_upgrade_in_progress(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(*IS_IN_REPLAY != 0 || unit->playerId == *LOCAL_NATION_ID) {
+
+		u8 raceId;
+		u32 upgradeTimeCost;
+		char* upgradeText;
+		BinDlg* current_dialog;
+
+		if(*u8_0068C1E5 != 8 ){
+			function_00457310(dialog);
+			function_00457250(dialog,-35,15);
+			*u8_0068C1E5 = 8;
+		}
+
+		upgradeTimeCost = getUpgradeTimeCost(unit->playerId, unit->building.upgradeType);
+
+		DLGsetProgressBarValue(
+			dialog,
+			14,
+			100 * (upgradeTimeCost - unit->building.upgradeResearchTime) / upgradeTimeCost
+		);
+
+		if(dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog;
+		else
+			current_dialog = dialog->parent;
+
+		current_dialog = current_dialog->childrenDlg;
+
+		while(current_dialog != NULL && current_dialog->index != 15)
+			current_dialog = current_dialog->next;
+
+		u16 panelGraphic, iconId, itemId, tooltipTypeId;
+		char* iconText;
+		std::vector<int*> events_arg(6);
+
+		panelGraphic = 2;
+		iconId = upgrades_dat::IconId[unit->building.upgradeType];
+		tooltipTypeId = PanelTooltipTypes::UpgradePanelTooltip;
+		itemId = unit->building.upgradeType;
+		iconText = NULL;
+
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)&panelGraphic;
+		events_arg[2] = (int*)&iconId;
+		events_arg[3] = (int*)&tooltipTypeId;
+		events_arg[4] = (int*)&itemId;
+		events_arg[5] = (int*)&iconText;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_PANEL, events_arg);
+
+		current_dialog->graphic = panelGraphic;
+		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
+		current_dialog->statUser->iconId_04 = iconId;
+		current_dialog->statUser->tooltipType_06 = tooltipTypeId;
+		current_dialog->statUser->id_08 = itemId;
+
+		if(iconText != NULL)
+			current_dialog->pszText = iconText;
+
+		function_00418E00(current_dialog);
+
+		if(!(current_dialog->flags & BinDlgFlags::Unknown0)) {
+			current_dialog->flags |= BinDlgFlags::Unknown0;
+			updateDialog(current_dialog);
+		}
+
+		if(units_dat::GroupFlags[unit->id].isZerg)
+			raceId = RaceId::Zerg;
+		else
+		if(units_dat::GroupFlags[unit->id].isProtoss)
+			raceId = RaceId::Protoss;
+		else
+		if(units_dat::GroupFlags[unit->id].isTerran)
+			raceId = RaceId::Terran;
+		else
+			raceId = RaceId::Neutral;
+
+		if(unit->lockdownTimer != 0 || unit->stasisTimer != 0 || unit->maelstromTimer != 0)
+			upgradeText = (char*)statTxtTbl->getString(0x33C + raceId); //"Disabled","Disabled" or "Unpowered"
+		else
+			upgradeText = (char*)statTxtTbl->getString(0x2FD + raceId); //"Evolving","Upgrading" or "Upgrading"
+
+		std::vector<int*> events_progress_arg(3);
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)iconId;
+		events_arg[2] = (int*)&upgradeText;
+
+		EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_progress_arg);
+
+		AddTextToDialog(dialog, -35, upgradeText);
+
+	}
+
+}
+#else
 void stats_upgrade_in_progress(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -59,7 +160,7 @@ void stats_upgrade_in_progress(BinDlg* dialog) {
 		current_dialog->graphic = 2;
 		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
 		current_dialog->statUser->iconId_04 = upgrades_dat::IconId[unit->building.upgradeType];
-		current_dialog->statUser->unknown_06 = 5;
+		current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::UpgradePanelTooltip;
 		current_dialog->statUser->id_08 = unit->building.upgradeType;
 
 		function_00418E00(current_dialog);
@@ -90,10 +191,111 @@ void stats_upgrade_in_progress(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 ;
 
 //Equivalent to function at 0x004266F0
+#ifdef EVENTS_SYSTEM
+void stats_research_in_progress(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(*IS_IN_REPLAY != 0 || unit->playerId == *LOCAL_NATION_ID) {
+
+		u8 raceId;
+		u32 researchTimeCost;
+		char* researchText;
+		BinDlg* current_dialog;
+
+		if(*u8_0068C1E5 != 7 ){
+			function_00457310(dialog);
+			function_00457250(dialog,-35,15);
+			*u8_0068C1E5 = 7;
+		}
+
+		researchTimeCost = techdata_dat::TimeCost[unit->building.techType];
+
+		DLGsetProgressBarValue(
+			dialog,
+			14,
+			100 * (researchTimeCost - unit->building.upgradeResearchTime) / researchTimeCost
+		);
+
+		if(dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog;
+		else
+			current_dialog = dialog->parent;
+
+		current_dialog = current_dialog->childrenDlg;
+
+		while(current_dialog != NULL && current_dialog->index != 15)
+			current_dialog = current_dialog->next;
+
+		u16 panelGraphic, iconId, itemId, tooltipTypeId;
+		char* iconText;
+		std::vector<int*> events_arg(6);
+
+		panelGraphic = 2;
+		iconId = techdata_dat::IconId[unit->building.techType];
+		tooltipTypeId = PanelTooltipTypes::ResearchPanelTooltip;
+		itemId = unit->building.techType;
+		iconText = NULL;
+
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)&panelGraphic;
+		events_arg[2] = (int*)&iconId;
+		events_arg[3] = (int*)&tooltipTypeId;
+		events_arg[4] = (int*)&itemId;
+		events_arg[5] = (int*)&iconText;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_PANEL, events_arg);
+
+		current_dialog->graphic = panelGraphic;
+		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
+		current_dialog->statUser->iconId_04 = iconId;
+		current_dialog->statUser->tooltipType_06 = tooltipTypeId;
+		current_dialog->statUser->id_08 = itemId;
+
+		if(iconText != NULL)
+			current_dialog->pszText = iconText;
+
+		function_00418E00(current_dialog);
+
+		if(!(current_dialog->flags & BinDlgFlags::Unknown0)) {
+			current_dialog->flags |= BinDlgFlags::Unknown0;
+			updateDialog(current_dialog);
+		}
+
+		if(units_dat::GroupFlags[unit->id].isZerg)
+			raceId = RaceId::Zerg;
+		else
+		if(units_dat::GroupFlags[unit->id].isProtoss)
+			raceId = RaceId::Protoss;
+		else
+		if(units_dat::GroupFlags[unit->id].isTerran)
+			raceId = RaceId::Terran;
+		else
+			raceId = RaceId::Neutral;
+
+		if(unit->lockdownTimer != 0 || unit->stasisTimer != 0 || unit->maelstromTimer != 0)
+			researchText = (char*)statTxtTbl->getString(0x33C + raceId); //"Disabled","Disabled" or "Unpowered"
+		else
+			researchText = (char*)statTxtTbl->getString(0x300 + raceId); //"Evolving,Researching or Developing"
+
+		std::vector<int*> events_progress_arg(3);
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)iconId;
+		events_arg[2] = (int*)&researchText;
+
+		EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_progress_arg);
+
+		AddTextToDialog(dialog, -35, researchText);
+
+	}
+
+}
+#else
 void stats_research_in_progress(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -132,7 +334,7 @@ void stats_research_in_progress(BinDlg* dialog) {
 		current_dialog->graphic = 2;
 		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
 		current_dialog->statUser->iconId_04 = techdata_dat::IconId[unit->building.techType];
-		current_dialog->statUser->unknown_06 = 4;
+		current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::ResearchPanelTooltip;
 		current_dialog->statUser->id_08 = unit->building.techType;
 
 		function_00418E00(current_dialog);
@@ -163,6 +365,7 @@ void stats_research_in_progress(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 ;
 
