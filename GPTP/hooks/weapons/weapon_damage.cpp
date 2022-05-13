@@ -1,5 +1,6 @@
 #include "weapon_damage.h"
 #include "../../SCBW/api.h"
+#include <Events/Events.h>
 
 namespace {
 
@@ -35,6 +36,121 @@ namespace hooks {
 
 // Hooks into the CUnit::damageHp() function.
 // 004797B0  killTargetUnitCheck 
+#ifdef EVENTS_SYSTEM
+void killTargetUnitCheck(CUnit* target, s32 damage, CUnit* attacker, u32 attackingPlayerId, Bool32 bNotify) {
+
+	bool cancelNormalCheck = false;
+	s32 initialDamage = damage;
+
+	std::vector<int*> events_override_arg(4);
+	std::vector<int*> events_override_arg_2(5);
+	std::vector<int*> events_damage_hp_arg(5);
+
+	events_override_arg[0] = (int*)target;
+	events_override_arg[1] = (int*)damage;
+	events_override_arg[2] = (int*)attacker;
+	events_override_arg[3] = (int*)attackingPlayerId;
+
+	EventManager::EventCalling(EventId::UNIT_DAMAGEHP_OVERRIDE, &cancelNormalCheck, events_override_arg);
+
+	if (!cancelNormalCheck && target->hitPoints != 0) {
+		
+		if (target->sprite->flags & CSprite_Flags::Selected)
+			setAllImageGroupFlagsPal11(target->sprite);
+
+		if (attacker != NULL)
+			function_004795D0(target, attacker, bNotify);
+
+		if (*CHEAT_STATE & CheatFlags::PowerOverwhelming && playerTable[attackingPlayerId].type != PlayerType::Human)
+			damage = 0;
+
+		events_damage_hp_arg[0] = (int*)target;
+		events_damage_hp_arg[1] = (int*)&damage;
+		events_damage_hp_arg[2] = (int*)attacker;
+		events_damage_hp_arg[3] = (int*)attackingPlayerId;
+		events_damage_hp_arg[4] = (int*)initialDamage;
+
+		EventManager::EventCalled(EventId::UNIT_DAMAGEHP, events_damage_hp_arg);
+
+		if (damage >= target->hitPoints) { //killing target
+
+			if (unitIsActiveTransport(target)) {
+
+				CUnit* loaded_unit;
+
+				events_override_arg_2[1] = (int*)damage;
+				events_override_arg_2[2] = (int*)attacker;
+				events_override_arg_2[3] = (int*)attackingPlayerId;
+				events_override_arg_2[4] = (int*)target;
+
+				for (int i = 0; i < 8; i++) {
+
+					loaded_unit = getLoadedUnitFromIndex(target, i);
+
+					if (
+						loaded_unit != NULL && 
+						loaded_unit->sprite != NULL &&
+						loaded_unit->mainOrderId != OrderId::Die
+					)
+					{
+
+						cancelNormalCheck = false;
+						events_override_arg_2[0] = (int*)loaded_unit;
+
+						EventManager::EventCalling(EventId::UNIT_KILLED_FROM_TRANSPORT_DEATH_OVERRIDE, &cancelNormalCheck, events_override_arg_2);
+
+						if (!cancelNormalCheck) {
+							loaded_unit->remove();
+							incrementUnitDeathScores(loaded_unit, attackingPlayerId);
+						}
+
+					}
+
+				}
+
+			}
+
+			target->hitPoints = 0;
+			target->remove();
+			incrementUnitDeathScores(target, attackingPlayerId);
+
+			if (attacker != NULL) {
+
+				u8 targetPlayerId;
+
+				if (target->playerId != 11)
+					targetPlayerId = target->playerId;
+				else
+					targetPlayerId = target->sprite->playerId;
+
+				if (!scbw::isAlliedTo(attacker->playerId, targetPlayerId))
+					incrementUnitKillCount(attacker);
+
+			}
+
+		}
+		else //target surviving
+		{
+
+			target->hitPoints -= damage;
+			target->airStrength = getUnitStrength(target, false);
+			target->groundStrength = getUnitStrength(target, true);
+
+			if (
+				target->status & UnitStatus::Completed &&
+				images_dat::DamageOverlay[target->sprite->mainGraphic->id] != 0 //not sure if 0 or NULL contextually
+			)
+				updateUnitDamageOverlay(target);
+
+			if (attacker != NULL && target->playerId != attacker->playerId && bNotify)
+				doAttackNotifyEvent(target);
+
+		}
+
+	}
+
+}
+#else
 void killTargetUnitCheck(CUnit* target, s32 damage, CUnit* attacker, u32 attackingPlayerId, Bool32 bNotify) {
 
 	if (target->hitPoints != 0) {
@@ -112,11 +228,150 @@ void killTargetUnitCheck(CUnit* target, s32 damage, CUnit* attacker, u32 attacki
 	}
 
 }
+#endif
 
 ;
 
 // Hooks into the CUnit::damageWith() function.
 // 00479930 DoWpnDamage
+#ifdef EVENTS_SYSTEM
+void weaponDamageHook(	s32		damage,
+						CUnit*	target,
+						u8		weaponId,
+						CUnit*	attacker,
+						u8		attackingPlayerId,
+						s8		direction,
+						u8		dmgDivisor
+						) 
+{
+
+	bool cancelNormalCheck = false;
+	std::vector<int*> events_override_arg(7);
+	std::vector<int*> events_damage_shield_arg(6);
+	s32 initialDamage;
+	bool bCreateShieldOverlay;
+
+	events_override_arg[0] = (int*)target;
+	events_override_arg[1] = (int*)&damage;
+	events_override_arg[2] = (int*)attacker;
+	events_override_arg[3] = (int*)attackingPlayerId;
+	events_override_arg[4] = (int*)weaponId;
+	events_override_arg[5] = (int*)direction;
+	events_override_arg[6] = (int*)dmgDivisor;
+
+	EventManager::EventCalling(EventId::UNIT_WEAPONDAMAGE_OVERRIDE, &cancelNormalCheck, events_override_arg);
+
+	initialDamage = damage;
+
+	//the unit must neither be already dead nor invincible
+	if (!cancelNormalCheck && target->hitPoints != 0 && !(target->status & UnitStatus::Invincible)) {
+
+		u8 damageType;
+		s32 shieldReduceAmount = 0;
+		u32 damageFactorResult;
+
+		if (scbw::isCheatEnabled(CheatFlags::PowerOverwhelming)	&&			//If Power Overwhelming is enabled
+			playerTable[attackingPlayerId].type != PlayerType::Human)		//and the attacker is not a human player
+			damage = 0;
+
+		if (target->status & UnitStatus::IsHallucination)
+			damage *= 2;
+
+		damage = damage / dmgDivisor + (target->acidSporeCount * 256);
+
+		if (damage < 128)
+			damage = 128;
+
+		//Reduce Defensive Matrix
+		if (target->defensiveMatrixHp != 0) {
+
+			s32 d_matrix_reduceAmount;
+
+			if(damage <= target->defensiveMatrixHp)
+				d_matrix_reduceAmount = damage;						//partial damage to matrix shield
+			else
+				d_matrix_reduceAmount = target->defensiveMatrixHp;	//destroy all hp of matrix shield
+
+			damage -= d_matrix_reduceAmount;
+			target->reduceDefensiveMatrixHp(d_matrix_reduceAmount);
+
+		}
+
+		damageType = weapons_dat::DamageType[weaponId];
+
+		if (units_dat::ShieldsEnabled[target->id] && target->shields >= 256) {
+
+			if (damageType != DamageType::IgnoreArmor) {
+
+				s32 shieldArmor = scbw::getUpgradeLevel(target->playerId, UpgradeId::ProtossPlasmaShields) * 256;
+
+				if (shieldArmor >= damage)
+					damage = 128;
+				else
+					damage -= shieldArmor;
+
+			}
+
+			//799F7
+			if (damage <= target->shields)
+				shieldReduceAmount = damage;
+			else
+				shieldReduceAmount = target->shields;
+
+			damage -= shieldReduceAmount;
+
+			/*Shield not reduced yet because shield don't get protected by non-shield armor calculation below*/
+
+		}
+
+		//79A01
+		if (damageType != DamageType::IgnoreArmor) {
+
+			s32 armorTotal = target->getArmor() * 256;
+
+			if (damage <= armorTotal)
+				damage = 0;
+			else
+				damage -= armorTotal;
+
+		}
+
+		//79A38
+		damageFactorResult = damageFactor[damageType].unitSizeFactor[units_dat::SizeType[target->id]];
+		damage = (damageFactorResult * damage) / 256; //256 being the max damage factor, "damageFactorResult/256" is the multiplier
+
+		if (shieldReduceAmount == 0 && damage < 128)
+			damage = 128;
+
+		//hooked killTargetUnitCheck, damage is reduced to 0 in here when Power Overwhelming is ON
+		//Shields still take impact as seen in this function though
+		target->damageHp(damage, attacker, attackingPlayerId, (weaponId != WeaponId::Irradiate));
+
+		bCreateShieldOverlay = shieldReduceAmount != 0 && damageType != DamageType::Independent && target->shields != 0;
+
+		events_damage_shield_arg[0] = (int*)target;
+		events_damage_shield_arg[1] = (int*)&shieldReduceAmount;
+		events_damage_shield_arg[2] = (int*)attacker;
+		events_damage_shield_arg[3] = (int*)attackingPlayerId;
+		events_damage_shield_arg[4] = (int*)initialDamage;
+		events_damage_shield_arg[5] = (int*)&bCreateShieldOverlay;
+
+		EventManager::EventCalled(EventId::UNIT_DAMAGESHIELD, events_damage_shield_arg);
+
+		if(shieldReduceAmount != 0)
+			target->shields -= shieldReduceAmount;
+
+		if(bCreateShieldOverlay)
+			createShieldOverlay(target, direction);
+
+		//Update unit strength data
+		target->airStrength = getUnitStrength(target, false);
+		target->groundStrength = getUnitStrength(target, true);
+
+	}
+
+}
+#else
 void weaponDamageHook(	s32		damage,
 						CUnit*	target,
 						u8		weaponId,
@@ -220,13 +475,14 @@ void weaponDamageHook(	s32		damage,
 
 		}
 
-		//Update unit strength data (?)
+		//Update unit strength data
 		target->airStrength = getUnitStrength(target, false);
 		target->groundStrength = getUnitStrength(target, true);
 
 	}
 
 }
+#endif
 
 ;
 
