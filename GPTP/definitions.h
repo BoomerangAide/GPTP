@@ -31,3 +31,6 @@ char ( &_ArraySizeHelper( T (&array)[N] ))[N];
 
 //What is the plugin's name (and version)?
 #define PLUGIN_NAME "General Plugin Template Project for Starcraft"
+
+//If defined, will enable the events system (not native of SC)
+//#define EVENTS_SYSTEM
