@@ -1,7 +1,6 @@
 #include <cassert>
 #include "CUnit.h"
 #include "../api.h"
-#include "../enumerations.h"
 
 //-------- Unit stats and properties --------//
 
@@ -43,12 +42,12 @@ u32 CUnit::getCurrentLifeInGame() const {
 
 //Identical to function @ 0x00475AD0
 u8 CUnit::getGroundWeapon() const {
-
+	
 	if (this->id == UnitId::lurker && !(this->status & UnitStatus::Burrowed))
 		return WeaponId::None;
 	else
 		return units_dat::GroundWeapon[this->id];
-	
+
 }
 
 u8 CUnit::getAirWeapon() const {
@@ -526,7 +525,7 @@ void CUnit::removeAcidSpores() {
 
 ///Identical to Unit__SpendEnergy @ 0x00491460
 ///May underflow if alone
-void	CUnit::spendUnitEnergy(u32 energy) {
+void CUnit::spendUnitEnergy(u32 energy) {
 	if(!(*CHEAT_STATE & CheatFlags::TheGathering))
 		this->energy -= energy;
 }
@@ -887,7 +886,7 @@ int CUnit::canMakeUnit(u16 unitId, u8 playerId) const {
 
 const u32 Func_CanUseTech = 0x0046DD80;
 int CUnit::canUseTech(u8 techId, u8 playerId) const {
-	assert(this);
+
 	s32 playerId_ = playerId;
 	static s32 result;
 
