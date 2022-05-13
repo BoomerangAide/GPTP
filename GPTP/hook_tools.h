@@ -25,6 +25,11 @@ void jmpPatch(const void* target, void* position, unsigned int nops = 0);
 inline void jmpPatch(const void* target, DWORD position, unsigned int nops = 0) {
   jmpPatch(target, (void*)position, nops);
 }
+inline void jmpPatch2(const void* target1, const void* target2, DWORD position1, DWORD position2, unsigned int nops1 = 0, unsigned int nops2 = 0) 
+{
+  jmpPatch(target1, (void*)position1, nops1);
+  jmpPatch(target2, (void*)position2, nops2);
+}
 
 /// Injects a CALL to [target] at the [position], optionally overwriting [nops]
 /// bytes with NOPs.
