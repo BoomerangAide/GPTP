@@ -1,5 +1,6 @@
 #include "building_protoss.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //helper functions def
 
@@ -25,145 +26,248 @@ bool function_004EB9C0(CUnit* unit, int x, int y);										//EB9C0
 
 namespace hooks {
 
-	void orders_ProbeBuild(CUnit* unit) {
+void orders_ProbeBuild(CUnit* unit) {
 
-		if(unit->pAI != NULL)
-			unit->status |= UnitStatus::IsGathering;
+	if(unit->pAI != NULL)
+		unit->status |= UnitStatus::IsGathering;
 
-		if(unit->mainOrderState == 0) {
-			if(function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y))
-				unit->mainOrderState = 1;
-		}
+	if(unit->mainOrderState == 0) {
+		if(function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y))
+			unit->mainOrderState = 1;
+	}
+	else
+	if(unit->mainOrderState == 1) {
+
+		u32 distance,distance_wanted;
+
+		distance = scbw::getDistanceFast(unit->halt.x,unit->halt.y,unit->orderTarget.pt.x * 256,unit->orderTarget.pt.y * 256);
+
+		if(unit->buildQueue[unit->buildQueueSlot] == UnitId::ProtossAssimilator)
+			distance_wanted = 88;
 		else
-		if(unit->mainOrderState == 1) {
+			distance_wanted = 70;
 
-			u32 distance,distance_wanted;
+		if(distance / 256 > distance_wanted) {
 
-			distance = scbw::getDistanceFast(unit->halt.x,unit->halt.y,unit->orderTarget.pt.x * 256,unit->orderTarget.pt.y * 256);
+			if(unit->getMovableState() != MovableState::NotReachedDestination)
+				function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y);
 
-			if(unit->buildQueue[unit->buildQueueSlot] == UnitId::ProtossAssimilator)
+		}
+		else { //E4DA9
+			makeToHoldPosition_Helper(unit);
+			unit->mainOrderState = 2;
+		}
+
+	}
+	else
+	if(unit->mainOrderState == 2) {
+
+		if(!(unit->movementFlags & MovementFlags::Accelerating)) {
+
+			u32 distance_wanted;
+			bool isBuildingAssimilator = (unit->buildQueue[unit->buildQueueSlot] == UnitId::ProtossAssimilator);
+
+			if(isBuildingAssimilator)
 				distance_wanted = 88;
 			else
 				distance_wanted = 70;
 
-			if(distance / 256 > distance_wanted) {
-				
+			if(!isDistanceGreaterThanHaltDistance(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y, distance_wanted)) {
+					
 				if(unit->getMovableState() != MovableState::NotReachedDestination)
 					function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y);
 
 			}
-			else { //E4DA9
-				makeToHoldPosition_Helper(unit);
-				unit->mainOrderState = 2;
-			}
+			else {
 
-		}
-		else
-		if(unit->mainOrderState == 2) {
+				if(function_00467030(unit)) {
 
-			if(!(unit->movementFlags & MovementFlags::Accelerating)) {
+					CUnit* builtUnit;
 
-				u32 distance_wanted;
-				bool isBuildingAssimilator = (unit->buildQueue[unit->buildQueueSlot] == UnitId::ProtossAssimilator);
+					if(isBuildingAssimilator)
+						builtUnit = function_004678A0(unit,UnitId::ProtossAssimilator);
+					else
+						builtUnit = createUnit(
+										unit->buildQueue[unit->buildQueueSlot],
+										unit->orderTarget.pt.x,
+										unit->orderTarget.pt.y,
+										unit->playerId
+						);
 
-				if(isBuildingAssimilator)
-					distance_wanted = 88;
-				else
-					distance_wanted = 70;
+					unit->buildQueue[unit->buildQueueSlot] = UnitId::None;
 
-				if(!isDistanceGreaterThanHaltDistance(unit, unit->orderTarget.pt.x, unit->orderTarget.pt.y, distance_wanted)) {
+					if(builtUnit == NULL) {
+						displayLastNetErrForPlayer(unit->playerId);
+						unit->orderToIdle();
+					}
+					else { //E4E63
 
-					if(unit->getMovableState() != MovableState::NotReachedDestination)
-						function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y);
-
-				}
-				else {
-
-					if(function_00467030(unit)) {
-
-						CUnit* builtUnit;
+						replaceSpriteImages(builtUnit->sprite,ImageId::WarpAnchor,0);
 
 						if(isBuildingAssimilator)
-							builtUnit = function_004678A0(unit,UnitId::ProtossAssimilator);
-						else
-							builtUnit = createUnit(
-											unit->buildQueue[unit->buildQueueSlot],
-											unit->orderTarget.pt.x,
-											unit->orderTarget.pt.y,
-											unit->playerId
-							);
+							createBottomOverlay(builtUnit->sprite,ImageId::VespeneGeyser,0,0,0);
 
-						unit->buildQueue[unit->buildQueueSlot] = UnitId::None;
+						unit->orderTarget.unit = builtUnit;
 
-						if(builtUnit == NULL) {
-							displayLastNetErrForPlayer(unit->playerId);
-							unit->orderToIdle();
-						}
-						else { //E4E63
+						AI_TrainingOverlord(unit,builtUnit);
 
-							replaceSpriteImages(builtUnit->sprite,ImageId::WarpAnchor,0);
+						builtUnit->orderComputerCL(OrderId::BuildSelf2);
 
-							if(isBuildingAssimilator)
-								createBottomOverlay(builtUnit->sprite,ImageId::VespeneGeyser,0,0,0);
-
-							unit->orderTarget.unit = builtUnit;
-
-							AI_TrainingOverlord(unit,builtUnit);
-
-							builtUnit->orderComputerCL(OrderId::BuildSelf2);
-
-							scbw::playSound(SoundId::Protoss_SHUTTLE_pshBld00_wav,unit);
-							unit->mainOrderState = 3;
-
-						}
+						scbw::playSound(SoundId::Protoss_SHUTTLE_pshBld00_wav,unit);
+						unit->mainOrderState = 3;
 
 					}
-					else
-						unit->orderToIdle();
 
 				}
+				else
+					unit->orderToIdle();
 
-			}
-
-		}
-		else
-		if(unit->mainOrderState == 3) {
-
-			CUnit* target = unit->orderTarget.unit;
-			CImage* current_image;
-
-			if(	target == NULL ||
-				target->id != UnitId::ProtossAssimilator ||
-				unit->orderQueueHead != NULL
-			)
-				unit->orderToIdle();
-			else
-				unit->orderTo(OrderId::HarvestGas2,target);
-
-			current_image = unit->sprite->images.head;
-
-			while(current_image != NULL) {
-				current_image->playIscriptAnim(IscriptAnimation::WalkingToIdle);
-				current_image = current_image->link.next;
 			}
 
 		}
 
 	}
+	else
+	if(unit->mainOrderState == 3) {
 
-	;
+		CUnit* target = unit->orderTarget.unit;
+		CImage* current_image;
 
-	//Protoss building self-building
-	void orders_BuildSelf2(CUnit* building) {
-
-		bool jump_to_E50EE = false;
-
-		if(building->mainOrderState > 3)
-			jump_to_E50EE = true;
+		if(	target == NULL ||
+			target->id != UnitId::ProtossAssimilator ||
+			unit->orderQueueHead != NULL
+		)
+			unit->orderToIdle();
 		else
-		if(building->mainOrderState == 0) {
+			unit->orderTo(OrderId::HarvestGas2,target);
 
-			if(building->remainingBuildTime == 0) {
+		current_image = unit->sprite->images.head;
+
+		while(current_image != NULL) {
+			current_image->playIscriptAnim(IscriptAnimation::WalkingToIdle);
+			current_image = current_image->link.next;
+		}
+
+	}
+
+}
+
+;
+
+//Protoss building self-building
+#ifdef EVENTS_SYSTEM
+void orders_BuildSelf2(CUnit* building) {
+
+	bool jump_to_E50EE = false;
+
+	if(building->mainOrderState > 3)
+		jump_to_E50EE = true;
+	else
+	if(building->mainOrderState == 0) {
+
+		if(building->remainingBuildTime == 0) {
+
+			CImage* current_image = building->sprite->images.head;
+
+			while(current_image != NULL) {
+
+				if(current_image->flags & CImage_Flags::Flag04) {
+
+					const u32* u32_006D1200 = (u32*)0x006D1200;
+
+					current_image->animation = IscriptAnimation::SpecialState1;
+					current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x22);
+					current_image->wait = 0;
+					current_image->unknown14 = 0;
+					iscript_OpcodeCases(current_image,(u32)&current_image->iscriptHeaderOffset,0,0);
+
+				}
+
+				current_image = current_image->link.next;
+
+			}
+
+			scbw::playSound(SoundId::Protoss_SHUTTLE_pshBld03_wav,building);
+			building->mainOrderState = 1;
+			jump_to_E50EE = true;
+
+		}
+		else
+			jump_to_E50EE = true;
+
+	}
+	else
+	if(building->mainOrderState == 1) {
+
+		if(building->orderSignal & 1) {
+
+			building->orderSignal -= 1;
+
+			replaceSpriteImages(
+				building->sprite,
+				sprites_dat::ImageId[building->sprite->spriteId],
+				0
+			);
+
+			function_004D8500(building->sprite->mainGraphic);
+
+			building->mainOrderState = 2;
+
+		}
+
+	}
+	else
+	if(building->mainOrderState == 2) {
+
+		if(building->orderSignal & 1) {
+
+			CImage* current_image;
+
+			building->orderSignal -= 1;
+
+			replaceSpriteImages(
+				building->sprite,
+				sprites_dat::ImageId[building->sprite->spriteId],
+				0
+			);
+
+			current_image = building->sprite->images.head;
+
+			while(current_image != NULL) {
+
+				if(current_image->flags & CImage_Flags::Flag04) {
+
+					const u32* u32_006D1200 = (u32*)0x006D1200;
+
+					current_image->animation = IscriptAnimation::WarpIn;
+					current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x32);
+					current_image->wait = 0;
+					current_image->unknown14 = 0;
+					iscript_OpcodeCases(current_image,(u32)&current_image->iscriptHeaderOffset,0,0);
+
+				}
+
+				current_image = current_image->link.next;
+
+			}
+
+			building->mainOrderState = 3;
+
+		}
+
+	}
+	else
+	if(building->mainOrderState == 3) {
+
+		if(building->orderSignal & 1) {
+
+			building->orderSignal -= 1;
+
+			function_004A01F0(building);
+			updateUnitStrength(building);
+			function_0042D9A0(building);
+
+			if(building->status & UnitStatus::DoodadStatesThing) {
 
 				CImage* current_image = building->sprite->images.head;
 
@@ -173,8 +277,8 @@ namespace hooks {
 
 						const u32* u32_006D1200 = (u32*)0x006D1200;
 
-						current_image->animation = IscriptAnimation::SpecialState1;
-						current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x22);
+						current_image->animation = IscriptAnimation::Disable;
+						current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x38);
 						current_image->wait = 0;
 						current_image->unknown14 = 0;
 						iscript_OpcodeCases(current_image,(u32)&current_image->iscriptHeaderOffset,0,0);
@@ -185,8 +289,6 @@ namespace hooks {
 
 				}
 
-				scbw::playSound(SoundId::Protoss_SHUTTLE_pshBld03_wav,building);
-				building->mainOrderState = 1;
 				jump_to_E50EE = true;
 
 			}
@@ -194,42 +296,171 @@ namespace hooks {
 				jump_to_E50EE = true;
 
 		}
+
+	}
+		
+	if(jump_to_E50EE) {
+
+		std::vector<int*> events_building_protoss_life_add_arg(5);
+		s32 newHp, newShield;
+
+		//u32 hpGain, shieldGain;
+
+		if(building->remainingBuildTime != 0) {
+			if(*CHEAT_STATE & CheatFlags::OperationCwal) {
+				if(building->remainingBuildTime > 16)
+					building->remainingBuildTime -= 16;
+				else
+					building->remainingBuildTime = 0;
+			}
+			else
+				building->remainingBuildTime--;
+		}
+
+		if(*CHEAT_STATE & CheatFlags::OperationCwal)
+			newHp = building->hitPoints + building->buildRepairHpGain * 16;
 		else
-		if(building->mainOrderState == 1) {
+			newHp = building->hitPoints + building->buildRepairHpGain;
 
-			if(building->orderSignal & 1) {
+		if(*CHEAT_STATE & CheatFlags::OperationCwal)
+			newShield = building->shieldGain * 16;
+		else
+			newShield = building->shieldGain;
 
-				building->orderSignal -= 1;
+		if(building->shields + newShield >= (u32)units_dat::MaxShieldPoints[building->id] * 256)
+			newShield = units_dat::MaxShieldPoints[building->id] * 256;
+		else
+			newShield = building->shields + newShield;
 
-				replaceSpriteImages(
-					building->sprite,
-					sprites_dat::ImageId[building->sprite->spriteId],
-					0
-				);
+		events_building_protoss_life_add_arg[0] = (int*)building;
+		events_building_protoss_life_add_arg[1] = (int*)building->hitPoints;
+		events_building_protoss_life_add_arg[2] = (int*)&newHp;
+		events_building_protoss_life_add_arg[3] = (int*)building->shields;
+		events_building_protoss_life_add_arg[4] = (int*)&newShield;
 
-				function_004D8500(building->sprite->mainGraphic);
+		EventManager::EventCalled(EventId::BUILDING_PROTOSS_LIFE_ADD, events_building_protoss_life_add_arg);
 
-				building->mainOrderState = 2;
+		building->setHp(newHp);
+		building->shields = newShield;
+
+	}
+
+}
+#else
+void orders_BuildSelf2(CUnit* building) {
+
+	bool jump_to_E50EE = false;
+
+	if(building->mainOrderState > 3)
+		jump_to_E50EE = true;
+	else
+	if(building->mainOrderState == 0) {
+
+		if(building->remainingBuildTime == 0) {
+
+			CImage* current_image = building->sprite->images.head;
+
+			while(current_image != NULL) {
+
+				if(current_image->flags & CImage_Flags::Flag04) {
+
+					const u32* u32_006D1200 = (u32*)0x006D1200;
+
+					current_image->animation = IscriptAnimation::SpecialState1;
+					current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x22);
+					current_image->wait = 0;
+					current_image->unknown14 = 0;
+					iscript_OpcodeCases(current_image,(u32)&current_image->iscriptHeaderOffset,0,0);
+
+				}
+
+				current_image = current_image->link.next;
 
 			}
 
+			scbw::playSound(SoundId::Protoss_SHUTTLE_pshBld03_wav,building);
+			building->mainOrderState = 1;
+			jump_to_E50EE = true;
+
 		}
 		else
-		if(building->mainOrderState == 2) {
+			jump_to_E50EE = true;
 
-			if(building->orderSignal & 1) {
+	}
+	else
+	if(building->mainOrderState == 1) {
 
-				CImage* current_image;
+		if(building->orderSignal & 1) {
 
-				building->orderSignal -= 1;
+			building->orderSignal -= 1;
 
-				replaceSpriteImages(
-					building->sprite,
-					sprites_dat::ImageId[building->sprite->spriteId],
-					0
-				);
+			replaceSpriteImages(
+				building->sprite,
+				sprites_dat::ImageId[building->sprite->spriteId],
+				0
+			);
 
-				current_image = building->sprite->images.head;
+			function_004D8500(building->sprite->mainGraphic);
+
+			building->mainOrderState = 2;
+
+		}
+
+	}
+	else
+	if(building->mainOrderState == 2) {
+
+		if(building->orderSignal & 1) {
+
+			CImage* current_image;
+
+			building->orderSignal -= 1;
+
+			replaceSpriteImages(
+				building->sprite,
+				sprites_dat::ImageId[building->sprite->spriteId],
+				0
+			);
+
+			current_image = building->sprite->images.head;
+
+			while(current_image != NULL) {
+
+				if(current_image->flags & CImage_Flags::Flag04) {
+
+					const u32* u32_006D1200 = (u32*)0x006D1200;
+
+					current_image->animation = IscriptAnimation::WarpIn;
+					current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x32);
+					current_image->wait = 0;
+					current_image->unknown14 = 0;
+					iscript_OpcodeCases(current_image,(u32)&current_image->iscriptHeaderOffset,0,0);
+
+				}
+
+				current_image = current_image->link.next;
+
+			}
+
+			building->mainOrderState = 3;
+
+		}
+
+	}
+	else
+	if(building->mainOrderState == 3) {
+
+		if(building->orderSignal & 1) {
+
+			building->orderSignal -= 1;
+
+			function_004A01F0(building);
+			updateUnitStrength(building);
+			function_0042D9A0(building);
+
+			if(building->status & UnitStatus::DoodadStatesThing) {
+
+				CImage* current_image = building->sprite->images.head;
 
 				while(current_image != NULL) {
 
@@ -237,8 +468,8 @@ namespace hooks {
 
 						const u32* u32_006D1200 = (u32*)0x006D1200;
 
-						current_image->animation = IscriptAnimation::WarpIn;
-						current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x32);
+						current_image->animation = IscriptAnimation::Disable;
+						current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x38);
 						current_image->wait = 0;
 						current_image->unknown14 = 0;
 						iscript_OpcodeCases(current_image,(u32)&current_image->iscriptHeaderOffset,0,0);
@@ -249,91 +480,55 @@ namespace hooks {
 
 				}
 
-				building->mainOrderState = 3;
+				jump_to_E50EE = true;
 
 			}
-
-		}
-		else
-		if(building->mainOrderState == 3) {
-
-			if(building->orderSignal & 1) {
-
-				building->orderSignal -= 1;
-
-				function_004A01F0(building);
-				updateUnitStrength(building);
-				function_0042D9A0(building);
-
-				if(building->status & UnitStatus::DoodadStatesThing) {
-
-					CImage* current_image = building->sprite->images.head;
-
-					while(current_image != NULL) {
-
-						if(current_image->flags & CImage_Flags::Flag04) {
-
-							const u32* u32_006D1200 = (u32*)0x006D1200;
-
-							current_image->animation = IscriptAnimation::Disable;
-							current_image->iscriptOffset = *(u16*)(*u32_006D1200 + current_image->iscriptHeaderOffset + 0x38);
-							current_image->wait = 0;
-							current_image->unknown14 = 0;
-							iscript_OpcodeCases(current_image,(u32)&current_image->iscriptHeaderOffset,0,0);
-
-						}
-
-						current_image = current_image->link.next;
-
-					}
-
-					jump_to_E50EE = true;
-
-				}
-				else
-					jump_to_E50EE = true;
-
-			}
-
-		}
-		
-		if(jump_to_E50EE) {
-
-			u32 hpGain, shieldGain;
-
-			if(building->remainingBuildTime != 0) {
-				if(*CHEAT_STATE & CheatFlags::OperationCwal) {
-					if(building->remainingBuildTime > 16)
-						building->remainingBuildTime -= 16;
-					else
-						building->remainingBuildTime = 0;
-				}
-				else
-					building->remainingBuildTime--;
-			}
-
-			if(*CHEAT_STATE & CheatFlags::OperationCwal)
-				hpGain = building->buildRepairHpGain * 16;
 			else
-				hpGain = building->buildRepairHpGain;
-
-			building->setHp(building->hitPoints + hpGain);
-
-			if(*CHEAT_STATE & CheatFlags::OperationCwal)
-				shieldGain = building->shieldGain * 16;
-			else
-				shieldGain = building->shieldGain;
-
-			if(building->shields + shieldGain >= (u32)units_dat::MaxShieldPoints[building->id] * 256)
-				building->shields = units_dat::MaxShieldPoints[building->id] * 256;
-			else
-				building->shields += shieldGain;
+				jump_to_E50EE = true;
 
 		}
 
 	}
+		
+	if(jump_to_E50EE) {
 
-	;
+		u32 hpGain, shieldGain;
+
+		if(building->remainingBuildTime != 0) {
+			if(*CHEAT_STATE & CheatFlags::OperationCwal) {
+				if(building->remainingBuildTime > 16)
+					building->remainingBuildTime -= 16;
+				else
+					building->remainingBuildTime = 0;
+			}
+			else
+				building->remainingBuildTime--;
+		}
+
+		if(*CHEAT_STATE & CheatFlags::OperationCwal)
+			hpGain = building->buildRepairHpGain * 16;
+		else
+			hpGain = building->buildRepairHpGain;
+
+		building->setHp(building->hitPoints + hpGain);
+
+		if(*CHEAT_STATE & CheatFlags::OperationCwal)
+			shieldGain = building->shieldGain * 16;
+		else
+			shieldGain = building->shieldGain;
+
+		if(building->shields + shieldGain >= (u32)units_dat::MaxShieldPoints[building->id] * 256)
+			building->shields = units_dat::MaxShieldPoints[building->id] * 256;
+		else
+			building->shields += shieldGain;
+
+	}
+
+}
+#endif
+
+
+;
 
 } //namespace hooks
 
