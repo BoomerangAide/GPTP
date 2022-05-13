@@ -1,5 +1,6 @@
 #include "building_terran.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 #ifndef FALSE
 #define FALSE 0
@@ -111,6 +112,421 @@ void orders_TerranBuildSelf(CUnit* building) {
 ;
 
 //Go to build on an existing building
+#ifdef EVENTS_SYSTEM
+void orders_SCVBuild2(CUnit* unit) {
+
+	CUnit* builtUnit = unit->orderTarget.unit;
+
+	if(builtUnit != NULL && !(builtUnit->status & UnitStatus::Completed)) {
+
+		bool jump_to_switch_1 = false;
+
+		if(
+			unit->mainOrderState > 8 ||
+			unit->mainOrderState == 1
+		)
+			jump_to_switch_1 = true;
+
+		if(unit->mainOrderState == 0) {
+			if(orderToMoveToTarget(unit,builtUnit))
+				unit->mainOrderState = 2;
+		}
+		
+		if(unit->mainOrderState == 2) {
+
+			u32 movableState = unit->getMovableState();
+
+			if(movableState == MovableState::UnmovableAtDestination)
+				unit->orderToIdle();
+			else
+			if(movableState != MovableState::NotReachedDestination) {
+
+				scbw::refreshConsole();
+
+				if (
+					builtUnit->connectedUnit != NULL &&
+					builtUnit->connectedUnit != unit &&
+					(builtUnit->connectedUnit)->orderTarget.unit == builtUnit
+				)
+					unit->orderToIdle(); //another SCV is already on the job
+				else { //67AF9
+
+					builtUnit->connectedUnit = unit;
+					unit->status &= ~UnitStatus::IsNormal;	//remove UnitStatus::IsNormal if present
+					unit->sprite->elevationLevel = units_dat::Elevation[unit->id] + 1;
+
+					unit->orderSimple(OrderId::ResetCollision1,false);
+					unit->orderSimple(units_dat::ReturnToIdleOrder[unit->id],false);
+
+					if (
+						function_004EB9C0(	
+							unit,
+							builtUnit->sprite->position.x,
+							builtUnit->sprite->position.y
+						)
+					)
+						unit->mainOrderState = 3;
+
+				}
+
+			}
+
+		} //if(unit->mainOrderState == 2)
+		else
+		if(unit->mainOrderState == 3) {
+			if(unit->getMovableState() != MovableState::NotReachedDestination)
+				unit->mainOrderState = 4;
+		}
+		else
+		if(unit->mainOrderState == 4) {
+
+			s16 x_min,y_min,x_max,y_max;
+			s32 dimX, dimY;
+
+			Box16 temp_box;
+
+			temp_box.left = builtUnit->sprite->position.x - builtUnit->sprite->unkflags_12 / 2;
+			temp_box.right = builtUnit->sprite->position.x + builtUnit->sprite->unkflags_12 / 2 - 1;
+			temp_box.top = builtUnit->sprite->position.y - builtUnit->sprite->unkflags_13 / 2;
+			temp_box.bottom = builtUnit->sprite->position.y + builtUnit->sprite->unkflags_13 / 2 - 1;
+
+			dimX = (s16)units_dat::BuildingDimensions[builtUnit->id].x;
+
+			if(dimX < 0)
+				x_min = builtUnit->sprite->position.x - (dimX + 1) / 2;
+			else
+				x_min = builtUnit->sprite->position.x - dimX / 2;
+
+			x_max = dimX + x_min - 1;
+
+			dimY = (s16)units_dat::BuildingDimensions[builtUnit->id].y;
+
+			if(dimY < 0)
+				y_min = builtUnit->sprite->position.y - (dimY + 1) / 2;
+			else
+				y_min = builtUnit->sprite->position.y - dimY / 2;
+
+			y_max = dimY + y_min - 1;
+
+			x_min = x_min + units_dat::UnitBounds[unit->id].left + 1;
+			x_max = x_max - (units_dat::UnitBounds[unit->id].right + 1);
+			y_min = y_min + units_dat::UnitBounds[unit->id].top + 1;
+			y_max = y_max - (units_dat::UnitBounds[unit->id].bottom + 1);
+
+			if(x_min < temp_box.left)
+				x_min = temp_box.left;
+
+			if(y_min < temp_box.top)
+				y_min = temp_box.top;
+
+			if(x_max > temp_box.right)
+				x_max = temp_box.right;
+
+			if(y_max > temp_box.bottom)
+				y_max = temp_box.bottom;
+
+			unit->orderTarget.pt.x = RandBetween(temp_box.left,temp_box.right,9);
+			unit->orderTarget.pt.y = RandBetween(temp_box.top,temp_box.bottom,9);
+
+			fixTargetLocation(&unit->orderTarget.pt,unit->id);
+
+			if(
+				function_004F1870(
+					unit,
+					unit->orderTarget.pt.x - unit->sprite->position.x,
+					unit->orderTarget.pt.y - unit->sprite->position.y
+				) != 0
+			) 
+			{
+
+				unit->orderTarget.pt.x = RandBetween(x_min,x_max,9);
+				unit->orderTarget.pt.y = RandBetween(y_min,y_max,9);
+
+				fixTargetLocation(&unit->orderTarget.pt,unit->id);
+
+			}
+
+			if(function_004EB9C0(unit,unit->orderTarget.pt.x,unit->orderTarget.pt.y))
+			{
+				unit->mainOrderState = 5;
+				jump_to_switch_1 = true;
+			}
+
+		} //mainOrderState == 4
+		else
+		if(unit->mainOrderState == 5) {
+			unit->mainOrderState = 6;
+			jump_to_switch_1 = true;
+		}
+		else
+		if(unit->mainOrderState == 6) {
+
+			if(!isDistanceGreaterThanHaltDistance(
+					unit,
+					unit->orderTarget.pt.x,
+					unit->orderTarget.pt.y,
+					20 //0x14
+				)
+			)
+				jump_to_switch_1 = true;
+			else {
+
+				s32 angle;
+
+				setNextWaypoint_Sub4EB290(unit);
+
+				function_00494BB0(
+					unit,
+					(unit->orderTarget.unit)->sprite->position.x,
+					(unit->orderTarget.unit)->sprite->position.y
+				);
+
+				angle = scbw::getAngle(
+					unit->sprite->position.x,
+					unit->sprite->position.y,
+					unit->nextTargetWaypoint.x,
+					unit->nextTargetWaypoint.y
+				);
+
+				unit->orderTarget.pt.x = (angleDistance[angle].x * 20) / 256 + unit->sprite->position.x;
+				unit->orderTarget.pt.y = (angleDistance[angle].y * 20) / 256 + unit->sprite->position.y;
+				unit->mainOrderState = 7;
+				jump_to_switch_1 = true;
+
+			}
+
+		}
+		else
+		if(unit->mainOrderState == 7) {
+
+			if(!isUnitPositions2Equal(unit)) {
+
+				s32 angle = 
+					scbw::getAngle(
+						unit->sprite->position.x,
+						unit->sprite->position.y,
+						unit->nextTargetWaypoint.x,
+						unit->nextTargetWaypoint.y
+					);
+
+				angle = unit->currentDirection1 - angle;
+
+				if(angle < 0)
+					angle += 256;
+
+				if (angle > 128)
+					angle = 256 - angle;
+
+				if(angle > weapons_dat::AttackAngle[unit->getGroundWeapon()])
+					jump_to_switch_1 = true;
+				else { //67E4A
+
+					u8 rand_value = RandomizeShort(10);
+					CImage* current_image = unit->sprite->images.head;
+
+					unit->mainOrderTimer = (rand_value & 63) + 30; //63==0x3F, 30==0x1E
+
+					while(current_image != NULL) {
+						current_image->playIscriptAnim(IscriptAnimation::AlmostBuilt);
+						current_image = current_image->link.next;
+					}
+
+					unit->mainOrderState = 8;
+					jump_to_switch_1 = true;
+
+				}
+
+
+			}
+			else { //67E4A
+
+				u8 rand_value = RandomizeShort(10);
+				CImage* current_image = unit->sprite->images.head;
+
+				unit->mainOrderTimer = (rand_value & 63) + 30; //63==0x3F, 30==0x1E
+
+				while(current_image != NULL) {
+					current_image->playIscriptAnim(IscriptAnimation::AlmostBuilt); //SCV got that animation indeed
+					current_image = current_image->link.next;
+				}
+
+				unit->mainOrderState = 8;
+				jump_to_switch_1 = true;
+
+			}
+
+		}
+		else
+		if(unit->mainOrderState == 8) {
+
+			if(unit->mainOrderTimer != 0)
+				jump_to_switch_1 = true;
+			else {
+
+				CImage* current_image = unit->sprite->images.head;
+
+				while(current_image != NULL) {
+					current_image->playIscriptAnim(IscriptAnimation::GndAttkToIdle);
+					current_image = current_image->link.next;
+				}
+
+				unit->mainOrderState = 4;
+
+				jump_to_switch_1 = true;
+
+			}
+
+		}
+
+		if(jump_to_switch_1) {
+
+			std::vector<int*> events_building_terran_hp_add_arg(3);
+			u32 hpGain = builtUnit->buildRepairHpGain;
+
+			if(*CHEAT_STATE & CheatFlags::OperationCwal)
+				hpGain *= 16;
+
+			events_building_terran_hp_add_arg[0] = (int*)builtUnit;
+			events_building_terran_hp_add_arg[1] = (int*)unit;
+			events_building_terran_hp_add_arg[2] = (int*)&hpGain;
+
+			EventManager::EventCalled(EventId::BUILDING_TERRAN_CONSTRUCTION_HP_ADD, events_building_terran_hp_add_arg);
+
+			buildingAddon(builtUnit,hpGain,FALSE);
+
+			if(builtUnit->status & UnitStatus::Completed) {
+
+				CImage* current_image = unit->sprite->images.head;
+				bool bEndThere = false;
+
+				while(current_image != NULL) {
+					current_image->playIscriptAnim(IscriptAnimation::WalkingToIdle);
+					current_image = current_image->link.next;
+				}
+
+				if(builtUnit != NULL) {
+
+					bool jump_to_67F3C = false;
+
+					builtUnit->connectedUnit = NULL;
+					playBuildingCompleteSound(unit); //sound come from SCV, not building
+
+					if(builtUnit->status & UnitStatus::Completed) {
+
+						if(
+							builtUnit->id == UnitId::TerranRefinery ||
+							builtUnit->id == UnitId::ProtossAssimilator ||
+							builtUnit->id == UnitId::ZergExtractor
+						)
+						{
+							if(builtUnit->playerId == unit->playerId)
+								jump_to_67F3C = true;
+						}
+
+					}
+
+					if(!jump_to_67F3C) { //67F2C
+
+						if(	
+							builtUnit->id >= UnitId::ResourceMineralField &&
+							builtUnit->id <= UnitId::ResourceMineralFieldType3
+						)
+							jump_to_67F3C = true;
+
+					}
+
+					if(jump_to_67F3C) {
+						unit->orderTo(OrderId::Harvest1,builtUnit);
+						bEndThere = true;
+					}
+
+				}
+
+				if(!bEndThere) { //67F4C
+
+					if(unit->orderQueueHead != NULL) {
+						unit->userActionFlags |= 1;
+						prepareForNextOrder(unit);
+					}
+					else 
+					if(unit->pAI != NULL) //67F6F
+						unit->orderComputerCL(OrderId::ComputerAI);
+					else
+						unit->orderComputerCL(units_dat::ReturnToIdleOrder[unit->id]);
+
+				}
+
+			}
+
+		}
+
+	}
+	else { //67ED0
+
+		CImage* current_image = unit->sprite->images.head;
+		bool bEndThere = false;
+
+		while(current_image != NULL) {
+			current_image->playIscriptAnim(IscriptAnimation::WalkingToIdle);
+			current_image = current_image->link.next;
+		}
+
+		if(builtUnit != NULL) {
+
+			bool jump_to_67F3C = false;
+
+			builtUnit->connectedUnit = NULL;
+			playBuildingCompleteSound(unit); //sound come from SCV, not building
+
+			if(builtUnit->status & UnitStatus::Completed) {
+
+				if(
+					builtUnit->id == UnitId::TerranRefinery ||
+					builtUnit->id == UnitId::ProtossAssimilator ||
+					builtUnit->id == UnitId::ZergExtractor
+				)
+				{
+					if(builtUnit->playerId == unit->playerId)
+						jump_to_67F3C = true;
+				}
+
+			}
+
+			if(!jump_to_67F3C) { //67F2C
+
+				if(	
+					builtUnit->id >= UnitId::ResourceMineralField &&
+					builtUnit->id <= UnitId::ResourceMineralFieldType3
+				)
+					jump_to_67F3C = true;
+
+			}
+
+			if(jump_to_67F3C) {
+				unit->orderTo(OrderId::Harvest1,builtUnit);
+				bEndThere = true;
+			}
+
+		}
+
+		if(!bEndThere) { //67F4C
+
+			if(unit->orderQueueHead != NULL) {
+				unit->userActionFlags |= 1;
+				prepareForNextOrder(unit);
+			}
+			else 
+			if(unit->pAI != NULL) //67F6F
+				unit->orderComputerCL(OrderId::ComputerAI);
+			else
+				unit->orderComputerCL(units_dat::ReturnToIdleOrder[unit->id]);
+
+		}
+
+	}
+
+}
+#else
 void orders_SCVBuild2(CUnit* unit) {
 
 	CUnit* builtUnit = unit->orderTarget.unit;
@@ -517,6 +933,7 @@ void orders_SCVBuild2(CUnit* unit) {
 	}
 
 }
+#endif
 
 ;
 
@@ -536,7 +953,7 @@ void orders_SCVBuild(CUnit* unit) {
 			unit->sprite->position.y == unit->moveTarget.pt.y
 		)
 		{
-			
+
 			/*Ignored a bugged unit->status & UnitStatus::Unmovable check here*/
 
 			if (
