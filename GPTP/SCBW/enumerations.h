@@ -131,9 +131,9 @@ enum Enum : u32 {
 
 namespace BUTTON_STATE {
 enum Enum {
-	Disabled = -1,
-	Invisible= 0,
-	Enabled   = 1
+	Disabled	= -1,
+	Invisible	= 0,
+	Enabled		= 1
 };
 }
 
@@ -259,7 +259,7 @@ enum Enum {
   None                   = 0,
   BlackSheepWall         = 1 <<  0,		/*0x00000001*/
   OperationCwal          = 1 <<  1,		/*0x00000002*/
-  PowerOverwhelming       = 1 <<  2,	/*0x00000004*/
+  PowerOverwhelming      = 1 <<  2,		/*0x00000004*/
   SomethingForNothing    = 1 <<  3,		/*0x00000008*/
   ShowMeTheMoney         = 1 <<  4,		/*0x00000010*/
   GameOverMan            = 1 <<  6,		/*0x00000040*/
@@ -456,6 +456,19 @@ enum Enum {
 	ListBox				= 0x0000000C,
 	ComboBox			= 0x0000000D,
 	LightUpButton		= 0x0000000E
+};
+}
+
+//Based on my personal research, may be wrong
+namespace PanelTooltipTypes {
+enum Enum {
+	WeaponPanelTooltip = 0,		//set in getWeaponTooltipString
+	ArmorPanelTooltip = 1,		//set in getArmorTooltipString
+	ShieldPanelTooltip = 2,		//set in getShieldTooltipString
+	SpecialPanelTooltip = 3,	//some possibilities set in getSpecialTooltipString
+	ResearchPanelTooltip = 4,
+	UpgradePanelTooltip = 5,
+	NoPanelTooltip = 6
 };
 }
 
