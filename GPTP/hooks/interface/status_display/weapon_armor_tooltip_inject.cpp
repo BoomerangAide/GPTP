@@ -25,34 +25,34 @@ void createContextHelpFromDialog(BinDlg* dialog, const char *text) {
 	}
 
 }
-	
+
 ;
 
 //Replaces function @ 0x004576A0 by replacing the call to it
 void __stdcall statdatalUserInteractWrapper(BinDlg *consoleIcon) {
 
-	GuiOverlay *gui = (GuiOverlay*) consoleIcon->user;
+	UnknownUserStruct* iconData = (UnknownUserStruct*) consoleIcon->user;
 
-	switch (gui->overlayType) {
-		case 0:
+	switch (iconData->tooltipType_06) {
+		case PanelTooltipTypes::WeaponPanelTooltip:
 			createContextHelpFromDialog(consoleIcon,
-				hooks::getWeaponTooltipString((u8) gui->id, *activePortraitUnit));
+				hooks::getWeaponTooltipString((u8) iconData->id_08, *activePortraitUnit));
 			break;
-		case 1:
+		case PanelTooltipTypes::ArmorPanelTooltip:
 			createContextHelpFromDialog(consoleIcon,
 				hooks::getArmorTooltipString(*activePortraitUnit));
 			break;
-		case 2:
+		case PanelTooltipTypes::ShieldPanelTooltip:
 			createContextHelpFromDialog(consoleIcon,
 				hooks::getShieldTooltipString(*activePortraitUnit));
 			break;
-		case 3:
+		case PanelTooltipTypes::SpecialPanelTooltip:
 			createContextHelpFromDialog(consoleIcon,
-				hooks::getSpecialTooltipString(gui->id, *activePortraitUnit));
+				hooks::getSpecialTooltipString(iconData->id_08, *activePortraitUnit));
 			break;
 	}
 }
-	
+
 ;
 
 } //unnamed namespace
