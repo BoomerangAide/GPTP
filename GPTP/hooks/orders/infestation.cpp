@@ -1,5 +1,6 @@
 #include "infestation.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions definitions
 
@@ -29,7 +30,7 @@ namespace hooks {
 
 		bool returnValue;
 
-		returnValue = (unit->id == UnitId::queen || unit->id == UnitId::matriarch);
+		returnValue = (unit->id == UnitId::ZergQueen || unit->id == UnitId::Hero_Matriarch);
 
 		return returnValue;
 
@@ -64,7 +65,152 @@ namespace hooks {
 	;
 
 	//Based on and replace orders_InfestMine1 (0x004EA4C0)
+#ifdef EVENTS_SYSTEM
 	void orderMorphIntoInfested(CUnit* unitInfested) {
+
+		bool bErrorReturnToIdle;
+		bool bStopFunction = false;
+
+		u16 infestedUnitNewId;
+		u16 infestationOverlayId;
+
+		CUnit* unitInfesting = unitInfested->orderTarget.unit;
+
+		bErrorReturnToIdle = (unitInfesting == NULL || !isInfestableUnit(unitInfested));
+
+		if(!bErrorReturnToIdle) {
+
+			if(unitInfested->mainOrderState == 0) {
+
+				//init timer
+				unitInfested->remainingBuildTime = 3;
+				unitInfested->mainOrderState = 2;
+				bStopFunction = true;
+
+			}
+
+			if(!bStopFunction) {
+
+				if(unitInfested->remainingBuildTime != 0) {
+
+					//advancing timer
+					unitInfested->remainingBuildTime--;
+					bStopFunction = true;
+
+				}
+				else {
+
+					std::vector<int*> events_unit_infested_hp_set_arg(5);
+					u32 oldId;
+					s32 oldHp, newHp;
+
+					oldId = unitInfested->id;
+					oldHp = unitInfested->hitPoints;
+
+					//will become 0xffff, this is used by internal functions
+					unitInfested->remainingBuildTime--;
+
+					//disconnect terran buildings from their add-on
+					if(unitInfested->building.addon != NULL)
+						disconnectFromAddOn(unitInfested);
+
+					//this is the same as calling 0047B2E0 unitIsFactoryUnit like original code but faster
+					if(unitInfested->isFactory())
+						unitInfested->rally.unit = unitInfested;
+
+					//original code was *(u16*)(0x006648AC + 2*unitInfested->id);
+					infestedUnitNewId = units_dat::InfestedUnitPartial[unitInfested->id - UnitId::TerranCommandCenter];
+
+					//update number of kills/casualties for endgame score
+					incrementUnitDeathScores(unitInfested, unitInfesting->playerId);
+
+					//effect unknown, don't seem to affect score screen at endgame
+					incrementUnitScores(unitInfested,-1);
+					if(unitInfested->status & UnitStatus::Completed)
+						incrementUnitScoresEx(unitInfested,0,-1);
+
+					//the unit receive the new id (infested id)
+					unitInfested->id = infestedUnitNewId;
+
+					//effect unknown, don't seem to affect score screen at endgame
+					incrementUnitScores(unitInfested,1);
+					if(unitInfested->status & UnitStatus::Completed)
+						incrementUnitScoresEx(unitInfested,0,1);
+
+					//I don't really know, advanced internal mechanics, just have to work with it
+					GiveUnitHelper(unitInfested, unitInfesting->playerId, 1);
+					initializeEmptyUnitsLinkedListRef_Sub49E4E0(unitInfested, unitInfesting->playerId);
+
+					//Related to infestation process, don't use unitInfested->setSecondaryOrder
+					//because here it is supposed to perform all actions even if 
+					//unitInfested->secondaryOrderId == OrderId::Nothing2 beforehand
+					unitInfested->secondaryOrderPos.y = 0;
+					unitInfested->secondaryOrderPos.x = 0;
+					unitInfested->currentBuildUnit = NULL;
+					unitInfested->secondaryOrderState = 0;
+					unitInfested->secondaryOrderId = OrderId::Nothing2;
+
+					//refund what the unit was producing
+					refundAllQueueSlots(unitInfested);
+
+					//clear the orders queue of the unit (hardcoding function @ 0x004744D0)
+					//original code used the actual function instead of hardcoding
+					while(unitInfested->orderQueueHead != NULL)
+						removeOrderFromUnitQueue(unitInfested, unitInfested->orderQueueHead);
+
+					if(unitInfested->status & UnitStatus::GroundedBuilding) {
+
+						CImage* current_image = unitInfested->sprite->images.head;
+
+						while(current_image != NULL) {
+
+							//script 0x14 in asm code
+							current_image->playIscriptAnim(IscriptAnimation::WorkingToIdle);
+
+							//load next image of the list (or NULL)
+							current_image = current_image->link.next;
+
+						}
+
+					}
+
+					//Just use ImageId::InfestedCommandCenterOverlay instead
+					//if you're modding this file and you're going for the
+					//default infestation overlay for any target.
+					infestationOverlayId = units_dat::ConstructionGraphic[infestedUnitNewId];
+
+					if(infestationOverlayId < ImageId::None)
+						unitInfested->sprite->createOverlay(infestationOverlayId);
+
+					newHp = units_dat::MaxHitPoints[infestedUnitNewId];
+
+					events_unit_infested_hp_set_arg[0] = (int*)unitInfested;
+					events_unit_infested_hp_set_arg[1] = (int*)unitInfesting;
+					events_unit_infested_hp_set_arg[2] = (int*)oldId;
+					events_unit_infested_hp_set_arg[3] = (int*)oldHp;
+					events_unit_infested_hp_set_arg[4] = (int*)&newHp;
+
+					EventManager::EventCalled(EventId::BUILDING_INFESTED_HP_SET, events_unit_infested_hp_set_arg);
+
+					unitInfested->setHp(newHp);
+
+					//give the proper button set to the unit
+					changeUnitButtonSet_Sub_4E5D60(unitInfested, infestedUnitNewId);
+
+					scbw::refreshConsole();
+
+				} //if(unitInfested->remainingBuildTime == 0)
+
+			} //if(!bStopFunction)
+
+		} //if(!bErrorReturnToIdle)
+
+		if(!bStopFunction)
+			actUnitReturnToIdle(unitInfested);
+
+	}
+#else
+void orderMorphIntoInfested(CUnit* unitInfested) {
 
 		bool bErrorReturnToIdle;
 		bool bStopFunction = false;
@@ -190,6 +336,7 @@ namespace hooks {
 			actUnitReturnToIdle(unitInfested);
 
 	}
+#endif
 
 
 	;
