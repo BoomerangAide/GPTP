@@ -1,7 +1,8 @@
 #include "update_unit_state.h"
-#include "update_status_effects.h"
 #include <SCBW/api.h>
-#include <algorithm>
+#ifdef EVENTS_SYSTEM
+#include <Events/Events.h>
+#endif
 
 namespace {
 //Helper function: Returns true if the unit's HP <= 33%.
@@ -62,7 +63,7 @@ void updateUnitEnergy(CUnit* unit) {
 
 			}
 
-			if(!bStopHere)	//the function prevent energy consumption if THE GATHERING enabled
+			if(!bStopHere)	//within that function is where THE GATHERING enabled prevent energy spending
 				unit->spendUnitEnergy(cloakingEnergyCost);
 
 		}
@@ -110,6 +111,138 @@ void updateUnitEnergy(CUnit* unit) {
 
 /// Updates unit timers, regenerates hp and shields, and burns down Terran buildings.
 /// Identical to function @ 0x004EC290
+#ifdef EVENTS_SYSTEM
+void updateUnitStateHook(CUnit* unit) {
+
+	//Timers
+	if (unit->mainOrderTimer)
+		unit->mainOrderTimer--;
+	if (unit->groundWeaponCooldown)
+		unit->groundWeaponCooldown--;
+	if (unit->airWeaponCooldown)
+		unit->airWeaponCooldown--;
+	if (unit->spellCooldown)
+		unit->spellCooldown--;
+
+	//Shield regeneration
+	if (units_dat::ShieldsEnabled[unit->id] != 0) {
+
+		s32 maxShields = (s32)(units_dat::MaxShieldPoints[unit->id]) * 256;
+
+		if (unit->shields != maxShields) {
+
+			unit->shields += 7;
+
+			if (unit->shields > maxShields)
+				unit->shields = maxShields;
+
+			if (unit->sprite->flags & CSprite_Flags::Selected)  //If the unit is currently selected, redraw its graphics
+				setAllImageGroupFlagsPal11(unit->sprite);
+
+		}
+
+	}
+
+	//Supposedly, allows Zerglings to attack after unburrowing without delay.
+	if (unit->id == UnitId::zergling || unit->id == UnitId::Hero_DevouringOne)
+		if (unit->groundWeaponCooldown == 0)
+		  unit->orderQueueTimer = 0;
+
+	//Clear the healing flag every frame
+	unit->isBeingHealed = 0;
+
+	//Update unit status effects (stim, maelstrom, plague, etc.)
+	if (unit->status & UnitStatus::Completed || !(unit->sprite->flags & CSprite_Flags::Hidden)) {
+
+		unit->cycleCounter++;
+
+		if (unit->cycleCounter >= 8) {
+			unit->cycleCounter = 0;
+			RestoreAllUnitStats(unit); //use update_status_effects hook if available
+		}
+
+	}
+
+	//Only for fully-constructed units and buildings
+	if (unit->status & UnitStatus::Completed) {
+
+		bool bStopHere = false;
+		std::vector<int*> events_unit_hp_regen_arg(3);
+		bool bCanRegen =
+			units_dat::BaseProperty[unit->id] & UnitProperty::RegeneratesHP &&
+			unit->hitPoints > 0 &&
+			unit->hitPoints != units_dat::MaxHitPoints[unit->id];
+		s32 hpAfterRegen = unit->hitPoints + 4;
+
+		events_unit_hp_regen_arg[0] = (int*)unit;
+		events_unit_hp_regen_arg[1] = (int*)&hpAfterRegen;
+		events_unit_hp_regen_arg[2] = (int*)&bCanRegen;
+
+		EventManager::EventCalled(EventId::UNIT_HP_REGEN, events_unit_hp_regen_arg);
+
+		//HP regeneration
+		if (bCanRegen) {
+			unit->setHp(hpAfterRegen);
+		}
+
+		//Update unit energy (energy regen/drain)
+		updateUnitEnergy(unit);
+
+		//Recent order timer
+		if (unit->recentOrderTimer != 0)
+			unit->recentOrderTimer--;
+
+		//Self-destruct timer
+		if (unit->removeTimer != 0) {
+
+			unit->removeTimer--;
+
+			if (unit->removeTimer == 0) {
+				unit->remove();
+				bStopHere = true;
+			}
+
+		}
+
+		//Terran building burn-down
+		if (!bStopHere) {
+
+			RaceId::Enum raceId = unit->getRace();
+
+			if(
+				raceId != RaceId::Zerg &&
+				raceId != RaceId::Protoss &&
+				raceId == RaceId::Terran
+			)
+
+				//Check if the unit is a grounded or lifted building
+				if (	
+					unit->status & UnitStatus::GroundedBuilding ||
+					units_dat::BaseProperty[unit->id] & UnitProperty::FlyingBuilding)
+				{
+
+					std::vector<int*> events_unit_buildingfire_dmg_arg(3);
+					bool bApplyDamage = unitHpIsInRedZone(unit);	//...whose current HP is less or equal to 33% of max HP
+					s32 damage = 20;
+
+					events_unit_buildingfire_dmg_arg[0] = (int*)unit;
+					events_unit_buildingfire_dmg_arg[1] = (int*)&damage;
+					events_unit_buildingfire_dmg_arg[2] = (int*)&bApplyDamage;
+
+					EventManager::EventCalled(EventId::UNIT_BURNING_DAMAGE_PRECALCULATION, events_unit_buildingfire_dmg_arg);
+
+					if (bApplyDamage)
+						unit->damageHp(damage, NULL, unit->lastAttackingPlayer,true);
+
+				}
+
+		} //if (unit->getRace() == RaceId::Terran)
+
+
+	} //if (unit->status & UnitStatus::Completed) {
+
+}
+#else
 void updateUnitStateHook(CUnit* unit) {
 
 	//Timers
@@ -223,6 +356,7 @@ void updateUnitStateHook(CUnit* unit) {
 	} //if (unit->status & UnitStatus::Completed) {
 
 }
+#endif
 
 ;
 
