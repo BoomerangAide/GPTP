@@ -157,11 +157,11 @@ typedef Bool32 (__fastcall *ActionPointer)(ACTION*);
 
 //GRP frame header
 struct GrpFrame {
-  s8  x;
-  s8  y;
-  s8  width;
-  s8  height;
-  u32 dataOffset;	//might be u16* (but as a pointer, would still fit in u32)
+/*0*/  s8  x;
+/*1*/  s8  y;
+/*2*/  s8  width;
+/*3*/  s8  height;
+/*4*/  u32 dataOffset;	//might be u16* (but as a pointer, would still fit in u32)
 };
 
 C_ASSERT(sizeof(GrpFrame) == 8); 
@@ -169,10 +169,10 @@ C_ASSERT(sizeof(GrpFrame) == 8);
 
 //GRP file header
 struct GrpHead {
-  u16 frameCount;
-  s16 width;
-  s16 height;
-  GrpFrame frames[1];
+/*0*/  u16 frameCount;
+/*2*/  s16 width;
+/*4*/  s16 height;
+/*6*/  GrpFrame frames[1];
 };
 
 C_ASSERT(sizeof(GrpHead) == 14); 
@@ -273,7 +273,7 @@ C_ASSERT(sizeof(UnitFinderData) == 8);
 struct UnknownUserStruct {
 /*0x00*/ u32	unkUser_00;
 /*0x04*/ u16	iconId_04;
-/*0x06*/ u16	unknown_06;
+/*0x06*/ u16	tooltipType_06; //see PanelTooltipTypes::Enum
 /*0x08*/ u16	id_08;
 };
 
@@ -378,6 +378,30 @@ struct {
 C_ASSERT(sizeof(BinDlg) == 86); //0x56
 //static_assert(sizeof(BinDlg) == 86, "The size of the BinDlg structure is invalid");
 
+struct SMK_Structure {
+/*0x00*/ u32		smkOverlayOffset;
+/*0x04*/ u16		flags;				//use SmkFlags::Enum
+/*0x06*/ u32		internalUse1;
+/*0x0A*/ u32		smkFilenameOffset;
+/*0x0E*/ u32		internalUse2;
+/*0x12*/ Point16	smkOverlayPosition;
+/*0x16*/ u32		internalUse3;
+/*0x1A*/ u32		internalUse4;
+};
+
+C_ASSERT(sizeof(SMK_Structure) == 30); //0x1E
+//static_assert(sizeof(SMK_Structure) == 30, "The size of the SMK_Structure structure is invalid");
+
+struct GuiOverlay {
+/*0x00*/  UNK     unk_0[6];
+/*0x06*/  u16     overlayType;
+/*0x08*/  u16     id;
+/*0x0A*/  UNK     unk_a[34];
+};
+
+C_ASSERT(sizeof(GuiOverlay) == 44); //0x2C
+//static_assert(sizeof(GuiOverlay) == 44, "The size of the GuiOverlay structure is invalid");
+
 //Based on https://github.com/bwapi/bwapi/blob/master/bwapi/BWAPI/Source/BW/Path.h
 struct Path
 {
@@ -409,30 +433,6 @@ C_ASSERT(sizeof(Path) == 36); //0x24
 								 //to the destination, and cut off if there isn't enough room
 
 //End of Path.h based
-
-struct SMK_Structure {
-/*0x00*/ u32		smkOverlayOffset;
-/*0x04*/ u16		flags;				//use SmkFlags::Enum
-/*0x06*/ u32		internalUse1;
-/*0x0A*/ u32		smkFilenameOffset;
-/*0x0E*/ u32		internalUse2;
-/*0x12*/ Point16	smkOverlayPosition;
-/*0x16*/ u32		internalUse3;
-/*0x1A*/ u32		internalUse4;
-};
-
-C_ASSERT(sizeof(SMK_Structure) == 30); //0x1E
-//static_assert(sizeof(SMK_Structure) == 30, "The size of the SMK_Structure structure is invalid");
-
-struct GuiOverlay {
-/*0x00*/  UNK     unk_0[6];
-/*0x06*/  u16     overlayType;
-/*0x08*/  u16     id;
-/*0x0A*/  UNK     unk_a[34];
-};
-
-C_ASSERT(sizeof(GuiOverlay) == 44); //0x2C
-//static_assert(sizeof(GuiOverlay) == 44, "The size of the GuiOverlay structure is invalid");
 
 //-------- AI related stuff --------//
 
