@@ -432,7 +432,7 @@ SCBW_DATA(u32*,           aiSupplyReserved,     0x006CA4BC);
 
 SCBW_DATA(const Bool32*,  IS_GAME_PAUSED,       	0x006509C4);  //See scbw::isGamePaused()
 SCBW_DATA(const Bool8*,   IS_BROOD_WAR,         	0x0058F440);  //See scbw::isBroodWarMode()
-SCBW_DATAu32*,     CHEAT_STATE,          			0x006D5A6C);  //See scbw::isCheatEnabled()
+SCBW_DATA(u32*,			  CHEAT_STATE,          	0x006D5A6C);  //See scbw::isCheatEnabled()
 SCBW_DATA(const s32*,     MAX_UNIT_WIDTH,       	0x006BEE68);
 SCBW_DATA(const s32*,     MAX_UNIT_HEIGHT,      	0x006BB930);
 SCBW_DATA(const Bool32*,  IS_IN_REPLAY,         	0x006D0F14);  //See scbw::isInReplay()
