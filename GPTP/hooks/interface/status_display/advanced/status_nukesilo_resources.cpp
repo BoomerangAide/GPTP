@@ -1,5 +1,6 @@
 #include "status_nukesilo_resources.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions declaration
 
@@ -41,6 +42,7 @@ const int TEXTLABELINDEX_UNUSED_TEXT_LINE_1 = -10;
 namespace hooks {
 
 //00426190
+#ifdef EVENTS_SYSTEM
 void stats_resources(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -55,40 +57,192 @@ void stats_resources(BinDlg* dialog) {
 		*u8_0068C1E5 = 15;
 	}
 
-	AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_1,NULL);
-	AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_3,NULL);
-	AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_4,NULL);
+	bool cancelDisplay = false;
+	std::vector<int*> events_override_arg(1);
 
-	if(unit->id >= UnitId::ResourceMineralField && unit->id <= UnitId::ResourceMineralFieldType3) {
-		SC_sprintf_s(
-			buffer_resource_amount,
-			260,
-			FORMATSTRING_TEXT_SPACE_VALUE,
-			(int)statTxtTbl->getString(0x31C), //"Minerals:"
-			unit->building.resource.resourceAmount
-		);
-		AddTextToDialog(dialog,TEXTLABELINDEX_RESOURCE_AMOUNT,buffer_resource_amount);
-	}
-	else 
-	if(unit->building.resource.resourceAmount != 0) {
-		SC_sprintf_s(
-			buffer_resource_amount,
-			260,
-			FORMATSTRING_TEXT_SPACE_VALUE,
-			(int)statTxtTbl->getString(0x31D), //"Vespene Gas:"
-			unit->building.resource.resourceAmount
-		);
-		AddTextToDialog(dialog,TEXTLABELINDEX_RESOURCE_AMOUNT,buffer_resource_amount);
-	}
-	else
-		AddTextToDialog(
-			dialog,
-			TEXTLABELINDEX_RESOURCE_AMOUNT,
-			(char*)statTxtTbl->getString(0x31E) //"Depleted"
-		);
+	events_override_arg[0] = (int*)unit;
 
-	if(units_dat::ShieldsEnabled[unit->id])
-		StatsShieldLevel_Helper(dialog,0);
+	EventManager::EventCalling(EventId::STATUS_RESOURCES_TEXTS_OVERRIDE, &cancelDisplay, events_override_arg);
+
+	if(!cancelDisplay){
+
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_1,NULL);
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_3,NULL);
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_4,NULL);
+
+		if(unit->id >= UnitId::ResourceMineralField && unit->id <= UnitId::ResourceMineralFieldType3) {
+
+			char* resourceName = (char*)statTxtTbl->getString(0x31C); //"Minerals:"
+			u16 resourceAmount = unit->building.resource.resourceAmount;
+
+			std::vector<int*> events_arg(3);
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&resourceName;
+			events_arg[1] = (int*)&resourceAmount;
+
+			EventManager::EventCalled(EventId::STATUS_RESOURCES_TEXT, events_arg);
+
+			SC_sprintf_s(
+				buffer_resource_amount,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)resourceName,
+				resourceAmount
+			);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_RESOURCE_AMOUNT,buffer_resource_amount);
+
+		}
+		else 
+		if(unit->building.resource.resourceAmount != 0) {
+
+			char* resourceName = (char*)statTxtTbl->getString(0x31D); //"Vespene Gas:"
+			u16 resourceAmount = unit->building.resource.resourceAmount;
+
+			std::vector<int*> events_arg(3);
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&resourceName;
+			events_arg[1] = (int*)&resourceAmount;
+
+			EventManager::EventCalled(EventId::STATUS_RESOURCES_TEXT, events_arg);
+
+			SC_sprintf_s(
+				buffer_resource_amount,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)resourceName,
+				resourceAmount
+			);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_RESOURCE_AMOUNT,buffer_resource_amount);
+
+		}
+		else {
+
+			char* resourceName = (char*)statTxtTbl->getString(0x31E); //"Depleted"
+			u16 resourceAmount = 0;
+
+			std::vector<int*> events_arg(3);
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&resourceName;
+			events_arg[1] = (int*)&resourceAmount;
+
+			EventManager::EventCalled(EventId::STATUS_RESOURCES_TEXT, events_arg);
+
+			if(resourceAmount == 0)
+				AddTextToDialog(
+					dialog,
+					TEXTLABELINDEX_RESOURCE_AMOUNT,
+					resourceName
+				);
+			else {
+
+				SC_sprintf_s(
+					buffer_resource_amount,
+					260,
+					FORMATSTRING_TEXT_SPACE_VALUE,
+					(int)resourceName,
+					resourceAmount
+				);
+
+				AddTextToDialog(dialog,TEXTLABELINDEX_RESOURCE_AMOUNT,buffer_resource_amount);
+
+			}
+
+		}
+
+	}
+
+	int index = 0;
+
+	std::vector<int*> events_override_arg_2(2);
+
+	events_override_arg_2[0] = (int*)unit;
+	events_override_arg_2[1] = (int*)&index;
+
+	cancelDisplay = false;
+
+	EventManager::EventCalling(EventId::STATUS_DISPLAYING_PANEL_SUPPLY_OR_RESOURCE_SHIELD_OVERRIDE, &cancelDisplay, events_override_arg_2);
+
+	if (!cancelDisplay && units_dat::ShieldsEnabled[unit->id]) {
+		StatsShieldLevel_Helper(dialog, index);
+		index++;
+	}
+	
+	if(index == 0) {
+
+
+		if(dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog->childrenDlg;
+		else
+			current_dialog = dialog->parent->childrenDlg;
+
+		while(current_dialog != NULL && current_dialog->index != 9)
+			current_dialog = current_dialog->next;
+
+		hideDialog(current_dialog);
+
+	}
+
+}
+#else
+void stats_resources(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+	BinDlg* current_dialog;
+	char* resource_type_text = NULL;
+
+	*(u16*)selectionVariableData1Offset = unit->building.resource.resourceAmount;
+
+	if(*u8_0068C1E5 != 15) {
+		function_00457310(dialog);
+		function_00457250(dialog,-10,-13);
+		*u8_0068C1E5 = 15;
+	}
+
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_1,NULL);
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_3,NULL);
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNUSED_TEXT_LINE_4,NULL);
+
+		if(unit->id >= UnitId::ResourceMineralField && unit->id <= UnitId::ResourceMineralFieldType3) {
+
+			SC_sprintf_s(
+				buffer_resource_amount,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)statTxtTbl->getString(0x31C), //"Minerals:"
+				unit->building.resource.resourceAmount
+			);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_RESOURCE_AMOUNT,buffer_resource_amount);
+
+		}
+		else 
+		if(unit->building.resource.resourceAmount != 0) {
+
+			SC_sprintf_s(
+				buffer_resource_amount,
+				260,
+				FORMATSTRING_TEXT_SPACE_VALUE,
+				(int)statTxtTbl->getString(0x31D), //"Vespene Gas:"
+				unit->building.resource.resourceAmount
+			);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_RESOURCE_AMOUNT,buffer_resource_amount);
+
+		}
+		else {
+
+			AddTextToDialog(
+				dialog,
+				TEXTLABELINDEX_RESOURCE_AMOUNT,
+				(char*)statTxtTbl->getString(0x31E) //"Depleted"
+			);
+
+		}
+
+	if (units_dat::ShieldsEnabled[unit->id])
+		StatsShieldLevel_Helper(dialog, 0);
 	else {
 
 		if(dialog->controlType == DialogControlTypes::DialogBox)
@@ -104,10 +258,162 @@ void stats_resources(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 ;
 
 //00426FF0
+#ifdef XEVENTS_SYSTEM
+void stats_nukesilo(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+	BinDlg* current_dialog;
+
+	//buildings id start after disruption web id
+	//block use of buildings id, but only normal
+	//use case is last id UnitId::None
+	if(unit->buildQueue[unit->buildQueueSlot % 5] > UnitId::Spell_DisruptionWeb) { //271D0
+		
+		if(*(u16*)u8_0068C1E5 != 3) {
+			function_00457310(dialog);
+			function_00457250(dialog,-20,12);
+			*u8_0068C1E5 = 3;
+		}
+
+		stats_panel_display_Helper(dialog);
+	
+		if(dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog->childrenDlg;
+		else
+			current_dialog = dialog->parent->childrenDlg;
+
+		while(current_dialog != NULL && current_dialog->index != -20)
+			current_dialog = current_dialog->next;
+
+		hideDialog(current_dialog);
+
+		if(dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog->childrenDlg;
+		else
+			current_dialog = dialog->parent->childrenDlg;
+
+		while(current_dialog != NULL && current_dialog->index != -21)
+			current_dialog = current_dialog->next;
+
+		hideDialog(current_dialog);
+
+	}
+	else { 
+
+		CUnit* target = NULL;
+		int progress;
+		u8 raceId;
+		u16 builtUnitId;
+		
+		//2701E
+		if(dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog->childrenDlg;
+		else
+			current_dialog = dialog->parent->childrenDlg;
+
+		while(current_dialog != NULL && current_dialog->index != 2)
+			current_dialog = current_dialog->next;
+
+		if(*u8_0068C1E5 != 14) {
+			function_00457310(dialog);
+			*u8_0068C1E5 = 14;
+		}
+
+		if(
+			unit->mainOrderId == OrderId::BuildTerran ||
+			unit->mainOrderId == OrderId::Repair1 ||
+			unit->mainOrderId == OrderId::ConstructingBuilding ||
+			isAttemptingProtossBuild(unit)
+		)
+			target = unit->orderTarget.unit;
+		else
+		if(
+			unit->secondaryOrderId == OrderId::Train ||
+			unit->secondaryOrderId == OrderId::TrainFighter ||
+			isConstructingAddon(unit)
+		)
+			target = unit->currentBuildUnit;
+
+		if(target != NULL) {
+			progress = function_004669E0(target);
+			builtUnitId = target->id;
+		}
+		else { //2713D
+			progress = 0;
+			builtUnitId = 0;
+		}
+
+		//270B4
+		DLGsetProgressBarValue(dialog,7,progress);
+		SC_sprintf_s(queues_buffers[0],8,FORMATSTRING_VALUE_SPACE,1); //active slot number display
+
+		u16 panelGraphic, iconId, itemId, tooltipTypeId;
+		char* iconText;
+		std::vector<int*> events_arg(6);
+
+		panelGraphic = 2;
+		iconId = builtUnitId;
+		tooltipTypeId = PanelTooltipTypes::SpecialPanelTooltip;
+		itemId = builtUnitId;
+		iconText = queues_buffers[0];
+
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)&panelGraphic;
+		events_arg[2] = (int*)&iconId;
+		events_arg[3] = (int*)&tooltipTypeId;
+		events_arg[4] = (int*)&itemId;
+		events_arg[5] = (int*)&iconText;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_PANEL, events_arg);
+
+		current_dialog->graphic = panelGraphic;
+		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
+		current_dialog->statUser->iconId_04 = iconId;
+		current_dialog->statUser->tooltipType_06 = tooltipTypeId;
+		current_dialog->statUser->id_08 = itemId;
+
+		function_00418E00(current_dialog);
+
+		if(iconText != NULL)
+			current_dialog->pszText = iconText;
+
+		showDialog(current_dialog);
+
+		if(!(current_dialog->flags & BinDlgFlags::Unknown0)) {
+			current_dialog->flags |= BinDlgFlags::Unknown0;
+			updateDialog(current_dialog);
+		}
+
+		if(units_dat::GroupFlags[unit->id].isZerg)
+			raceId = RaceId::Zerg;
+		else
+		if(units_dat::GroupFlags[unit->id].isProtoss)
+			raceId = RaceId::Protoss;
+		else
+		if(units_dat::GroupFlags[unit->id].isTerran)
+			raceId = RaceId::Terran;
+		else
+			raceId = RaceId::Neutral;
+
+		char* progressText = (char*)statTxtTbl->getString(0x303 + raceId);	//Zerg: "Morphing", Terran: "Building", Protoss: "Opening Warp Gate"
+		std::vector<int*> events_progress_arg(3);
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)iconId;
+		events_arg[2] = (int*)&progressText;
+
+		EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_progress_arg);
+
+		AddTextToDialog(dialog, -15, progressText);
+
+	}
+
+}
+#else
 void stats_nukesilo(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -199,12 +505,13 @@ void stats_nukesilo(BinDlg* dialog) {
 		current_dialog->graphic = 2;
 		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
 		current_dialog->statUser->iconId_04 = builtUnitId;
-		current_dialog->statUser->unknown_06 = 3;
+		current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::SpecialPanelTooltip;
 		current_dialog->statUser->id_08 = builtUnitId;		
 
 		function_00418E00(current_dialog);
 
 		current_dialog->pszText = queues_buffers[0];
+
 		showDialog(current_dialog);
 
 		if(!(current_dialog->flags & BinDlgFlags::Unknown0)) {
@@ -232,6 +539,7 @@ void stats_nukesilo(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 ;
 
