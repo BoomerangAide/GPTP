@@ -1,5 +1,6 @@
 #include "stats_display_main.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions declaration
 
@@ -20,6 +21,96 @@ namespace hooks {
 
 //Main function when it comes to display the stats
 //part at the bottom of the screen
+#ifdef EVENTS_SYSTEM
+void function_00458120() {
+
+	struct UnitStatFuncArrayEntry {
+		u32 unitId;	//unused?
+		u32 UnitStatCondFunc;
+		u32 UnitStatActFunc;
+	};
+
+	UnitStatFuncArrayEntry* const unitStatFuncs	= (UnitStatFuncArrayEntry*)	0x005193A0;
+
+	u8*		const u8_0068C1E5				= (u8*)						0x0068C1E5;
+	Bool8*	const bCanUpdateStatDataDialog	= (Bool8*)					0x0068C1F8;
+
+	CUnit* activeUnit = *activePortraitUnit;
+	BinDlg* dialog_0068C1F0 = *(BinDlg**)(0x0068C1F0);
+
+	if(activeUnit == NULL) {
+
+		if(*bCanUpdateStatDataDialog == 0)
+			*bCanUpdateStatDataDialog = 0;
+		else {
+
+			BinDlg* current_dialog;
+
+			if(dialog_0068C1F0->controlType != DialogControlTypes::DialogBox)
+				current_dialog = dialog_0068C1F0;
+			else
+				current_dialog = dialog_0068C1F0->childrenDlg;
+
+			while(current_dialog != NULL) {
+				hideDialog(current_dialog);
+				current_dialog = current_dialog->next;
+			}
+
+			*u8_0068C1E5 = 0;
+			*bCanUpdateStatDataDialog = 0;
+
+		}
+
+	}
+	else
+	if(*clientSelectionCount == 1) {
+
+		bool canDisplay = true;
+
+		if (*bCanUpdateStatDataDialog == 0) {
+
+			bool cancelNormalCheck = false;
+
+			std::vector<int*> events_selected_unit_require_refresh_arg(2);
+			events_selected_unit_require_refresh_arg[0] = (int*)activeUnit;
+			events_selected_unit_require_refresh_arg[0] = (int*)&canDisplay;
+
+			EventManager::EventCalling(EventId::STATUS_SINGLE_SELECT_UPDATECOND_OVERRIDE, &cancelNormalCheck, events_selected_unit_require_refresh_arg);
+
+			if (!cancelNormalCheck)
+				canDisplay = UnitStatCondFunc(unitStatFuncs[activeUnit->id].UnitStatCondFunc);
+
+		}
+
+		if(!canDisplay)
+			*bCanUpdateStatDataDialog = 0;
+		else {
+			UnitStatActFunc(unitStatFuncs[activeUnit->id].UnitStatActFunc, dialog_0068C1F0);
+			function_004568B0();
+			function_00457FE0();
+			*bCanUpdateStatDataDialog = 0;
+		}
+
+	}
+	else { //*clientSelectionCount != 1
+
+		bool canDisplay = true;
+
+		if(*bCanUpdateStatDataDialog == 0)
+			canDisplay = UnitStatCond_Selection_Helper();
+
+		if(!canDisplay)
+			*bCanUpdateStatDataDialog = 0;
+		else {
+			UnitStatAct_Selection_Helper(dialog_0068C1F0);
+			function_00457FE0();
+			*bCanUpdateStatDataDialog = 0;
+		}
+
+	}
+
+}
+#else
 void function_00458120() {
 
 	struct UnitStatFuncArrayEntry {
@@ -96,6 +187,7 @@ void function_00458120() {
 	}
 
 }
+#endif
 
 ;
 
