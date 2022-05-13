@@ -1,5 +1,6 @@
 #include "building_morph.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //helper functions def
 
@@ -27,32 +28,229 @@ CUnit* createUnit(u32 unitId, int x, int y, u32 playerId);			//A09D0
 
 namespace hooks {
 
-	bool isMorphing(CUnit* building) {
+bool isMorphing(CUnit* building) {
 
-		bool bIsMorphing;
+	bool bIsMorphing;
 
-		if(!(building->status & UnitStatus::Completed))
-			 //was hardcoded instead of using isValidMorph in original code
-			bIsMorphing = isValidMorph(building->buildQueue[building->buildQueueSlot]);
+	if(!(building->status & UnitStatus::Completed))
+			//was hardcoded instead of using isValidMorph in original code
+		bIsMorphing = isValidMorph(building->buildQueue[building->buildQueueSlot]);
+	else
+		bIsMorphing = false;
+
+	return bIsMorphing;
+
+}
+
+;
+
+#ifdef EVENTS_SYSTEM
+void orders_ZergBuildSelf(CUnit* building) {
+
+	const int OPCWAL_PROGRESS_INCREASE = 16;
+
+	u16 buildingId;
+	bool jump_to_5D56C = false;
+	bool jump_to_5D718 = false;
+	bool jump_to_5D720 = false;
+
+	buildingId = building->buildQueue[building->buildQueueSlot];
+
+	if(
+		buildingId != UnitId::ZergHive &&
+		buildingId != UnitId::ZergLair &&
+		buildingId != UnitId::ZergGreaterSpire &&
+		buildingId != UnitId::ZergSporeColony &&
+		buildingId != UnitId::ZergSunkenColony
+	)
+		buildingId = building->id;
+
+	if(building->mainOrderState == 0) {
+
+		if(building->remainingBuildTime < (units_dat::TimeCost[buildingId] * 3 / 4))
+			building->mainOrderState = 1;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState > 6)
+		jump_to_5D56C = true;
+
+	if(jump_to_5D56C) { //5D56C
+
+		jump_to_5D56C = false;
+
+		if(building->remainingBuildTime == 0)
+			jump_to_5D720 = true;
 		else
-			bIsMorphing = false;
+		if(!scbw::isCheatEnabled(CheatFlags::OperationCwal))
+			jump_to_5D718 = true;
+		else {
 
-		return bIsMorphing;
+			if(building->remainingBuildTime >= OPCWAL_PROGRESS_INCREASE)
+				building->remainingBuildTime -= OPCWAL_PROGRESS_INCREASE;
+			else
+				building->remainingBuildTime = 0;
+
+			jump_to_5D720 = true;
+
+		}
+
+	}
+	else
+	if(building->mainOrderState == 1) { //5D5AE
+
+		if(building->id == UnitId::ZergExtractor) {
+
+			CImage* overlay = building->sprite->getOverlay(ImageId::VespeneGeyser2);
+
+			if(overlay != NULL)
+				overlay->free();
+
+		}
+
+		//5D5D0
+		building->sprite->playIscriptAnim(IscriptAnimation::SpecialState1,true);
+		building->mainOrderState = 2;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 2) { //5D5E2
+
+		if(building->remainingBuildTime < units_dat::TimeCost[buildingId] / 2)
+			building->mainOrderState = 3;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 3) { //5D603
+
+		building->sprite->playIscriptAnim(IscriptAnimation::SpecialState2,true);
+		building->mainOrderState = 4;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 4) { //5D618
+
+		if(building->remainingBuildTime == 0)
+			building->mainOrderState = 5;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 5) { //5D62F
+
+		building->sprite->playIscriptAnim(IscriptAnimation::AlmostBuilt,true);
+		building->mainOrderState = 6;
+		playBuildingCompleteSound(building);
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 6) { //5D64B
+
+		if(building->orderSignal & 4) {
+
+			s32 hpAfterMorph;
+			CImage* current_image;
+
+			building->orderSignal -= 4;
+
+			if(isValidMorph(buildingId)) {
+
+				std::vector<int*> events_building_morph_hp_set_arg(3);
+				s32 oldHp = building->hitPoints;
+
+				events_building_morph_hp_set_arg[0] = (int*)building;
+				events_building_morph_hp_set_arg[1] = (int*)oldHp;
+
+				//update score
+				building->status |= UnitStatus::Completed;
+				incrementUnitScoresEx(building,-1,0);
+
+				//do the building change
+				building->status -= UnitStatus::Completed;
+				replaceUnitWithType(building,buildingId);
+
+				//newHp = newHpMax - oldHpMax + oldHp
+				hpAfterMorph =
+					units_dat::MaxHitPoints[buildingId] -
+					units_dat::MaxHitPoints[building->previousUnitType] +
+					oldHp;
+
+				if(hpAfterMorph < 256)
+					hpAfterMorph = 256;
+
+				events_building_morph_hp_set_arg[2] = (int*)&hpAfterMorph;
+
+				EventManager::EventCalled(EventId::BUILDING_MORPH_HP_SET, events_building_morph_hp_set_arg);
+
+				building->setHp(hpAfterMorph);
+				building->remainingBuildTime = 0;
+
+			}
+
+			//5d6cd
+
+			//update various stuff (set hp, set shield...) not finished on Morph
+			function_004A01F0(building);
+			updateUnitStrength(building);
+
+			//relate to building placement / taking room around?
+			function_0047D770(building);
+
+			current_image = building->sprite->images.head;
+
+			while(current_image != NULL) {
+				current_image->playIscriptAnim(IscriptAnimation::AlmostBuilt);
+				current_image = current_image->link.next;
+			}
+
+			updateNewUnitVision(buildingId, building->sprite->position.x, building->sprite->position.y);
+
+		}
 
 	}
 
-	;
+	if(jump_to_5D56C) { //5D56C
 
-	void orders_ZergBuildSelf(CUnit* building) {
+		jump_to_5D56C = false;
 
-		const int OPCWAL_PROGRESS_INCREASE = 16;
+		if(building->remainingBuildTime == 0)
+			jump_to_5D720 = true;
+		else
+		if(!scbw::isCheatEnabled(CheatFlags::OperationCwal))
+			jump_to_5D718 = true;
+		else {
 
-		u16 buildingId;
-		bool jump_to_5D56C = false;
-		bool jump_to_5D718 = false;
-		bool jump_to_5D720 = false;
+			if(building->remainingBuildTime >= OPCWAL_PROGRESS_INCREASE)
+				building->remainingBuildTime -= OPCWAL_PROGRESS_INCREASE;
+			else
+				building->remainingBuildTime = 0;
 
-		buildingId = building->buildQueue[building->buildQueueSlot];
+			jump_to_5D720 = true;
+
+		}
+
+	}
+
+	if(jump_to_5D718) {
+		jump_to_5D718 = false;
+		building->remainingBuildTime--;
+		jump_to_5D720 = true;
+	}
+
+	if(jump_to_5D720) {
+
+		jump_to_5D720 = false;
 
 		if(
 			buildingId != UnitId::ZergHive &&
@@ -61,323 +259,497 @@ namespace hooks {
 			buildingId != UnitId::ZergSporeColony &&
 			buildingId != UnitId::ZergSunkenColony
 		)
-			buildingId = building->id;
+		{
 
-		if(building->mainOrderState == 0) {
+			std::vector<int*> events_building_morph_hp_add_arg(3);
+			s32 newHp;
 
-			if(building->remainingBuildTime < (units_dat::TimeCost[buildingId] * 3 / 4))
-				building->mainOrderState = 1;
-
-			jump_to_5D56C = true;
-
-		}
-		else
-		if(building->mainOrderState > 6)
-			jump_to_5D56C = true;
-
-		if(jump_to_5D56C) { //5D56C
-
-			jump_to_5D56C = false;
-
-			if(building->remainingBuildTime == 0)
-				jump_to_5D720 = true;
+			if(scbw::isCheatEnabled(CheatFlags::OperationCwal))
+				newHp = building->hitPoints + building->buildRepairHpGain * OPCWAL_PROGRESS_INCREASE;
 			else
-			if(!scbw::isCheatEnabled(CheatFlags::OperationCwal))
-				jump_to_5D718 = true;
-			else {
+				newHp = building->hitPoints + building->buildRepairHpGain;
 
-				if(building->remainingBuildTime >= OPCWAL_PROGRESS_INCREASE)
-					building->remainingBuildTime -= OPCWAL_PROGRESS_INCREASE;
-				else
-					building->remainingBuildTime = 0;
+			events_building_morph_hp_add_arg[0] = (int*)building;
+			events_building_morph_hp_add_arg[1] = (int*)building->hitPoints;
+			events_building_morph_hp_add_arg[2] = (int*)&newHp;
 
-				jump_to_5D720 = true;
+			EventManager::EventCalled(EventId::BUILDING_MORPH_HP_ADD, events_building_morph_hp_add_arg);
 
-			}
-
-		}
-		else
-		if(building->mainOrderState == 1) { //5D5AE
-
-			if(building->id == UnitId::ZergExtractor) {
-
-				CImage* overlay = building->sprite->getOverlay(ImageId::VespeneGeyser2);
-
-				if(overlay != NULL)
-					overlay->free();
-
-			}
-
-			//5D5D0
-			building->sprite->playIscriptAnim(IscriptAnimation::SpecialState1,true);
-			building->mainOrderState = 2;
-
-			jump_to_5D56C = true;
-
-		}
-		else
-		if(building->mainOrderState == 2) { //5D5E2
-
-			if(building->remainingBuildTime < units_dat::TimeCost[buildingId] / 2)
-				building->mainOrderState = 3;
-
-			jump_to_5D56C = true;
-
-		}
-		else
-		if(building->mainOrderState == 3) { //5D603
-
-			building->sprite->playIscriptAnim(IscriptAnimation::SpecialState2,true);
-			building->mainOrderState = 4;
-
-			jump_to_5D56C = true;
-
-		}
-		else
-		if(building->mainOrderState == 4) { //5D618
-
-			if(building->remainingBuildTime == 0)
-				building->mainOrderState = 5;
-
-			jump_to_5D56C = true;
-
-		}
-		else
-		if(building->mainOrderState == 5) { //5D62F
-
-			building->sprite->playIscriptAnim(IscriptAnimation::AlmostBuilt,true);
-			building->mainOrderState = 6;
-			playBuildingCompleteSound(building);
-
-			jump_to_5D56C = true;
-
-		}
-		else
-		if(building->mainOrderState == 6) { //5D64B
-
-			if(building->orderSignal & 4) {
-
-				s32 hpAfterMorph;
-				CImage* current_image;
-
-				building->orderSignal -= 4;
-
-				if(isValidMorph(buildingId)) {
-
-					//save hp before some functions modify them
-					hpAfterMorph = building->hitPoints;
-
-					//update score
-					building->status |= UnitStatus::Completed;
-					incrementUnitScoresEx(building,-1,0);
-
-					//do the building change
-					building->status -= UnitStatus::Completed;
-					replaceUnitWithType(building,buildingId);
-
-					//newHp = newHpMax - oldHpMax + oldHp
-					hpAfterMorph = 
-						units_dat::MaxHitPoints[buildingId] -
-						units_dat::MaxHitPoints[building->previousUnitType] +
-						hpAfterMorph;
-
-					if(hpAfterMorph < 256)
-						hpAfterMorph = 256;
-
-					building->setHp(hpAfterMorph);
-					building->remainingBuildTime = 0;
-
-				}
-
-				//5d6cd
-
-				//update various stuff (set hp, set shield...) not finished on Morph
-				function_004A01F0(building);
-				updateUnitStrength(building);
-
-				//relate to building placement / taking room around?
-				function_0047D770(building);
-
-				current_image = building->sprite->images.head;
-
-				while(current_image != NULL) {
-					current_image->playIscriptAnim(IscriptAnimation::AlmostBuilt);
-					current_image = current_image->link.next;
-				}
-
-				updateNewUnitVision(buildingId, building->sprite->position.x, building->sprite->position.y);
-
-			}
-
-		}
-
-		if(jump_to_5D56C) { //5D56C
-
-			jump_to_5D56C = false;
-
-			if(building->remainingBuildTime == 0)
-				jump_to_5D720 = true;
-			else
-			if(!scbw::isCheatEnabled(CheatFlags::OperationCwal))
-				jump_to_5D718 = true;
-			else {
-
-				if(building->remainingBuildTime >= OPCWAL_PROGRESS_INCREASE)
-					building->remainingBuildTime -= OPCWAL_PROGRESS_INCREASE;
-				else
-					building->remainingBuildTime = 0;
-
-				jump_to_5D720 = true;
-
-			}
-
-		}
-
-		if(jump_to_5D718) {
-			jump_to_5D718 = false;
-			building->remainingBuildTime--;
-			jump_to_5D720 = true;
-		}
-
-		if(jump_to_5D720) {
-
-			jump_to_5D720 = false;
-
-			if(
-				buildingId != UnitId::ZergHive &&
-				buildingId != UnitId::ZergLair &&
-				buildingId != UnitId::ZergGreaterSpire &&
-				buildingId != UnitId::ZergSporeColony &&
-				buildingId != UnitId::ZergSunkenColony
-			)
-			{
-
-				s32 hpGain = building->buildRepairHpGain;
-
-				if(scbw::isCheatEnabled(CheatFlags::OperationCwal))
-					hpGain *= OPCWAL_PROGRESS_INCREASE;
-
-				building->setHp(building->hitPoints + hpGain);
-
-			}
-
-		}
-
-	} //void orders_ZergBuildSelf(CUnit* building)
-
-	;
-
-	void ZergPlaceBuilding(CUnit* unit) {
-
-		bool bStopThere = false;
-
-		if(!(unit->status & UnitStatus::Completed)) {
-
-			u16 builtUnitId = unit->buildQueue[unit->buildQueueSlot];
-
-			//original code was hardcoded instead of using isValidMorph
-			if(isValidMorph(builtUnitId)) {
-				zergPlaceBuildingCntd(unit);
-				bStopThere = true;
-			}
-
-		}
-
-		if(!bStopThere) {
-
-			static u32* const scoreUnitsOwned = (u32*)	0x00581E44;
-			static u32* const scoreUnitsTotal = (u32*)	0x00581ED4;
-
-			refundBuildingCost(unit->id,unit->playerId);
-
-			scoreUnitsTotal[unit->playerId] = scoreUnitsTotal[unit->playerId] - units_dat::BuildScore[UnitId::ZergDrone];
-			scoreUnitsOwned[unit->playerId] = scoreUnitsOwned[unit->playerId] - 1;
-
-			if(unit->id == UnitId::ZergExtractor) {
-
-				CUnit* drone = createUnit(UnitId::ZergDrone,unit->getX(),unit->getY(),unit->playerId);
-
-				if(drone == NULL) {
-					displayLastNetErrForPlayer(unit->playerId);
-					unit->remove();
-					bStopThere = true;
-				}
-				else {	//5DB1E
-
-					//update various stuff (set hp, set shield...) not finished after createUnit
-					function_004A01F0(drone);
-					updateUnitStrength(drone);
-
-					drone->setHp(unit->previousHp * 256);
-
-					unit->remove();
-
-					bStopThere = true;
-
-				}
-
-			}
-
-			if(!bStopThere) {	//5DB45
-
-				CThingy* thingy = createThingy(SpriteId::Zerg_Building_Spawn_Small,unit->getX(),unit->getY(),0);
-
-				if(thingy != NULL) {
-					thingy->sprite->elevationLevel = unit->sprite->elevationLevel + 1;
-					setThingyVisibilityFlags(thingy);
-				}
-
-				scbw::playSound(SoundId::Misc_ZBldgPlc_wav_1,unit);
-				replaceUnitWithType(unit,UnitId::ZergDrone);
-
-				//probably AI related
-				function_00433FE0(unit);
-
-				//update various stuff (set hp, set shield...) not finished after unit change
-				function_004A01F0(unit);
-				updateUnitStrength(unit);
-
-				if(
-					unit->sprite->images.tail->paletteType == PaletteType::RLE_SHADOW &&
-					unit->sprite->images.tail->verticalOffset != 7
-				) 
-				{
-					unit->sprite->images.tail->flags |= CImage_Flags::Redraw;
-					unit->sprite->images.tail->verticalOffset = 7;
-				}
-
-				refreshSpriteData(unit->sprite);
-
-				unit->orderComputerCL(OrderId::ResetCollision1);
-
-				unit->order(	
-					units_dat::ReturnToIdleOrder[unit->id],
-					0,
-					0,
-					NULL,
-					UnitId::None,
-					false
-				);
-
-				unit->setHp(unit->previousHp * 256);
-
-				//???
-				function_0047DE40(
-					unit->sprite,
-					unit->id,
-					unit->getX(),
-					unit->getY()
-				);
-
-
-			}
-
+			building->setHp(newHp);
 
 		}
 
 	}
 
-	;
+} //void orders_ZergBuildSelf(CUnit* building)
+#else
+void orders_ZergBuildSelf(CUnit* building) {
+
+	const int OPCWAL_PROGRESS_INCREASE = 16;
+
+	u16 buildingId;
+	bool jump_to_5D56C = false;
+	bool jump_to_5D718 = false;
+	bool jump_to_5D720 = false;
+
+	buildingId = building->buildQueue[building->buildQueueSlot];
+
+	if(
+		buildingId != UnitId::ZergHive &&
+		buildingId != UnitId::ZergLair &&
+		buildingId != UnitId::ZergGreaterSpire &&
+		buildingId != UnitId::ZergSporeColony &&
+		buildingId != UnitId::ZergSunkenColony
+	)
+		buildingId = building->id;
+
+	if(building->mainOrderState == 0) {
+
+		if(building->remainingBuildTime < (units_dat::TimeCost[buildingId] * 3 / 4))
+			building->mainOrderState = 1;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState > 6)
+		jump_to_5D56C = true;
+
+	if(jump_to_5D56C) { //5D56C
+
+		jump_to_5D56C = false;
+
+		if(building->remainingBuildTime == 0)
+			jump_to_5D720 = true;
+		else
+		if(!scbw::isCheatEnabled(CheatFlags::OperationCwal))
+			jump_to_5D718 = true;
+		else {
+
+			if(building->remainingBuildTime >= OPCWAL_PROGRESS_INCREASE)
+				building->remainingBuildTime -= OPCWAL_PROGRESS_INCREASE;
+			else
+				building->remainingBuildTime = 0;
+
+			jump_to_5D720 = true;
+
+		}
+
+	}
+	else
+	if(building->mainOrderState == 1) { //5D5AE
+
+		if(building->id == UnitId::ZergExtractor) {
+
+			CImage* overlay = building->sprite->getOverlay(ImageId::VespeneGeyser2);
+
+			if(overlay != NULL)
+				overlay->free();
+
+		}
+
+		//5D5D0
+		building->sprite->playIscriptAnim(IscriptAnimation::SpecialState1,true);
+		building->mainOrderState = 2;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 2) { //5D5E2
+
+		if(building->remainingBuildTime < units_dat::TimeCost[buildingId] / 2)
+			building->mainOrderState = 3;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 3) { //5D603
+
+		building->sprite->playIscriptAnim(IscriptAnimation::SpecialState2,true);
+		building->mainOrderState = 4;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 4) { //5D618
+
+		if(building->remainingBuildTime == 0)
+			building->mainOrderState = 5;
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 5) { //5D62F
+
+		building->sprite->playIscriptAnim(IscriptAnimation::AlmostBuilt,true);
+		building->mainOrderState = 6;
+		playBuildingCompleteSound(building);
+
+		jump_to_5D56C = true;
+
+	}
+	else
+	if(building->mainOrderState == 6) { //5D64B
+
+		if(building->orderSignal & 4) {
+
+			s32 hpAfterMorph;
+			CImage* current_image;
+
+			building->orderSignal -= 4;
+
+			if(isValidMorph(buildingId)) {
+
+				//save hp before some functions modify them
+				hpAfterMorph = building->hitPoints;
+
+				//update score
+				building->status |= UnitStatus::Completed;
+				incrementUnitScoresEx(building,-1,0);
+
+				//do the building change
+				building->status -= UnitStatus::Completed;
+				replaceUnitWithType(building,buildingId);
+
+				//newHp = newHpMax - oldHpMax + oldHp
+				hpAfterMorph =
+					units_dat::MaxHitPoints[buildingId] -
+					units_dat::MaxHitPoints[building->previousUnitType] +
+					hpAfterMorph;
+
+				if(hpAfterMorph < 256)
+					hpAfterMorph = 256;
+
+				building->setHp(hpAfterMorph);
+				building->remainingBuildTime = 0;
+
+			}
+
+			//5d6cd
+
+			//update various stuff (set hp, set shield...) not finished on Morph
+			function_004A01F0(building);
+			updateUnitStrength(building);
+
+			//relate to building placement / taking room around?
+			function_0047D770(building);
+
+			current_image = building->sprite->images.head;
+
+			while(current_image != NULL) {
+				current_image->playIscriptAnim(IscriptAnimation::AlmostBuilt);
+				current_image = current_image->link.next;
+			}
+
+			updateNewUnitVision(buildingId, building->sprite->position.x, building->sprite->position.y);
+
+		}
+
+	}
+
+	if(jump_to_5D56C) { //5D56C
+
+		jump_to_5D56C = false;
+
+		if(building->remainingBuildTime == 0)
+			jump_to_5D720 = true;
+		else
+		if(!scbw::isCheatEnabled(CheatFlags::OperationCwal))
+			jump_to_5D718 = true;
+		else {
+
+			if(building->remainingBuildTime >= OPCWAL_PROGRESS_INCREASE)
+				building->remainingBuildTime -= OPCWAL_PROGRESS_INCREASE;
+			else
+				building->remainingBuildTime = 0;
+
+			jump_to_5D720 = true;
+
+		}
+
+	}
+
+	if(jump_to_5D718) {
+		jump_to_5D718 = false;
+		building->remainingBuildTime--;
+		jump_to_5D720 = true;
+	}
+
+	if(jump_to_5D720) {
+
+		jump_to_5D720 = false;
+
+		if(
+			buildingId != UnitId::ZergHive &&
+			buildingId != UnitId::ZergLair &&
+			buildingId != UnitId::ZergGreaterSpire &&
+			buildingId != UnitId::ZergSporeColony &&
+			buildingId != UnitId::ZergSunkenColony
+		)
+		{
+
+			s32 hpGain = building->buildRepairHpGain;
+
+			if(scbw::isCheatEnabled(CheatFlags::OperationCwal))
+				hpGain *= OPCWAL_PROGRESS_INCREASE;
+
+			building->setHp(building->hitPoints + hpGain);
+
+		}
+
+	}
+
+} //void orders_ZergBuildSelf(CUnit* building)
+#endif
+
+;
+
+#ifdef EVENTS_SYSTEM
+void ZergPlaceBuilding(CUnit* unit) {
+
+	bool bStopThere = false;
+
+	if(!(unit->status & UnitStatus::Completed)) {
+
+		u16 builtUnitId = unit->buildQueue[unit->buildQueueSlot];
+
+		//original code was hardcoded instead of using isValidMorph
+		if(isValidMorph(builtUnitId)) {
+			zergPlaceBuildingCntd(unit);
+			bStopThere = true;
+		}
+
+	}
+
+	if(!bStopThere) {
+
+		static u32* const scoreUnitsOwned = (u32*)	0x00581E44;
+		static u32* const scoreUnitsTotal = (u32*)	0x00581ED4;
+
+		std::vector<int*> events_unit_drone_hp_set_arg(5);
+		u32 oldId;
+		s32 oldHp, newHp;
+
+		oldHp = unit->hitPoints;
+		oldId = unit->id;
+
+		refundBuildingCost(unit->id,unit->playerId);
+
+		scoreUnitsTotal[unit->playerId] = scoreUnitsTotal[unit->playerId] - units_dat::BuildScore[UnitId::ZergDrone];
+		scoreUnitsOwned[unit->playerId] = scoreUnitsOwned[unit->playerId] - 1;
+
+		if(unit->id == UnitId::ZergExtractor) {
+
+			CUnit* drone = createUnit(UnitId::ZergDrone,unit->getX(),unit->getY(),unit->playerId);
+
+			if(drone == NULL) {
+				displayLastNetErrForPlayer(unit->playerId);
+				unit->remove();
+			}
+			else {	//5DB1E
+
+				//update various stuff (set hp, set shield...) not finished after createUnit
+				function_004A01F0(drone);
+				updateUnitStrength(drone);
+
+				newHp = unit->previousHp * 256;
+
+				events_unit_drone_hp_set_arg[0] = (int*)unit;
+				events_unit_drone_hp_set_arg[1] = (int*)drone;
+				events_unit_drone_hp_set_arg[2] = (int*)oldId;
+				events_unit_drone_hp_set_arg[3] = (int*)oldHp;
+				events_unit_drone_hp_set_arg[4] = (int*)&newHp;
+
+				EventManager::EventCalled(EventId::BUILDING_DRONE_SPAWNED_FROM_CANCELED_BUILDING_HP_SET, events_unit_drone_hp_set_arg);
+
+				drone->setHp(newHp);
+
+				unit->remove();
+
+			}
+
+		}
+		else {	//5DB45
+
+			CThingy* thingy = createThingy(SpriteId::Zerg_Building_Spawn_Small,unit->getX(),unit->getY(),0);
+
+			if(thingy != NULL) {
+				thingy->sprite->elevationLevel = unit->sprite->elevationLevel + 1;
+				setThingyVisibilityFlags(thingy);
+			}
+
+			scbw::playSound(SoundId::Misc_ZBldgPlc_wav_1,unit);
+			replaceUnitWithType(unit,UnitId::ZergDrone);
+
+			//probably AI related
+			function_00433FE0(unit);
+
+			//update various stuff (set hp, set shield...) not finished after unit change
+			function_004A01F0(unit);
+			updateUnitStrength(unit);
+
+			if(
+				unit->sprite->images.tail->paletteType == PaletteType::RLE_SHADOW &&
+				unit->sprite->images.tail->verticalOffset != 7
+			)
+			{
+				unit->sprite->images.tail->flags |= CImage_Flags::Redraw;
+				unit->sprite->images.tail->verticalOffset = 7;
+			}
+
+			refreshSpriteData(unit->sprite);
+
+			unit->orderComputerCL(OrderId::ResetCollision1);
+
+			unit->order(
+				units_dat::ReturnToIdleOrder[unit->id],
+				0,
+				0,
+				NULL,
+				UnitId::None,
+				false
+			);
+
+			newHp = unit->previousHp * 256;
+
+			events_unit_drone_hp_set_arg[0] = (int*)unit;
+			events_unit_drone_hp_set_arg[1] = (int*)unit;
+			events_unit_drone_hp_set_arg[2] = (int*)oldId;
+			events_unit_drone_hp_set_arg[3] = (int*)oldHp;
+			events_unit_drone_hp_set_arg[4] = (int*)&newHp;
+
+			EventManager::EventCalled(EventId::BUILDING_DRONE_SPAWNED_FROM_CANCELED_BUILDING_HP_SET, events_unit_drone_hp_set_arg);
+
+			unit->setHp(unit->previousHp * 256);
+
+			//???
+			function_0047DE40(
+				unit->sprite,
+				unit->id,
+				unit->getX(),
+				unit->getY()
+			);
+
+
+		}
+
+
+	}
+
+}
+#else
+void ZergPlaceBuilding(CUnit* unit) {
+
+	bool bStopThere = false;
+
+	if(!(unit->status & UnitStatus::Completed)) {
+
+		u16 builtUnitId = unit->buildQueue[unit->buildQueueSlot];
+
+		//original code was hardcoded instead of using isValidMorph
+		if(isValidMorph(builtUnitId)) {
+			zergPlaceBuildingCntd(unit);
+			bStopThere = true;
+		}
+
+	}
+
+	if(!bStopThere) {
+
+		static u32* const scoreUnitsOwned = (u32*)	0x00581E44;
+		static u32* const scoreUnitsTotal = (u32*)	0x00581ED4;
+
+		refundBuildingCost(unit->id,unit->playerId);
+
+		scoreUnitsTotal[unit->playerId] = scoreUnitsTotal[unit->playerId] - units_dat::BuildScore[UnitId::ZergDrone];
+		scoreUnitsOwned[unit->playerId] = scoreUnitsOwned[unit->playerId] - 1;
+
+		if(unit->id == UnitId::ZergExtractor) {
+
+			CUnit* drone = createUnit(UnitId::ZergDrone,unit->getX(),unit->getY(),unit->playerId);
+
+			if(drone == NULL) {
+				displayLastNetErrForPlayer(unit->playerId);
+				unit->remove();
+			}
+			else {	//5DB1E
+
+				//update various stuff (set hp, set shield...) not finished after createUnit
+				function_004A01F0(drone);
+				updateUnitStrength(drone);
+
+				drone->setHp(unit->previousHp * 256);
+
+				unit->remove();
+
+			}
+
+		}
+		else {	//5DB45
+
+			CThingy* thingy = createThingy(SpriteId::Zerg_Building_Spawn_Small,unit->getX(),unit->getY(),0);
+
+			if(thingy != NULL) {
+				thingy->sprite->elevationLevel = unit->sprite->elevationLevel + 1;
+				setThingyVisibilityFlags(thingy);
+			}
+
+			scbw::playSound(SoundId::Misc_ZBldgPlc_wav_1,unit);
+			replaceUnitWithType(unit,UnitId::ZergDrone);
+
+			//probably AI related
+			function_00433FE0(unit);
+
+			//update various stuff (set hp, set shield...) not finished after unit change
+			function_004A01F0(unit);
+			updateUnitStrength(unit);
+
+			if(
+				unit->sprite->images.tail->paletteType == PaletteType::RLE_SHADOW &&
+				unit->sprite->images.tail->verticalOffset != 7
+			)
+			{
+				unit->sprite->images.tail->flags |= CImage_Flags::Redraw;
+				unit->sprite->images.tail->verticalOffset = 7;
+			}
+
+			refreshSpriteData(unit->sprite);
+
+			unit->orderComputerCL(OrderId::ResetCollision1);
+
+			unit->order(
+				units_dat::ReturnToIdleOrder[unit->id],
+				0,
+				0,
+				NULL,
+				UnitId::None,
+				false
+			);
+
+			unit->setHp(unit->previousHp * 256);
+
+			//???
+			function_0047DE40(
+				unit->sprite,
+				unit->id,
+				unit->getX(),
+				unit->getY()
+			);
+
+
+		}
+
+
+	}
+
+}
+#endif
+
+;
 
 } //namespace hooks
 
