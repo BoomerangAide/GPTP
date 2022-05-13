@@ -1,5 +1,6 @@
 #include "unit_stat_act.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions declaration
 
@@ -11,23 +12,23 @@ void hideDialog(BinDlg* dialog);										//18700
 void updateDialog(BinDlg* dialog);										//1C400
 void function_004248F0();												//248F0
 bool function_00424A10_helper();										//24A10
-void setSpellSpecialBtnGraphic(BinDlg* dialog);							//24BA0
+void stats_transports_loaded_units_buttons_Helper(BinDlg* dialog);		//24BA0
 void function_00424FC0();												//24FC0
 void AddTextToDialog(BinDlg* dialog, int index, char* textOffset);		//258B0
 void SetUnitStatusStrText(BinDlg* dialog);								//25B50
 void SetKillsStrText(BinDlg* dialog);									//25DD0
 void function_00425EC0(BinDlg* dialog);									//25EC0
-void function_00425F30(BinDlg* dialog);									//25F30
-void function_004260C0(BinDlg* dialog);									//260C0
-void function_00426190(BinDlg* dialog);									//26190
+void stats_AddOnBuilder_Helper(BinDlg* dialog);							//25F30
+void stats_IncompleteUnit_Helper(BinDlg* dialog);						//260C0
+void stats_resources_Helper(BinDlg* dialog);							//26190
 void setTextStr(BinDlg* dialog);										//263E0
-void function_00426500(BinDlg* dialog);									//26500
-void function_004266F0(BinDlg* dialog);									//266F0
-void function_004268D0(BinDlg* dialog);									//268D0
+void stats_upgrade_in_progress_Helper(BinDlg* dialog);					//26500
+void stats_research_in_progress_Helper(BinDlg* dialog);					//266F0
+void stats_QueueProgress_Helper(BinDlg* dialog);						//268D0
 void stats_panel_display_Helper(BinDlg* dialog);						//26C60
 void UnitStatAct_Standard_Helper(BinDlg* dialog);						//26F50
-void function_00426FF0(BinDlg* dialog);									//26FF0
-void function_00427540(BinDlg* dialog);									//27540
+void stats_nukesilo_Helper(BinDlg* dialog);								//26FF0
+void stats_supply_provider_Helper(BinDlg* dialog);						//27540
 void UnitStatAct_Building_Helper(BinDlg* dialog);						//27890
 void UnitStatAct_Dropship_Helper(BinDlg* dialog);						//27C90
 void DLGsetProgressBarValue(BinDlg* dialog, int index, u32 progress);	//57200
@@ -43,12 +44,13 @@ bool unitIsActiveTransport(CUnit* unit);								//E6BA0
 
 } //unnamed namespace
 
-u32* const u32_0068C1E0				= (u32*)	0x0068C1E0; //unknown, maybe not always store the same thing
-u8* const u8_0068C1E5				= (u8*)		0x0068C1E5; //Some kind of ID of current type of display, to not redo memory allocation
-s32* const selectionHPvalues		= (s32*)	0x006CA94C;	//array of SELECTION_ARRAY_LENGTH elements
-s32* const selectionShieldvalue		= (s32*)	0x006CA9EC; //pointer on a single element (not array)
-Bool8* const selectionUpdateNeeded	= (Bool8*)	0x006CA9F0;
-u16* const selectionEnergyvalue		= (u16*)	0x006CAC0C; //pointer on a single element
+u32* const u32_0068C1E0					= (u32*)	0x0068C1E0; //unknown, maybe not always store the same thing
+u8* const u8_0068C1E5					= (u8*)		0x0068C1E5; //Some kind of ID of current type of display, to not redo memory allocation
+u16* const selectionVariableData3Offset	= (u16*)    0x006CA940;
+s32* const selectionHPvalues			= (s32*)	0x006CA94C;	//array of SELECTION_ARRAY_LENGTH elements
+s32* const selectionShieldvalue			= (s32*)	0x006CA9EC; //pointer on a single element (not array)
+Bool8* const selectionUpdateNeeded		= (Bool8*)	0x006CA9F0;
+u16* const selectionEnergyvalue			= (u16*)	0x006CAC0C; //pointer on a single element
 
 const int TEXTLABELINDEX_UNITNAME = -5;
 const int TEXTLABELINDEX_UNITSTATUS = -20;
@@ -64,6 +66,34 @@ namespace hooks {
 //0x00425EE0
 //Possibly used by units turrets, nukes, spells...
 //Probably Display Function 9 in FireGraft
+#ifdef EVENTS_SYSTEM
+void UnitStatAct_Default(BinDlg* dialog) {
+
+	BinDlg* current_dialog;
+
+	*u8_0068C1E5 = 0;
+
+	if(dialog->controlType != DialogControlTypes::DialogBox)
+		current_dialog = dialog;
+	else
+		current_dialog = dialog->childrenDlg;
+
+	while(current_dialog != NULL) {
+		hideDialog(current_dialog);
+		current_dialog = current_dialog->next;
+	}
+
+	char* unitName = getUnitName(*activePortraitUnit);
+	std::vector<int*> events_arg(2);
+	events_arg[0] = (int*)*activePortraitUnit;
+	events_arg[1] = (int*)&unitName;
+
+	EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_arg);
+
+	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+}
+#else
 void UnitStatAct_Default(BinDlg* dialog) {
 
 	BinDlg* current_dialog;
@@ -83,13 +113,17 @@ void UnitStatAct_Default(BinDlg* dialog) {
 	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(*activePortraitUnit));
 
 }
+#endif
 
 ;
 
 //0x00426EE0
 //Possibly used by spider mines, powerups, Floor armed traps...
 //Probably Display Function 8 in FireGraft
+#ifdef EVENTS_SYSTEM
 void UnitStatAct_Powerup(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
 
 	if(*u8_0068C1E5 != 14) {
 
@@ -109,14 +143,63 @@ void UnitStatAct_Powerup(BinDlg* dialog) {
 
 	}
 
-	selectionHPvalues[0] = (*activePortraitUnit)->hitPoints;
+	selectionHPvalues[0] = unit->hitPoints;
+
+	stats_panel_display_Helper(dialog);
+
+	bool cancelVitalsDisplay = false;
+	std::vector<int*> events_override_arg(1);
+
+	events_override_arg[0] = (int*)unit;
+
+	EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+	if (!cancelVitalsDisplay) {
+		setTextStr(dialog);
+
+	}
+
+	char* unitName = getUnitName(unit);
+	std::vector<int*> events_arg(2);
+	events_arg[0] = (int*)unit;
+	events_arg[1] = (int*)&unitName;
+
+	EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_arg);
+
+	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+}
+#else
+void UnitStatAct_Powerup(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(*u8_0068C1E5 != 14) {
+
+		BinDlg* current_dialog;
+
+		if(dialog->controlType != DialogControlTypes::DialogBox)
+			current_dialog = dialog;
+		else
+			current_dialog = dialog->childrenDlg;
+
+		while(current_dialog != NULL) {
+			hideDialog(current_dialog);
+			current_dialog = current_dialog->next;
+		}
+
+		*u8_0068C1E5 = 14;
+
+	}
+
+	selectionHPvalues[0] = unit->hitPoints;
 
 	stats_panel_display_Helper(dialog);
 	setTextStr(dialog);
-
 	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(*activePortraitUnit));
 
 }
+#endif
 
 ;
 
@@ -125,6 +208,7 @@ void UnitStatAct_Powerup(BinDlg* dialog) {
 //made by other functions (usually: unit not belonging to
 //current player or not having its possible special property)
 //Probably Display Function 1 in FireGraft
+#ifdef EVENTS_SYSTEM
 void UnitStatAct_Standard(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -143,21 +227,70 @@ void UnitStatAct_Standard(BinDlg* dialog) {
 
 	//unknown, may be related to one of the elements displayed
 	//by stats_panel_display, but not always the same
-	*(u16*)(0x006CA940) = 1;
+	*selectionVariableData3Offset = 1;
+
+	stats_panel_display_Helper(dialog);
+	SetUnitStatusStrText(dialog);
+	SetKillsStrText(dialog);
+
+	bool cancelVitalsDisplay = false;
+	std::vector<int*> events_override_arg(1);
+
+	events_override_arg[0] = (int*)unit;
+
+	EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+	if (!cancelVitalsDisplay) {
+		setTextStr(dialog);
+	}
+
+	char* unitName = getUnitName(unit);
+	std::vector<int*> events_arg(2);
+	events_arg[0] = (int*)unit;
+	events_arg[1] = (int*)&unitName;
+
+	EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_arg);
+
+	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+}
+#else
+void UnitStatAct_Standard(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	selectionHPvalues[0] = unit->hitPoints;
+	*selectionEnergyvalue = unit->energy / 256;
+	*selectionShieldvalue = unit->shields / 256;
+
+	function_004248F0();
+
+	if( ((u8)*(u16*)u8_0068C1E5) != 2 ) {
+		function_00457310(dialog);
+		function_00457250(dialog,TEXTLABELINDEX_UNITSTATUS,12);
+		*u8_0068C1E5 = 2;
+	}
+
+	//unknown, may be related to one of the elements displayed
+	//by stats_panel_display, but not always the same
+	*selectionVariableData3Offset = 1;
 
 	stats_panel_display_Helper(dialog);
 	SetUnitStatusStrText(dialog);
 	SetKillsStrText(dialog);
 	setTextStr(dialog);
+
 	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(unit));
 
 }
+#endif
 
 ;
 
 //0x00427260
 //Used by ZergEgg,ZergCocoon and ZergLurkerEgg.
 //Probably Display Function 6 in FireGraft
+#ifdef EVENTS_SYSTEM
 void UnitStatAct_Egg(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -172,7 +305,125 @@ void UnitStatAct_Egg(BinDlg* dialog) {
 
 		BinDlg* current_dialog;
 		u8 raceId;
-		u16 builtUnitId = unit->buildQueue[unit->buildQueueSlot]; //done earlier than normal, but should not matter
+		u16 builtUnitId = unit->buildQueue[unit->buildQueueSlot];
+
+		if(*u8_0068C1E5 != 10) {
+			function_00457310(dialog);
+			function_00457250(dialog,TEXTLABELINDEX_CONSTRUCTINGTEXT,17);
+			*u8_0068C1E5 = 10;
+		}
+
+		DLGsetProgressBarValue(dialog,EGGPROGRESSBARINDEX,function_004669E0(unit));
+
+		if(dialog->controlType == DialogControlTypes::DialogBox)
+			current_dialog = dialog->childrenDlg;
+		else
+			current_dialog = dialog->parent->childrenDlg;
+
+		while(current_dialog != NULL && current_dialog->index != EGGBUILTUNITICONINDEX)
+			current_dialog = current_dialog->next;
+
+		//original code don't handle the case of current_dialog being NULL
+		//at this point, and even overwrite it with 0 in this case,
+		//leading necessarily to a crash.Weird but probably mean current_dialog
+		//will definitely never be NULL here.
+
+		u16 panelGraphic, iconId, itemId, tooltipTypeId;
+		char* iconText;
+		std::vector<int*> events_arg(6);
+
+		panelGraphic = 2;
+		iconId = builtUnitId;
+		tooltipTypeId = PanelTooltipTypes::SpecialPanelTooltip;
+		itemId = builtUnitId;
+		iconText = NULL;
+
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)&panelGraphic;
+		events_arg[2] = (int*)&iconId;
+		events_arg[3] = (int*)&tooltipTypeId;
+		events_arg[4] = (int*)&itemId;
+		events_arg[5] = (int*)&iconText;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_PANEL, events_arg);
+
+		current_dialog->graphic = panelGraphic;
+		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
+		current_dialog->statUser->iconId_04 = iconId;
+		current_dialog->statUser->tooltipType_06 = tooltipTypeId;
+		current_dialog->statUser->id_08 = itemId;
+
+		if(iconText != NULL)
+			current_dialog->pszText = iconText;
+
+		if(!(current_dialog->flags & BinDlgFlags::Unknown0)) {
+			current_dialog->flags |= BinDlgFlags::Unknown0;
+			updateDialog(dialog);
+		}
+
+		if(units_dat::GroupFlags[unit->id].isZerg)
+			raceId = RaceId::Zerg;
+		else
+		if(units_dat::GroupFlags[unit->id].isProtoss)
+			raceId = RaceId::Protoss;
+		else
+		if(units_dat::GroupFlags[unit->id].isTerran)
+			raceId = RaceId::Terran;
+		else
+			raceId = RaceId::Neutral;
+
+		//skipping hardcoded use of statTxtTbl
+
+		char* progressText = (char*)statTxtTbl->getString(0x303 + raceId);
+		std::vector<int*> events_progress_arg(3);
+		events_progress_arg[0] = (int*)unit;
+		events_progress_arg[1] = (int*)builtUnitId;
+		events_progress_arg[2] = (int*)&progressText;
+
+		EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_progress_arg);
+
+		AddTextToDialog(dialog,TEXTLABELINDEX_CONSTRUCTINGTEXT,progressText);
+
+		bool cancelVitalsDisplay = false;
+		std::vector<int*> events_override_arg(1);
+
+		events_override_arg[0] = (int*)unit;
+
+		EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+		if (!cancelVitalsDisplay) {
+			setTextStr(dialog);
+		}
+
+		char* unitName = getUnitName(unit);
+		std::vector<int*> events_name_arg(2);
+		events_name_arg[0] = (int*)unit;
+		events_name_arg[1] = (int*)&unitName;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_name_arg);
+
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+	}
+
+}
+#else
+void UnitStatAct_Egg(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(
+		(*IS_IN_REPLAY == 0 &&
+		unit->playerId != *LOCAL_NATION_ID) ||
+		unit->status & UnitStatus::IsHallucination
+	)
+		UnitStatAct_Standard_Helper(dialog);
+	else 
+	{
+
+		BinDlg* current_dialog;
+		u8 raceId;
+		u16 builtUnitId = unit->buildQueue[unit->buildQueueSlot];
 
 		if(*u8_0068C1E5 != 10) {
 			function_00457310(dialog);
@@ -199,7 +450,7 @@ void UnitStatAct_Egg(BinDlg* dialog) {
 
 		current_dialog->statUser->unkUser_00 = *u32_0068C1E0;
 		current_dialog->statUser->iconId_04 = builtUnitId;
-		current_dialog->statUser->unknown_06 = 3;
+		current_dialog->statUser->tooltipType_06 = PanelTooltipTypes::SpecialPanelTooltip;
 		current_dialog->statUser->id_08 = builtUnitId;
 
 		if(!(current_dialog->flags & BinDlgFlags::Unknown0)) {
@@ -222,19 +473,78 @@ void UnitStatAct_Egg(BinDlg* dialog) {
 
 		//Zerg: "Morphing", Terran: "Building", Protoss: "Opening Warp Gate", Neutral: "Building"
 		AddTextToDialog(dialog,TEXTLABELINDEX_CONSTRUCTINGTEXT,(char*)statTxtTbl->getString(0x303 + raceId));
-
 		setTextStr(dialog);
 		AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(unit));
 
 	}
 
 }
+#endif
 
 ;
 
 //0x004273E0
 //Used by ProtossDarkArchon and ProtossArchon (not heroic Archon)
 //Probably Display Function 5 in FireGraft
+#ifdef EVENTS_SYSTEM
+void UnitStatAct_Archon(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(
+		(*IS_IN_REPLAY == 0 &&
+		unit->playerId != *LOCAL_NATION_ID) ||
+		unit->mainOrderId != OrderId::CompletingArchonSummon
+	)
+		UnitStatAct_Standard_Helper(dialog);
+	else {
+
+		function_00457250(dialog,TEXTLABELINDEX_SUMMONINGTEXT,13);
+
+		if(*u8_0068C1E5 != 6) {
+			function_00457310(dialog);
+			*u8_0068C1E5 = 6;
+		}
+
+		DLGsetProgressBarValue(dialog,ARCHONPROGRESSBARINDEX,function_004669E0(unit));
+
+		//skipping hardcoded use of statTxtTbl
+
+		char* progressText = (char*)statTxtTbl->getString(0x316);
+		std::vector<int*> events_arg(3);
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)unit->id;
+		events_arg[2] = (int*)&progressText;
+
+		EventManager::EventCalled(EventId::STATUS_PROGRESS_TEXT, events_arg);
+
+		AddTextToDialog(dialog,TEXTLABELINDEX_SUMMONINGTEXT,progressText);
+
+		bool cancelVitalsDisplay = false;
+		std::vector<int*> events_override_arg(1);
+
+		events_override_arg[0] = (int*)unit;
+
+		EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+		if (!cancelVitalsDisplay) {
+			setTextStr(dialog);
+
+		}
+
+		char* unitName = getUnitName(unit);
+		std::vector<int*> events_name_arg(2);
+		events_name_arg[0] = (int*)unit;
+		events_name_arg[1] = (int*)&unitName;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_name_arg);
+
+		AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+	}
+
+}
+#else
 void UnitStatAct_Archon(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -260,19 +570,20 @@ void UnitStatAct_Archon(BinDlg* dialog) {
 
 		//Text: "Summoning"
 		AddTextToDialog(dialog,TEXTLABELINDEX_SUMMONINGTEXT,(char*)statTxtTbl->getString(0x316));
-
 		setTextStr(dialog);
 		AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(unit));
 
 	}
 
 }
+#endif
 
 ;
 
 //0x004274A0
 //Used by Carrier,Reaver, and their heroic versions
 //Probably Display Function 4 in FireGraft
+#ifdef EVENTS_SYSTEM
 void UnitStatAct_CarrierReaver(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -301,7 +612,64 @@ void UnitStatAct_CarrierReaver(BinDlg* dialog) {
 		if(builtUnitId > UnitId::Spell_DisruptionWeb) //builtUnitId is a building,UnitId::None or other
 			UnitStatAct_Standard_Helper(dialog);
 		else {
-			function_004268D0(dialog);
+
+			stats_QueueProgress_Helper(dialog);
+
+			bool cancelVitalsDisplay = false;
+			std::vector<int*> events_override_arg(1);
+
+			events_override_arg[0] = (int*)unit;
+
+			EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+			if (!cancelVitalsDisplay) {
+				setTextStr(dialog);
+			}
+
+			char* unitName = getUnitName(unit);
+			std::vector<int*> events_arg(2);
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&unitName;
+
+			EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_arg);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+		}
+
+	}
+
+}
+#else
+void UnitStatAct_CarrierReaver(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(
+		*IS_IN_REPLAY == 0 &&
+		unit->playerId != *LOCAL_NATION_ID
+	)
+		UnitStatAct_Standard_Helper(dialog);
+	else {
+
+		u16 builtUnitId;
+
+		if(function_00424A10_helper())
+			*selectionUpdateNeeded = 1;
+		else
+			*selectionUpdateNeeded = 0;
+
+		selectionHPvalues[0] = unit->hitPoints;
+		*selectionEnergyvalue = unit->energy / 256;
+		*selectionShieldvalue = unit->shields / 256;
+		function_004248F0();
+
+		builtUnitId = unit->buildQueue[unit->buildQueueSlot % 5];
+
+		if(builtUnitId > UnitId::Spell_DisruptionWeb) //builtUnitId is a building,UnitId::None or other
+			UnitStatAct_Standard_Helper(dialog);
+		else {
+			stats_QueueProgress_Helper(dialog);
 			setTextStr(dialog);
 			AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(unit));
 		}
@@ -309,12 +677,14 @@ void UnitStatAct_CarrierReaver(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 ;
 
 //0x00427890
 //Used by buildings and maybe others...
 //Probably Display Function 2 in FireGraft
+#ifdef EVENTS_SYSTEM
 void UnitStatAct_Building(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -353,10 +723,10 @@ void UnitStatAct_Building(BinDlg* dialog) {
 		}
 		else
 		if(!(unit->status & UnitStatus::Completed))
-			function_004260C0(dialog);
+			stats_IncompleteUnit_Helper(dialog);
 		else
 		if(unit->id == UnitId::TerranNuclearSilo)
-			function_00426FF0(dialog);
+			stats_nukesilo_Helper(dialog);
 		else
 		if(unitIsActiveTransport(unit)) {
 			if( ((u8)*(u16*)u8_0068C1E5) != 4 ) {
@@ -366,22 +736,22 @@ void UnitStatAct_Building(BinDlg* dialog) {
 		}
 		else
 		if(isQueueSlotActive(unit,0))
-			function_004268D0(dialog);
+			stats_QueueProgress_Helper(dialog);
 		else
 		if(
 			isConstructingAddon(unit) ||
 			isAttemptingProtossBuild(unit)
 		)
-			function_00425F30(dialog);
+			stats_AddOnBuilder_Helper(dialog);
 		else
 		if(unit->building.techType != TechId::None)
-			function_004266F0(dialog);
+			stats_research_in_progress_Helper(dialog);
 		else
 		if(unit->building.upgradeType != UpgradeId::None)
-			function_00426500(dialog);
+			stats_upgrade_in_progress_Helper(dialog);
 		else
 		if(units_dat::SupplyProvided[unit->id] != 0)
-			function_00427540(dialog);
+			stats_supply_provider_Helper(dialog);
 		else
 		if(unit_isGeyserUnit(unit))
 			isResourceUnit = true;
@@ -413,7 +783,132 @@ void UnitStatAct_Building(BinDlg* dialog) {
 	}
 
 	if(isResourceUnit) //unit is mineral field or vespene geyser or geyser using building
-		function_00426190(dialog);
+		stats_resources_Helper(dialog);
+
+	//below: basic display used in addition (or replacement) to all of the above
+	bool cancelVitalsDisplay = false;
+	std::vector<int*> events_override_arg(1);
+
+	events_override_arg[0] = (int*)unit;
+
+	EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+	if (!cancelVitalsDisplay) {
+		setTextStr(dialog);
+	}
+
+	SetUnitStatusStrText(dialog);
+
+	char* unitName = getUnitName(unit);
+	std::vector<int*> events_arg(2);
+	events_arg[0] = (int*)unit;
+	events_arg[1] = (int*)&unitName;
+
+	EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_arg);
+
+	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+}
+#else
+void UnitStatAct_Building(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	bool isResourceUnit;
+
+	selectionHPvalues[0] = unit->hitPoints;
+	*selectionEnergyvalue = unit->energy / 256;
+	*selectionShieldvalue = unit->shields / 256;
+
+	if(function_00424A10_helper())
+		*selectionUpdateNeeded = 1;
+	else
+		*selectionUpdateNeeded = 0;
+
+	function_004248F0();
+
+	isResourceUnit =
+		(
+			unit->id >= UnitId::ResourceMineralField &&
+			(unit->id <= UnitId::ResourceMineralFieldType3 ||
+			unit->id == UnitId::ResourceVespeneGeyser)
+		);
+
+	if(!isResourceUnit) {
+
+		if(
+			*IS_IN_REPLAY == 0 &&
+			unit->playerId != *LOCAL_NATION_ID
+		)
+		{
+			if( ((u8)*(u16*)u8_0068C1E5) != 4 ) {
+				function_00457310(dialog);
+				*u8_0068C1E5 = 4;
+			}
+		}
+		else
+		if(!(unit->status & UnitStatus::Completed))
+			stats_IncompleteUnit_Helper(dialog);
+		else
+		if(unit->id == UnitId::TerranNuclearSilo)
+			stats_nukesilo_Helper(dialog);
+		else
+		if(unitIsActiveTransport(unit)) {
+			if( ((u8)*(u16*)u8_0068C1E5) != 4 ) {
+				function_00457310(dialog);
+				*u8_0068C1E5 = 4;
+			}
+		}
+		else
+		if(isQueueSlotActive(unit,0))
+			stats_QueueProgress_Helper(dialog);
+		else
+		if(
+			isConstructingAddon(unit) ||
+			isAttemptingProtossBuild(unit)
+		)
+			stats_AddOnBuilder_Helper(dialog);
+		else
+		if(unit->building.techType != TechId::None)
+			stats_research_in_progress_Helper(dialog);
+		else
+		if(unit->building.upgradeType != UpgradeId::None)
+			stats_upgrade_in_progress_Helper(dialog);
+		else
+		if(units_dat::SupplyProvided[unit->id] != 0)
+			stats_supply_provider_Helper(dialog);
+		else
+		if(unit_isGeyserUnit(unit))
+			isResourceUnit = true;
+		else
+		if(
+			units_dat::AirWeapon[getLastQueueSlotType(unit)] == WeaponId::None &&
+			unit->getGroundWeapon() == WeaponId::None &&
+			units_dat::ShieldsEnabled[unit->id] == 0
+		)
+		{
+			if( ((u8)*(u16*)u8_0068C1E5) != 4 ) {
+				function_00457310(dialog);
+				*u8_0068C1E5 = 4;
+			}
+		}
+		else {
+			
+			if( ((u8)*(u16*)(u8_0068C1E5)) != 3 ) {
+				function_00457310(dialog);
+				function_00457250(dialog,TEXTLABELINDEX_UNITSTATUS,12);
+				*u8_0068C1E5 = 3;
+			}
+
+			stats_panel_display_Helper(dialog);
+			hideDialog(getControlFromIndex(dialog,-21));
+
+		}
+
+	}
+
+	if(isResourceUnit) //unit is mineral field or vespene geyser or geyser using building
+		stats_resources_Helper(dialog);
 
 	//below: basic display used in addition (or replacement) to all of the above
 	setTextStr(dialog);
@@ -421,12 +916,14 @@ void UnitStatAct_Building(BinDlg* dialog) {
 	AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(unit));
 
 }
+#endif
 
 ;
 
 //0x00427C90
 //Used (directly) by TerranDropship,ProtossShuttle and TerranBunker
 //Probably Display Function 3 in FireGraft
+#ifdef EVENTS_SYSTEM
 void UnitStatAct_Dropship(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -462,7 +959,70 @@ void UnitStatAct_Dropship(BinDlg* dialog) {
 				*u8_0068C1E5 = 11;
 			}
 
-			setSpellSpecialBtnGraphic(dialog);
+			stats_transports_loaded_units_buttons_Helper(dialog);
+
+			bool cancelVitalsDisplay = false;
+			std::vector<int*> events_override_arg(1);
+
+			events_override_arg[0] = (int*)unit;
+
+			EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+			if (!cancelVitalsDisplay) {
+					setTextStr(dialog);
+			}
+
+			char* unitName = getUnitName(unit);
+			std::vector<int*> events_arg(2);
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&unitName;
+
+			EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_arg);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+		}
+
+	}
+
+}
+#else
+void UnitStatAct_Dropship(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(
+		(*IS_IN_REPLAY == 0 && unit->playerId != *LOCAL_NATION_ID) ||
+		unit->status & UnitStatus::IsHallucination
+	) 
+	{
+		if(unit->status & UnitStatus::GroundedBuilding)
+			UnitStatAct_Building_Helper(dialog);
+		else
+			UnitStatAct_Standard_Helper(dialog);
+	}
+	else {
+
+		function_00424FC0();
+
+		if(
+			!unit->hasLoadedUnit() ||
+			(*IS_IN_REPLAY == 0 && unit->playerId != *LOCAL_NATION_ID)
+		)
+		{
+			if(unit->status & UnitStatus::GroundedBuilding)
+				UnitStatAct_Building_Helper(dialog);
+			else
+				UnitStatAct_Standard_Helper(dialog);
+		}
+		else {
+
+			if( ((u8)*(u16*)u8_0068C1E5) != 11 ) {
+				function_00457310(dialog);
+				*u8_0068C1E5 = 11;
+			}
+
+			stats_transports_loaded_units_buttons_Helper(dialog);
 			setTextStr(dialog);
 			function_00425EC0(dialog);
 
@@ -471,12 +1031,14 @@ void UnitStatAct_Dropship(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 ;
 
 //0x00427D30
 //Used by Overlord/Yggdrasill
 //Probably Display Function 7 in FireGraft
+#ifdef EVENTS_SYSTEM
 void UnitStatAct_Overlord(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -491,7 +1053,53 @@ void UnitStatAct_Overlord(BinDlg* dialog) {
 		if(unit->hasLoadedUnit())
 			UnitStatAct_Dropship_Helper(dialog);
 		else {
-			function_00427540(dialog);
+
+			stats_supply_provider_Helper(dialog);
+
+			bool cancelVitalsDisplay = false;
+			std::vector<int*> events_override_arg(1);
+
+			events_override_arg[0] = (int*)unit;
+
+			EventManager::EventCalling(EventId::STATUS_VITALS_OVERRIDE, &cancelVitalsDisplay, events_override_arg);
+
+			if (!cancelVitalsDisplay) {
+					setTextStr(dialog);
+			}
+
+			SetUnitStatusStrText(dialog);
+
+			char* unitName = getUnitName(unit);
+			std::vector<int*> events_arg(2);
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&unitName;
+
+			EventManager::EventCalled(EventId::STATUS_DISPLAYING_NAME, events_arg);
+
+			AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,unitName);
+
+		}
+
+	}
+
+}
+#else
+void UnitStatAct_Overlord(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+
+	if(
+		(*IS_IN_REPLAY == 0 && unit->playerId != *LOCAL_NATION_ID) ||
+		unit->status & UnitStatus::IsHallucination
+	)
+		UnitStatAct_Standard_Helper(dialog);
+	else {
+
+		if(unit->hasLoadedUnit())
+			UnitStatAct_Dropship_Helper(dialog);
+		else 
+		{
+			stats_supply_provider_Helper(dialog);
 			setTextStr(dialog);
 			SetUnitStatusStrText(dialog);
 			AddTextToDialog(dialog,TEXTLABELINDEX_UNITNAME,getUnitName(unit));
@@ -500,6 +1108,7 @@ void UnitStatAct_Overlord(BinDlg* dialog) {
 	}
 
 }
+#endif
 
 ;
 
@@ -619,9 +1228,7 @@ bool function_00424A10_helper() {
 ;
 
 const u32 Func_setSpellSpecialBtnGraphic = 0x00424BA0;
-//probably display for transport with special property
-//that each loaded unit is clickable (button)
-void setSpellSpecialBtnGraphic(BinDlg* dialog) {
+void stats_transports_loaded_units_buttons_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		MOV EAX, dialog
@@ -702,7 +1309,7 @@ void function_00425EC0(BinDlg* dialog) {
 
 const u32 Func_Sub425F30 = 0x00425F30;
 //Constructing addon or protoss building from building
-void function_00425F30(BinDlg* dialog) {
+void stats_AddOnBuilder_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		MOV EDI, dialog
@@ -715,7 +1322,7 @@ void function_00425F30(BinDlg* dialog) {
 
 const u32 Func_Sub4260C0 = 0x004260C0;
 //Display for an incomplete building
-void function_004260C0(BinDlg* dialog) {
+void stats_IncompleteUnit_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		MOV EDI, dialog
@@ -728,7 +1335,7 @@ void function_004260C0(BinDlg* dialog) {
 
 const u32 Func_Sub426190 = 0x00426190;
 //Display for a resource or extractor
-void function_00426190(BinDlg* dialog) {
+void stats_resources_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		MOV EAX, dialog
@@ -754,7 +1361,7 @@ void setTextStr(BinDlg* dialog) {
 
 const u32 Func_Sub426500 = 0x00426500;
 //Display for researching an upgrade
-void function_00426500(BinDlg* dialog) {
+void stats_upgrade_in_progress_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		PUSH dialog
@@ -767,7 +1374,7 @@ void function_00426500(BinDlg* dialog) {
 
 const u32 Func_Sub4266F0 = 0x004266F0;
 //Display for researching a tech
-void function_004266F0(BinDlg* dialog) {
+void stats_research_in_progress_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		PUSH dialog
@@ -780,7 +1387,7 @@ void function_004266F0(BinDlg* dialog) {
 
 const u32 Func_Sub4268D0 = 0x004268D0;
 //Display progress of constructing units with queue
-void function_004268D0(BinDlg* dialog) {
+void stats_QueueProgress_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		PUSH dialog
@@ -808,7 +1415,7 @@ void stats_panel_display_Helper(BinDlg* dialog) {
 
 const u32 Func_Sub426FF0 = 0x00426FF0;
 //Display for nuclear silo
-void function_00426FF0(BinDlg* dialog) {
+void stats_nukesilo_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		PUSH dialog
@@ -833,7 +1440,7 @@ void UnitStatAct_Standard_Helper(BinDlg* dialog) {
 
 const u32 Func_Sub427540 = 0x00427540;
 //Display for supply provider
-void function_00427540(BinDlg* dialog) {
+void stats_supply_provider_Helper(BinDlg* dialog) {
 	__asm {
 		PUSHAD
 		MOV EAX, dialog
