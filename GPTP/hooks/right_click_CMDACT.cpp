@@ -8,7 +8,7 @@ bool unitIsOwnedByCurrentPlayer(CUnit* unit); 													//01170
 Bool32 function_00455660(CUnit* unit);															//55660
 Bool32 function_004556D0(CUnit* unit);															//556D0
 Bool32 function_00455A00(CUnit* unit);															//55A00
-GuiOverlay* function_00456490(CUnit* unit, int x, int y);										//56490
+UnknownUserStruct* function_00456490(CUnit* unit, int x, int y);								//56490
 CUnit* function_0046F3A0(u32 unk1, u32 unk2);													//6F3A0
 void QueueGameCommand(u8* params, u32 param_length);											//85BD0
 void GroundAttackInit(int x, int y);															//88660
@@ -179,10 +179,10 @@ void function_004564E0(s16 someX, s16 someY) {
 					if (loop_stop_reached) {
 
 						u16 unitId;
-						GuiOverlay* unknown = function_00456490(clicked_unit, x, y);
+						UnknownUserStruct* iconData = function_00456490(clicked_unit, x, y);
 
-						if (unknown != 0)
-							unitId = unknown->id;
+						if (iconData != 0)
+							unitId = iconData->id_08;
 						else
 							unitId = UnitId::None;
 
@@ -374,11 +374,9 @@ Bool32 function_00455A00(CUnit* unit) {
 ;
 
 const u32 Func_sub_456490 = 0x00456490;
-//return type was chosen because element at 08 is 16 bits,
-//could have been UnknownUserStruct or something else too.
-GuiOverlay* function_00456490(CUnit* unit, int x, int y) {
+UnknownUserStruct* function_00456490(CUnit* unit, int x, int y) {
 
-	GuiOverlay* return_value;
+	UnknownUserStruct* return_value;
 
 	__asm {
 		PUSHAD
