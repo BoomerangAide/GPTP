@@ -1,5 +1,6 @@
 #include "status_base_text.h"
 #include <SCBW/api.h>
+#include <Events/Events.h>
 
 //Helper functions declaration
 
@@ -36,76 +37,393 @@ const int TEXTLABELINDEX_HP_SHIELDS = -7;
 namespace hooks {
 
 //00425A30
+#ifdef EVENTS_SYSTEM
 void stats_text_energy_timer(BinDlg* dialog) {
 
 	char* TEXT_BUFFER = (char*)0x006CA76C;
 	CUnit* unit = *activePortraitUnit;
+	bool cancelEnergyDisplay = false;
+	std::vector<int*> events_override_arg(1);
 
-	if(
-		!(units_dat::BaseProperty[unit->id] & UnitProperty::Spellcaster) ||
-		unit->status & UnitStatus::IsHallucination ||
-		(*IS_IN_REPLAY == 0 && unit->playerId != *LOCAL_NATION_ID)
-	)
-	{ //25AAA (timer)
-		
-		if(
-			(unit->status & UnitStatus::IsHallucination ||
-			unit->id == UnitId::ZergBroodling) &&
-			(*IS_IN_REPLAY != 0 || unit->playerId == *LOCAL_NATION_ID)
+	events_override_arg[0] = (int*)unit;
+
+	EventManager::EventCalling(EventId::STATUS_DISPLAYING_ENERGY_OR_TIMER_OVERRIDE, &cancelEnergyDisplay, events_override_arg);
+
+	if (!cancelEnergyDisplay) {
+
+		if (
+			!(units_dat::BaseProperty[unit->id] & UnitProperty::Spellcaster) ||
+			unit->status & UnitStatus::IsHallucination ||
+			(*IS_IN_REPLAY == 0 && unit->playerId != *LOCAL_NATION_ID)
 		)
-		{ //25ACF
+		{ //25AAA (timer)
 
-			int timerMax;
-			int currentTimer;
+			if (
+				(unit->status & UnitStatus::IsHallucination ||
+				 unit->id == UnitId::ZergBroodling) &&
+				(*IS_IN_REPLAY != 0 || unit->playerId == *LOCAL_NATION_ID)
+			)
+			{ //25ACF
 
-			if(unit->status & UnitStatus::IsHallucination)
-				timerMax = 135; // 1/10 of internal value for display
-			else
-			if(unit->id == UnitId::ZergBroodling)
-				timerMax = 180; // 1/10 of internal value for display
-			else
-				timerMax = 0;
+				int timerMax;
+				int currentTimer;
 
-			currentTimer = unit->removeTimer / 10;
+				if (unit->status & UnitStatus::IsHallucination)
+					timerMax = 135; // 1/10 of internal value for display
+				else
+				if (unit->id == UnitId::ZergBroodling)
+					timerMax = 180; // 1/10 of internal value for display
+				else
+					timerMax = 0;
 
-			if(currentTimer < 0)
-				currentTimer++;
+				currentTimer = unit->removeTimer / 10;
 
-			if(timerMax < 0)
-				timerMax++;
+				if (currentTimer < 0)
+					currentTimer++;
+
+				if (timerMax < 0)
+					timerMax++;
+
+				std::vector<int*> events_timer_arg(3);
+				events_timer_arg[0] = (int*)unit;
+				events_timer_arg[1] = &currentTimer;
+				events_timer_arg[2] = &timerMax;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_ENERGY_OR_TIMER_TIMER, events_timer_arg);
+
+				SC_sprintf_s(
+					TEXT_BUFFER,
+					32,
+					FORMATSTRING_COLORWHITE_CURRENTVALUE_MAXVALUE,
+					currentTimer,
+					timerMax
+				);
+
+				AddTextToDialog(dialog, TEXTLABELINDEX_ENERGY_TIMER, TEXT_BUFFER);
+
+			}
+			else //25B3D
+				AddTextToDialog(dialog, TEXTLABELINDEX_ENERGY_TIMER, NULL);
+
+		}
+		else
+		{ //25A70 (energy)
+
+			std::vector<int*> events_energy_arg(3);
+			int energyCurrent = unit->energy / 256;
+			int energyMax = unit->getMaxEnergy() / 256;
+
+			events_energy_arg[0] = (int*)unit;
+			events_energy_arg[1] = &energyCurrent;
+			events_energy_arg[2] = &energyMax;
+
+			EventManager::EventCalled(EventId::STATUS_DISPLAYING_ENERGY_OR_TIMER_ENERGY, events_energy_arg);
 
 			SC_sprintf_s(
 				TEXT_BUFFER,
 				32,
 				FORMATSTRING_COLORWHITE_CURRENTVALUE_MAXVALUE,
-				currentTimer,
-				timerMax
+				energyCurrent,
+				energyMax
 			);
 
-			AddTextToDialog(dialog,TEXTLABELINDEX_ENERGY_TIMER,TEXT_BUFFER);
+			AddTextToDialog(dialog, TEXTLABELINDEX_ENERGY_TIMER, TEXT_BUFFER);
 
 		}
-		else //25B3D
-			AddTextToDialog(dialog,TEXTLABELINDEX_ENERGY_TIMER,NULL);
-
-	}
-	else
-	{ //25A70 (energy)
-		SC_sprintf_s(
-			TEXT_BUFFER,
-			32,
-			FORMATSTRING_COLORWHITE_CURRENTVALUE_MAXVALUE,
-			unit->energy / 256,
-			unit->getMaxEnergy() / 256
-		);
-		AddTextToDialog(dialog,TEXTLABELINDEX_ENERGY_TIMER,TEXT_BUFFER);
 	}
 
 } //void stats_text_energy_timer(BinDlg* dialog)
+#else
+void stats_text_energy_timer(BinDlg* dialog) {
+
+	char* TEXT_BUFFER = (char*)0x006CA76C;
+	CUnit* unit = *activePortraitUnit;
+
+		if (
+			!(units_dat::BaseProperty[unit->id] & UnitProperty::Spellcaster) ||
+			unit->status & UnitStatus::IsHallucination ||
+			(*IS_IN_REPLAY == 0 && unit->playerId != *LOCAL_NATION_ID)
+		)
+		{ //25AAA (timer)
+
+			if (
+				(unit->status & UnitStatus::IsHallucination ||
+				 unit->id == UnitId::ZergBroodling) &&
+				(*IS_IN_REPLAY != 0 || unit->playerId == *LOCAL_NATION_ID)
+			)
+			{ //25ACF
+
+				int timerMax;
+				int currentTimer;
+
+				if (unit->status & UnitStatus::IsHallucination)
+					timerMax = 135; // 1/10 of internal value for display
+				else
+				if (unit->id == UnitId::ZergBroodling)
+					timerMax = 180; // 1/10 of internal value for display
+				else
+					timerMax = 0;
+
+				currentTimer = unit->removeTimer / 10;
+
+				if (currentTimer < 0)
+					currentTimer++;
+
+				if (timerMax < 0)
+					timerMax++;
+
+				SC_sprintf_s(
+					TEXT_BUFFER,
+					32,
+					FORMATSTRING_COLORWHITE_CURRENTVALUE_MAXVALUE,
+					currentTimer,
+					timerMax
+				);
+
+				AddTextToDialog(dialog, TEXTLABELINDEX_ENERGY_TIMER, TEXT_BUFFER);
+
+			}
+			else //25B3D
+				AddTextToDialog(dialog, TEXTLABELINDEX_ENERGY_TIMER, NULL);
+
+		}
+		else
+		{ //25A70 (energy)
+
+			SC_sprintf_s(
+				TEXT_BUFFER,
+				32,
+				FORMATSTRING_COLORWHITE_CURRENTVALUE_MAXVALUE,
+				unit->energy / 256,
+				unit->getMaxEnergy() / 256
+			);
+
+			AddTextToDialog(dialog, TEXTLABELINDEX_ENERGY_TIMER, TEXT_BUFFER);
+
+		}
+
+} //void stats_text_energy_timer(BinDlg* dialog)
+#endif
 
 ;
 
 //00425B50
+#ifdef EVENTS_SYSTEM
+void stats_text_status_ranking(BinDlg* dialog) {
+
+	bool cancelStatusRankingDisplay = false;
+	std::vector<int*> events_override_arg(1);
+
+	events_override_arg[0] = (int*)*activePortraitUnit;
+
+	EventManager::EventCalling(EventId::STATUS_DISPLAYING_STATUS_OR_RANKING_OVERRIDE, &cancelStatusRankingDisplay, events_override_arg);
+
+	if (!cancelStatusRankingDisplay) {
+
+		char* TEXT_BUFFER = (char*)0x006CA818;
+		CUnit* unit = *activePortraitUnit;
+		char* textComponent;
+
+		if(
+			unit->status & UnitStatus::IsHallucination &&
+			(*IS_IN_REPLAY != 0 || unit->playerId == *LOCAL_NATION_ID)
+		) 
+		{
+
+			std::vector<int*> events_arg(2);
+
+			textComponent = (char*)statTxtTbl->getString(0x340); //"Hallucination"
+
+			events_arg[0] = (int*)unit;
+			events_arg[1] = (int*)&textComponent;
+
+			EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_HALLUCINATION, events_arg);
+
+			AddTextToDialog(
+				dialog,
+				TEXTLABELINDEX_UNITSTATUS,
+				textComponent
+			);
+
+		}
+		else { //25BC1
+
+			if(
+				units_dat::BaseProperty[unit->id] & UnitProperty::Building &&
+				(
+					unit->status & UnitStatus::DoodadStatesThing ||
+					unit->lockdownTimer != 0 ||
+					unit->stasisTimer != 0 ||
+					unit->maelstromTimer != 0
+				) &&
+				unit->status & UnitStatus::Completed &&
+				!unitIsTrainingOrMorphing(unit) &&
+				unit->building.techType == TechId::None &&
+				unit->building.upgradeType == UpgradeId::None
+			) //disabled building
+			{
+
+				std::vector<int*> events_arg(2);
+
+				textComponent = (char*)statTxtTbl->getString(0x33C + unit->getRace()); //"Disabled" (Z),"Disabled" (T),"Unpowered" (P)
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_DISABLED, events_arg);
+
+				AddTextToDialog(
+					dialog,
+					TEXTLABELINDEX_UNITSTATUS,
+					textComponent
+				);
+
+			}
+			else //25C42
+			if(
+				unit->acidSporeCount != 0 &&
+				unit->status & UnitStatus::Completed
+			) 
+			{
+
+				std::vector<int*> events_arg(3);
+				int integerComponent;
+
+				textComponent = (char*)statTxtTbl->getString(0x514); //"Acid Spores"
+				integerComponent = unit->acidSporeCount;
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+				events_arg[2] = &integerComponent;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_ACIDSPORES, events_arg);
+
+				SC_sprintf_s(
+					TEXT_BUFFER,
+					260,
+					FORMATSTRING_TEXT_SPACE_VALUE_IN_PARENTHESIS,
+					(int)textComponent,
+					integerComponent
+				);
+
+				AddTextToDialog(dialog,TEXTLABELINDEX_UNITSTATUS,TEXT_BUFFER);
+
+			}
+			else
+			if(
+				unit->isBlind &&
+				unit->status & UnitStatus::Completed
+			)
+			{
+
+				std::vector<int*> events_arg(2);
+
+				textComponent = (char*)statTxtTbl->getString(0x513); //"Blind"
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_BLIND, events_arg);
+
+				AddTextToDialog(
+					dialog,
+					TEXTLABELINDEX_UNITSTATUS,
+					textComponent
+				);
+
+			}
+			else
+			if(
+				unit->parasiteFlags &&
+				unit->status & UnitStatus::Completed
+			)
+			{
+
+				std::vector<int*> events_arg(2);
+
+				textComponent = (char*)statTxtTbl->getString(0x33B); //"Parasite Detected"
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_PARASITE, events_arg);
+
+				AddTextToDialog(
+					dialog,
+					TEXTLABELINDEX_UNITSTATUS,
+					textComponent
+				);
+
+			}
+			else
+			if(unit->canDetect())
+			{
+
+				std::vector<int*> events_arg(2);
+
+				textComponent = (char*)statTxtTbl->getString(0x33F); //"Detector"
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_DETECTOR, events_arg);
+
+				AddTextToDialog(
+					dialog,
+					TEXTLABELINDEX_UNITSTATUS,
+					textComponent
+				);
+
+			}
+			else
+			if(!(units_dat::BaseProperty[unit->id] & UnitProperty::Building))
+			{
+
+				std::vector<int*> events_arg(2);
+
+				textComponent = getUnitRankString(unit);
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+
+				if(textComponent != NULL)
+					EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_RANK, events_arg);
+				else
+					EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_BLANK, events_arg);
+
+				AddTextToDialog(
+					dialog,
+					TEXTLABELINDEX_UNITSTATUS,
+					textComponent
+				);
+
+			}
+			else
+			{
+
+				std::vector<int*> events_arg(2);
+
+				textComponent = NULL;
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_STATUS_BLANK, events_arg);
+
+				AddTextToDialog(
+					dialog,
+					TEXTLABELINDEX_UNITSTATUS,
+					textComponent
+				);
+
+			}
+
+		}
+
+	}
+
+} //void stats_text_status_ranking(BinDlg* dialog)
+#else
 void stats_text_status_ranking(BinDlg* dialog) {
 
 	char* TEXT_BUFFER = (char*)0x006CA818;
@@ -199,10 +517,89 @@ void stats_text_status_ranking(BinDlg* dialog) {
 	}
 
 } //void stats_text_status_ranking(BinDlg* dialog)
+#endif
 
 ;
 
 //00425DD0
+#ifdef EVENTS_SYSTEM
+void stats_text_kills(BinDlg* dialog) {
+
+	CUnit* unit = *activePortraitUnit;
+	bool cancelStatusKillDisplay = false;
+	std::vector<int*> events_override_arg(1);
+
+	events_override_arg[0] = (int*)unit;
+
+	EventManager::EventCalling(EventId::STATUS_DISPLAYING_KILLS_OVERRIDE, &cancelStatusKillDisplay, events_override_arg);
+
+	if(!cancelStatusKillDisplay) {
+
+		if(
+			unit->id == UnitId::ZergScourge ||
+			unit->id == UnitId::ZergInfestedTerran ||
+			(
+				unit->status & UnitStatus::IsHallucination &&
+				*IS_IN_REPLAY == 0 &&
+				unit->playerId == *LOCAL_NATION_ID
+			)
+		)
+		{ //25E88
+
+			BinDlg* current_dialog;
+
+			if(dialog->controlType == DialogControlTypes::DialogBox)
+				current_dialog = dialog;
+			else
+				current_dialog = dialog->parent;
+
+			current_dialog = current_dialog->childrenDlg;
+
+			while(current_dialog != NULL && current_dialog->index != TEXTLABELINDEX_KILLS)
+				current_dialog = current_dialog->next;
+
+			hideDialog(current_dialog);
+
+		}
+		else { //25E10
+
+			if(
+				unit->hasWeapon() ||
+				unit->killCount != 0
+			)
+			{ //25E3A
+
+				char* BUFFER = (char*)0x006CAC78;
+				std::vector<int*> events_arg(3);
+				char* textComponent = (char*)statTxtTbl->getString(0x2FC);	//"Kills:"
+				int integerComponent = unit->killCount;
+
+				events_arg[0] = (int*)unit;
+				events_arg[1] = (int*)&textComponent;
+				events_arg[2] = &integerComponent;
+
+				EventManager::EventCalled(EventId::STATUS_DISPLAYING_KILLS, events_arg);
+
+				SC_sprintf_s(
+					BUFFER,
+					260,
+					FORMATSTRING_TEXT_SPACE_VALUE,
+					(int)textComponent,
+					integerComponent
+				);
+
+				AddTextToDialog(dialog,TEXTLABELINDEX_KILLS,BUFFER);
+
+			}
+			else //25E25
+				hideDialog(getControlFromIndex(dialog,TEXTLABELINDEX_KILLS));
+
+		}
+
+	}
+
+} //void stats_text_kills(BinDlg* dialog)
+#else
 void stats_text_kills(BinDlg* dialog) {
 
 	CUnit* unit = *activePortraitUnit;
@@ -243,6 +640,7 @@ void stats_text_kills(BinDlg* dialog) {
 
 			char* BUFFER = (char*)0x006CAC78;
 
+
 			SC_sprintf_s(
 				BUFFER,
 				260,
@@ -259,8 +657,8 @@ void stats_text_kills(BinDlg* dialog) {
 
 	}
 
-
 } //void stats_text_kills(BinDlg* dialog)
+#endif
 
 ;
 
@@ -269,17 +667,171 @@ void stats_text_kills(BinDlg* dialog) {
 //above 0xFFFFFF / 0x64 (16777215/100 => 167772),
 //initial HP will be wrong (probably maxHP%167772
 //with a minimum of 1)
+#ifdef EVENTS_SYSTEM
 void stats_text_hp_shield(BinDlg* dialog) {
 
 	char* BUFFER = (char*)0x006CA91C;
 
 	CUnit* unit = *activePortraitUnit;
+
+	if (!EventManager::EventExists(EventId::STATUS_DISPLAYING_HP_SHIELDS)) {
+
+		int unitMaxHP = units_dat::MaxHitPoints[unit->id] / 256;
+
+		if (unitMaxHP == 0)
+			unitMaxHP = (unit->hitPoints + 255) / 256;
+
+		if (
+			(unitMaxHP == 0 || unitMaxHP <= 9999) &&
+			units_dat::MaxShieldPoints[unit->id] <= 9999 &&
+			!(unit->status & UnitStatus::Invincible)
+		)
+		{ //26438
+
+			u8 hpColor;
+
+			if (unitHpIsInRedZone(unit))
+				hpColor = TEXTLABELCOLOR::RED;
+			else
+				if (unitHpIsInYellowZone(unit))
+					hpColor = TEXTLABELCOLOR::YELLOW;
+				else
+					hpColor = TEXTLABELCOLOR::GREEN;
+
+			if (!units_dat::ShieldsEnabled[unit->id])
+				SC_sprintf_s(
+					BUFFER,
+					32,
+					FORMATSTRING_COLOR_CURRENTVALUE_MAXVALUE,
+					hpColor,
+					(unit->hitPoints + 255) / 256,
+					unit->getMaxHpInGame()
+				);
+			else { //26496
+				SC_sprintf_s(
+					BUFFER,
+					32,
+					FORMATSTRING_CURRENTVALUE1_MAXVALUE1_COLOR_CURRENTVALUE2_MAXVALUE2,
+					unit->shields / 256,
+					units_dat::MaxShieldPoints[getLastQueueSlotType(unit)],
+					hpColor,
+					(unit->hitPoints + 255) / 256,
+					unit->getMaxHpInGame()
+				);
+			}
+
+		}
+		else //264E1
+			BUFFER = NULL;
+
+	}
+	else {
+
+		int unitCurrentHP = (unit->hitPoints + 255) / 256;
+		int unitMaxHP = units_dat::MaxHitPoints[unit->id] / 256;
+		int unitCurrentShield = unit->shields / 256;
+		int unitMaxShieldPreMorph = units_dat::MaxShieldPoints[unit->id];
+		int unitMaxShieldPostMorph = units_dat::MaxShieldPoints[getLastQueueSlotType(unit)];
+
+		std::vector<int*> events_arg(6);
+
+		events_arg[0] = (int*)unit;
+		events_arg[1] = (int*)&unitCurrentHP;
+		events_arg[2] = (int*)&unitMaxHP;
+		events_arg[3] = (int*)&unitCurrentShield;
+		events_arg[4] = (int*)&unitMaxShieldPreMorph;
+		events_arg[5] = (int*)&unitMaxShieldPostMorph;
+
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_HP_SHIELDS, events_arg);
+
+		if (
+			unitMaxHP <= 9999 &&
+			(unitMaxHP != 0 || unitCurrentHP <= 9999) &&
+			unitMaxShieldPreMorph <= 9999 &&
+			!(unit->status & UnitStatus::Invincible)
+		)
+		{ //26438
+
+			u8 hpColor;
+			int percentage;
+
+			//Equivalent to code of unitHpIsInRedZone and
+			//unitHpIsInYellowZone
+			if (unitMaxHP == 0) {
+				if (unitCurrentHP == 0)
+					percentage = 0;
+				else
+					percentage = 100;
+			}
+			else
+				percentage = (100 * unitCurrentHP) / unitMaxHP;
+
+			if (percentage < 33)
+				hpColor = TEXTLABELCOLOR::RED;
+			else
+			if (percentage <= 66)
+				hpColor = TEXTLABELCOLOR::YELLOW;
+			else
+				hpColor = TEXTLABELCOLOR::GREEN;
+
+			if (!units_dat::ShieldsEnabled[unit->id])
+				SC_sprintf_s(
+					BUFFER,
+					32,
+					FORMATSTRING_COLOR_CURRENTVALUE_MAXVALUE,
+					hpColor,
+					unitCurrentHP,
+					(unitMaxHP != 0) ? unitMaxHP : (unitCurrentHP != 0) ? unitCurrentHP : 1
+				);
+			else { //26496
+				SC_sprintf_s(
+					BUFFER,
+					32,
+					FORMATSTRING_CURRENTVALUE1_MAXVALUE1_COLOR_CURRENTVALUE2_MAXVALUE2,
+					unitCurrentShield,
+					unitMaxShieldPostMorph,
+					hpColor,
+					unitCurrentHP,
+					(unitMaxHP != 0) ? unitMaxHP : (unitCurrentHP != 0) ? unitCurrentHP : 1
+				);
+			}
+
+		}
+		else //264E1
+			BUFFER = NULL;
+
+	}
+
+	std::vector<int*> events_arg(2);
+
+	events_arg[0] = (int*)unit;
+	events_arg[1] = (int*)&BUFFER;
+
+	if (BUFFER == NULL) {
+		BUFFER = (char*)0x006CA91C;
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_HP_SHIELDS_OVERRIDE_NOTEXT, events_arg);
+	}
+	else
+		EventManager::EventCalled(EventId::STATUS_DISPLAYING_HP_SHIELDS_OVERRIDE, events_arg);
+
+	AddTextToDialog(dialog,TEXTLABELINDEX_HP_SHIELDS,BUFFER);
+
+	stats_text_energy_timer_Helper(dialog);
+
+} //void stats_text_hp_shield(BinDlg* dialog)
+#else
+void stats_text_hp_shield(BinDlg* dialog) {
+
+	char* BUFFER = (char*)0x006CA91C;
+
+	CUnit* unit = *activePortraitUnit;
+
 	int unitMaxHP = units_dat::MaxHitPoints[unit->id] / 256;
 
-	if(unitMaxHP == 0)
+	if (unitMaxHP == 0)
 		unitMaxHP = (unit->hitPoints + 255) / 256;
 
-	if(
+	if (
 		(unitMaxHP == 0 || unitMaxHP <= 9999) &&
 		units_dat::MaxShieldPoints[unit->id] <= 9999 &&
 		!(unit->status & UnitStatus::Invincible)
@@ -288,15 +840,15 @@ void stats_text_hp_shield(BinDlg* dialog) {
 
 		u8 hpColor;
 
-		if(unitHpIsInRedZone(unit))
+		if (unitHpIsInRedZone(unit))
 			hpColor = TEXTLABELCOLOR::RED;
 		else
-		if(unitHpIsInYellowZone(unit))
-			hpColor = TEXTLABELCOLOR::YELLOW;
-		else
-			hpColor = TEXTLABELCOLOR::GREEN;
+			if (unitHpIsInYellowZone(unit))
+				hpColor = TEXTLABELCOLOR::YELLOW;
+			else
+				hpColor = TEXTLABELCOLOR::GREEN;
 
-		if(!units_dat::ShieldsEnabled[unit->id])
+		if (!units_dat::ShieldsEnabled[unit->id])
 			SC_sprintf_s(
 				BUFFER,
 				32,
@@ -323,9 +875,11 @@ void stats_text_hp_shield(BinDlg* dialog) {
 		BUFFER = NULL;
 
 	AddTextToDialog(dialog,TEXTLABELINDEX_HP_SHIELDS,BUFFER);
+
 	stats_text_energy_timer_Helper(dialog);
 
 } //void stats_text_hp_shield(BinDlg* dialog)
+#endif
 
 ;
 
@@ -619,7 +1173,7 @@ char* getUnitRankString(CUnit* unit) {
 		&&
 			units_dat::BaseProperty[unit->id] & UnitProperty::Hero
 		&&
-			units_dat::MapStringId[unit->id] == 0
+			units_dat::MapStringId[unit->id] != 0
 	)
 		return_value = (char*)statTxtTbl->getString(0x23B); //"Admiral"
 	else
