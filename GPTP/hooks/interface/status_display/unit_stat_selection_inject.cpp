@@ -110,9 +110,11 @@ void injectUnitStatSelectionHooks() {
 	jmpPatch(UnitStatCond_Selection_Wrapper,					0x00424660, 2);
 	jmpPatch(UnitStatAct_Selection_Wrapper,						0x00425960, 7);
 
-	//those 2 below must be hooked together, or neither should be hooked
-	jmpPatch(statdata_UnitWireframeSelectUpdate_Part1_Wrapper,	0x00456F50, 1);
-	jmpPatch(statdata_UnitWireframeSelectUpdate_Part3_Wrapper,	0x00457046, 5);
+	jmpPatch2(
+		statdata_UnitWireframeSelectUpdate_Part1_Wrapper,	statdata_UnitWireframeSelectUpdate_Part3_Wrapper,
+		0x00456F50,											0x00457046,
+		1,													5
+	);
 
 }
 
