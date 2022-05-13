@@ -9,7 +9,6 @@ void CImage::playIscriptAnim(IscriptAnimation::Enum animation) {
   u32 animation_ = (u8)animation;
 
   const u32 Func_PlayIscriptAnim = 0x004D8470;  //AKA playImageIscript();
-	
   __asm {
     PUSHAD
     PUSH animation_
@@ -17,7 +16,7 @@ void CImage::playIscriptAnim(IscriptAnimation::Enum animation) {
     CALL Func_PlayIscriptAnim
     POPAD
   }
-	
+
 }
 
 ;
@@ -89,5 +88,3 @@ GrpFrame* CImage::getCurrentFrame() const {
 	assert(this);
 	return &this->grpOffset->frames[this->frameIndex];
 }
-
-;
