@@ -19,7 +19,6 @@ void CMDRECV_Liftoff(s16 x, s16 y) {
 
 	u16* const maxBoxRightValue =	(u16*)0x00628450;	//should usually be mapTileSize->width * 32
 	u16* const maxBoxBottomValue =	(u16*)0x006284B4;	//should usually be mapTileSize->height * 32
-	u16* const u16_00665610 =		(u16*)0x00665610;
 	u32* const u32_0066FF60 =		(u32*)0x0066FF60;
 
 	CUnit* unit;
@@ -41,7 +40,7 @@ void CMDRECV_Liftoff(s16 x, s16 y) {
 
 		*u32_0066FF60 = 0;
 
-		if (*u16_00665610 == 0xFFFF)
+		if (orders_dat::RequirementsOffset[OrderId::BuildingLiftoff] == 0xFFFF)
 			parseOrdersDatReqs();
 
 		if (unit->playerId != *ACTIVE_NATION_ID)
@@ -69,7 +68,7 @@ void CMDRECV_Liftoff(s16 x, s16 y) {
 		)
 			*u32_0066FF60 = 0x08;
 		else
-		if(*u16_00665610 == 0)
+		if(orders_dat::RequirementsOffset[OrderId::BuildingLiftoff] == 0)
 			*u32_0066FF60 = 0x17;
 		else
 		if(
