@@ -112,6 +112,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="configure.cpp" />
+    <ClCompile Include="Events\Events.cpp" />
     <ClCompile Include="graphics\Bitmap.cpp" />
     <ClCompile Include="graphics\draw_hook.cpp" />
     <ClCompile Include="graphics\Font.cpp" />
@@ -128,6 +129,8 @@
     <ClCompile Include="hooks\cloak_nearby_units_inject.cpp" />
     <ClCompile Include="hooks\cloak_tech.cpp" />
     <ClCompile Include="hooks\cloak_tech_inject.cpp" />
+    <ClCompile Include="hooks\interface\status_display\panels\panels_generators.cpp" />
+    <ClCompile Include="hooks\interface\status_display\panels\panels_generators_inject.cpp" />
     <ClCompile Include="hooks\right_click_returnedOrders.cpp" />
     <ClCompile Include="hooks\right_click_returnedOrders_inject.cpp" />
     <ClCompile Include="hooks\create_init_units.cpp" />
@@ -376,6 +379,7 @@
   <ItemGroup>
     <ClInclude Include="AI\spells\defensive_matrix.h" />
     <ClInclude Include="definitions.h" />
+    <ClInclude Include="Events\Events.h" />
     <ClInclude Include="graphics\Bitmap.h" />
     <ClInclude Include="graphics\draw_hook.h" />
     <ClInclude Include="graphics\Font.h" />
@@ -388,6 +392,7 @@
     <ClInclude Include="hooks\bunker_hooks.h" />
     <ClInclude Include="hooks\cloak_nearby_units.h" />
     <ClInclude Include="hooks\cloak_tech.h" />
+    <ClInclude Include="hooks\interface\status_display\panels\panels_generators.h" />
     <ClInclude Include="hooks\right_click_returnedOrders.h" />
     <ClInclude Include="hooks\create_init_units.h" />
     <ClInclude Include="hooks\detector.h" />
